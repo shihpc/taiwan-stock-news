@@ -1,0 +1,51 @@
+name: 每日建置策展新聞
+
+on:
+  workflow_dispatch:
+    inputs:
+      lookback:
+        description: '近 N 個交易日'
+        required: false
+        default: '3'
+  schedule:
+    # 每週一到週五 22:30 台灣時間（UTC 14:30），排在 radar 掃描（21:30）之後，
+    # 確保讀到當日最新的 scan_app.csv 股票池。
+    - cron: '30 14 * * 1-5'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build news.json
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+        run: |
+          python build_news.py --lookback "${{ github.event.inputs.lookback || '3' }}"
+
+      - name: Commit news.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add news.json
+          if git diff --cached --quiet; then
+            echo "news.json 無變化，跳過 commit"
+          else
+            git commit -m "news update $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
