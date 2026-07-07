@@ -1,4 +1,4 @@
-# 台股策展新聞（taiwan-stock-news）
+# 台股新聞（taiwan-stock-news）
 
 股市雷達 Hub 的子專案。每日抓取 FinMind `TaiwanStockNews`，套**來源白名單**過濾
 （排除論壇、內容農場、綜合社會媒體），輸出 `news.json` 給前端 dashboard 呈現。
@@ -26,7 +26,7 @@ news.json            ← 每日由 GitHub Actions 產出並 commit
 ## 首次設定（一次性）
 1. **Secrets → Actions** 新增 `FINMIND_TOKEN`（FinMind API token）。
 2. **Settings → Pages** 來源選 `Deploy from a branch` → `main` / `/ (root)`。
-3. 到 **Actions → 每日建置策展新聞 → Run workflow** 手動跑一次產生 `news.json`。
+3. 到 **Actions → 每日建置台股新聞 → Run workflow** 手動跑一次產生 `news.json`。
 
 ## 手動更新
 ```bash
