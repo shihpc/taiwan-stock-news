@@ -50,6 +50,7 @@
   .panel.open{display:block}
   .panel .phead{display:flex;gap:10px;margin-bottom:8px}
   .panel .phead a{color:var(--accent);font-size:.76rem;cursor:pointer;text-decoration:none}
+  .panel .phead #srcClose{margin-left:auto;color:var(--muted)}
   .srcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px}
   .srcopt{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--txt);cursor:pointer;padding:3px 0}
   .srcopt input{accent-color:var(--accent);width:15px;height:15px}
@@ -187,16 +188,23 @@ function renderDayChips(){
     el.onclick = () => { state.days = parseInt(el.dataset.d,10); save(); renderImpactChips(); renderDayChips(); renderList(); });
 }
 
+function setSrcPanel(open){
+  document.getElementById("srcPanel").classList.toggle("open", open);
+  renderSrcPanel();
+}
+
 function renderSrcPanel(){
   const list = allSources();
   const on = list.filter(([s]) => srcOn(s)).length;
+  const open = document.getElementById("srcPanel").classList.contains("open");
   document.getElementById("srcToggle").textContent =
-    `來源 ${on}/${list.length} ▾`;
+    `來源 ${on}/${list.length} ${open ? "▴" : "▾"}`;
   const rows = list.map(([s,n]) =>
     `<label class="srcopt"><input type="checkbox" data-s="${esc(s)}" ${srcOn(s)?"checked":""}>`
     + `<span>${esc(s)}</span><span class="n">${n}</span></label>`).join("");
   document.getElementById("srcPanel").innerHTML =
-    `<div class="phead"><a id="selAll">全選</a><a id="selNone">清除</a></div>`
+    `<div class="phead"><a id="selAll">全選</a><a id="selNone">清除</a>`
+    + `<a id="srcClose">收合 ▴</a></div>`
     + `<div class="srcgrid">${rows}</div>`;
   document.querySelectorAll("#srcPanel input[type=checkbox]").forEach(cb =>
     cb.onchange = () => {
@@ -210,6 +218,7 @@ function renderSrcPanel(){
   document.getElementById("selNone").onclick = () => {
     state.disabled = new Set(list.map(([s]) => s)); save(); renderImpactChips(); renderSrcPanel(); renderList();
   };
+  document.getElementById("srcClose").onclick = () => setSrcPanel(false);
 }
 
 function newsItem(n){
@@ -282,7 +291,7 @@ async function load(){
 
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; renderList(); });
 document.getElementById("srcToggle").addEventListener("click", () =>
-  document.getElementById("srcPanel").classList.toggle("open"));
+  setSrcPanel(!document.getElementById("srcPanel").classList.contains("open")));
 load();
 </script>
 </body>
