@@ -28,11 +28,12 @@
     padding:7px 11px;font-size:.78rem;color:var(--muted)}
   .stat b{color:var(--txt);font-size:.95rem;font-weight:700;margin-right:4px}
   .bar{position:sticky;top:0;z-index:5;padding:8px 0 10px;
-    background:linear-gradient(var(--bg) 78%,transparent)}
+    background:linear-gradient(var(--bg) 82%,transparent)}
   #q{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;
     padding:11px 14px;color:var(--txt);font-size:.95rem;outline:none;transition:border-color .15s}
   #q:focus{border-color:var(--accent)}
-  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px}
+  .lbl{color:var(--muted);font-size:.72rem;margin-right:2px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 12px;
     font-size:.8rem;color:var(--muted);cursor:pointer;transition:.15s;user-select:none;white-space:nowrap}
   .chip:hover{border-color:#33507e}
@@ -40,6 +41,19 @@
   .chip.active.mkt{border-color:var(--mkt)}
   .chip b{color:var(--accent);margin-left:3px}
   .chip.active.mkt b{color:var(--mkt)}
+  .chip.day{padding:5px 10px;border-radius:9px;font-size:.78rem}
+  .srcbtn{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:5px 11px;
+    font-size:.78rem;color:var(--muted);cursor:pointer;user-select:none}
+  .srcbtn:hover{border-color:#33507e}
+  .panel{display:none;margin-top:8px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px}
+  .panel.open{display:block}
+  .panel .phead{display:flex;gap:10px;margin-bottom:8px}
+  .panel .phead a{color:var(--accent);font-size:.76rem;cursor:pointer;text-decoration:none}
+  .srcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px}
+  .srcopt{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--txt);cursor:pointer;padding:3px 0}
+  .srcopt input{accent-color:var(--accent);width:15px;height:15px}
+  .srcopt .n{color:var(--muted);font-size:.72rem;margin-left:auto}
   .indhead{display:flex;align-items:baseline;gap:8px;margin:20px 2px 8px}
   .indname{font-size:1rem;font-weight:700;letter-spacing:.5px}
   .indname::before{content:"▸";color:var(--accent);margin-right:6px;font-size:.85rem}
@@ -84,7 +98,10 @@
 
   <div class="bar">
     <input id="q" type="search" placeholder="🔍 搜尋股號或名稱…" autocomplete="off">
-    <div class="chips" id="chips"></div>
+    <div class="row" id="impactChips"></div>
+    <div class="row"><span class="lbl">天數</span><span id="dayChips" style="display:contents"></span>
+      <span class="srcbtn" id="srcToggle">來源 ▾</span></div>
+    <div class="panel" id="srcPanel"></div>
   </div>
 
   <div id="list"><div class="empty">載入中…</div></div>
@@ -98,47 +115,101 @@
 
 <script>
 const fmtDate = s => (s || "").slice(0, 16).replace("T", " ");
+const day10 = s => (s || "").slice(0, 10);
 const IMPACT_LABEL = { market: "盤面", heavy: "權值", stock: "個股" };
-let DATA = null;
-const state = { impact: "all", q: "" };
+const LS_DAYS = "tsn_days", LS_DISABLED = "tsn_disabled";
+let DATA = null, TDAYS = [];
+const state = {
+  impact: "all",
+  q: "",
+  days: parseInt(localStorage.getItem(LS_DAYS) || "3", 10),
+  disabled: new Set(JSON.parse(localStorage.getItem(LS_DISABLED) || "[]")),
+};
 
 function esc(s){
   return (s || "").replace(/[&<>"']/g, c => (
     {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
+const save = () => {
+  localStorage.setItem(LS_DAYS, String(state.days));
+  localStorage.setItem(LS_DISABLED, JSON.stringify([...state.disabled]));
+};
+
+// 全部來源（依則數多寡）
+function allSources(){
+  const c = {};
+  DATA.stocks.forEach(s => s.news.forEach(n => c[n.source] = (c[n.source]||0)+1));
+  return Object.entries(c).sort((a,b) => b[1]-a[1]);
+}
+const srcOn = src => !state.disabled.has(src);
+
+// 近 N 交易日的日期門檻
+function dayThreshold(){
+  const n = Math.min(state.days, TDAYS.length);
+  return TDAYS[TDAYS.length - n] || TDAYS[0] || "0000-00-00";
+}
+
+// 一則新聞是否通過（來源 + 天數）
+function passNews(n){
+  return srcOn(n.source) && day10(n.date) >= dayThreshold();
+}
 
 function renderStats(d){
   const gen = fmtDate(d.generated_at);
-  const days = (d.trading_days && d.trading_days.length)
-    ? d.trading_days[0] + " ~ " + d.trading_days[d.trading_days.length - 1] : "";
+  const days = TDAYS.length ? TDAYS[0] + " ~ " + TDAYS[TDAYS.length-1] : "";
   document.getElementById("stats").innerHTML =
     `<div class="stat"><b>${d.stocks_with_news ?? 0}</b>檔</div>` +
     `<div class="stat"><b>${d.total_news ?? 0}</b>則</div>` +
-    `<div class="stat"><b>${d.lookback_days ?? "-"}</b>個交易日</div>` +
+    `<div class="stat"><b>${TDAYS.length}</b>交易日</div>` +
     (days ? `<div class="stat">${days}</div>` : "") +
     `<div class="stat">更新 ${gen} UTC</div>`;
 }
 
-// 全部新聞攤平算各影響層數量
-function impactCounts(){
-  const c = { all: 0, market: 0, heavy: 0, stock: 0 };
-  DATA.stocks.forEach(s => s.news.forEach(n => { c.all++; c[n.impact] = (c[n.impact]||0)+1; }));
-  return c;
-}
-
-function renderChips(){
-  const c = impactCounts();
-  const defs = [
-    ["all",    "全部"],
-    ["market", "盤面"],
-    ["heavy",  "權值股"],
-    ["stock",  "個股"],
-  ];
-  document.getElementById("chips").innerHTML = defs.map(([k, label]) =>
+function renderImpactChips(){
+  const c = { all:0, market:0, heavy:0, stock:0 };
+  DATA.stocks.forEach(s => s.news.forEach(n => { if(passNews(n)){ c.all++; c[n.impact]++; } }));
+  const defs = [["all","全部"],["market","盤面"],["heavy","權值股"],["stock","個股"]];
+  document.getElementById("impactChips").innerHTML = defs.map(([k,label]) =>
     `<span class="chip ${state.impact===k?"active":""} ${k==="market"?"mkt":""}" data-k="${k}">`
     + `${label}<b>${c[k]||0}</b></span>`).join("");
-  document.querySelectorAll("#chips .chip").forEach(el =>
-    el.addEventListener("click", () => { state.impact = el.dataset.k; renderChips(); renderList(); }));
+  document.querySelectorAll("#impactChips .chip").forEach(el =>
+    el.onclick = () => { state.impact = el.dataset.k; renderImpactChips(); renderList(); });
+}
+
+function renderDayChips(){
+  const max = TDAYS.length || 1;
+  const opts = [1,2,3,5,7,10].filter(n => n < max);
+  opts.push(max);                                  // 全部
+  const uniq = [...new Set(opts)].sort((a,b)=>a-b);
+  document.getElementById("dayChips").innerHTML = uniq.map(n =>
+    `<span class="chip day ${state.days===n?"active":""}" data-d="${n}">近${n}日</span>`).join("");
+  document.querySelectorAll("#dayChips .chip").forEach(el =>
+    el.onclick = () => { state.days = parseInt(el.dataset.d,10); save(); renderImpactChips(); renderDayChips(); renderList(); });
+}
+
+function renderSrcPanel(){
+  const list = allSources();
+  const on = list.filter(([s]) => srcOn(s)).length;
+  document.getElementById("srcToggle").textContent =
+    `來源 ${on}/${list.length} ▾`;
+  const rows = list.map(([s,n]) =>
+    `<label class="srcopt"><input type="checkbox" data-s="${esc(s)}" ${srcOn(s)?"checked":""}>`
+    + `<span>${esc(s)}</span><span class="n">${n}</span></label>`).join("");
+  document.getElementById("srcPanel").innerHTML =
+    `<div class="phead"><a id="selAll">全選</a><a id="selNone">清除</a></div>`
+    + `<div class="srcgrid">${rows}</div>`;
+  document.querySelectorAll("#srcPanel input[type=checkbox]").forEach(cb =>
+    cb.onchange = () => {
+      const s = cb.dataset.s;
+      if (cb.checked) state.disabled.delete(s); else state.disabled.add(s);
+      save(); renderImpactChips(); renderSrcPanel(); renderList();
+    });
+  document.getElementById("selAll").onclick = () => {
+    state.disabled.clear(); save(); renderImpactChips(); renderSrcPanel(); renderList();
+  };
+  document.getElementById("selNone").onclick = () => {
+    state.disabled = new Set(list.map(([s]) => s)); save(); renderImpactChips(); renderSrcPanel(); renderList();
+  };
 }
 
 function newsItem(n){
@@ -164,33 +235,26 @@ function stockCard(s, news){
 }
 
 function renderList(){
-  const list = document.getElementById("list");
-  if (!DATA || !DATA.stocks){ list.innerHTML = `<div class="empty">無資料</div>`; return; }
+  const listEl = document.getElementById("list");
+  if (!DATA || !DATA.stocks){ listEl.innerHTML = `<div class="empty">無資料</div>`; return; }
   const q = state.q.trim().toLowerCase();
-
-  // 篩選：搜尋 + 影響層，並分組到產業別
-  const groups = {};   // industry -> [{stock, news}]
-  const order = [];
-  let shown = 0;
+  const groups = {}, order = [];
   DATA.stocks.forEach(s => {
     if (q && !(s.stock_id + " " + (s.name||"")).toLowerCase().includes(q)) return;
-    const news = state.impact === "all" ? s.news : s.news.filter(n => n.impact === state.impact);
+    const news = s.news.filter(n =>
+      passNews(n) && (state.impact === "all" || n.impact === state.impact));
     if (!news.length) return;
     const ind = s.industry || "其他";
     if (!groups[ind]){ groups[ind] = []; order.push(ind); }
     groups[ind].push({ s, news });
-    shown += news.length;
   });
-
   if (!order.length){
-    list.innerHTML = `<div class="empty">${q ? `找不到「${esc(state.q)}」相關個股` : "此分類目前無新聞"}</div>`;
+    listEl.innerHTML = `<div class="empty">${q ? `找不到「${esc(state.q)}」相關個股` : "此條件下目前無新聞"}</div>`;
     return;
   }
-  // 產業依新聞數多寡排序
-  order.sort((a, b) =>
+  order.sort((a,b) =>
     groups[b].reduce((n,x)=>n+x.news.length,0) - groups[a].reduce((n,x)=>n+x.news.length,0));
-
-  list.innerHTML = order.map(ind => {
+  listEl.innerHTML = order.map(ind => {
     const total = groups[ind].reduce((n,x)=>n+x.news.length,0);
     const body = groups[ind].map(x => stockCard(x.s, x.news)).join("");
     return `<div class="indhead"><span class="indname">${esc(ind)}</span>`
@@ -203,8 +267,12 @@ async function load(){
     const r = await fetch("news.json?t=" + Date.now());
     if (!r.ok) throw new Error(r.status);
     DATA = await r.json();
+    TDAYS = (DATA.trading_days || []).slice().sort();
+    if (state.days > TDAYS.length) state.days = TDAYS.length;
     renderStats(DATA);
-    renderChips();
+    renderImpactChips();
+    renderDayChips();
+    renderSrcPanel();
     renderList();
   }catch(e){
     document.getElementById("list").innerHTML =
@@ -213,6 +281,8 @@ async function load(){
 }
 
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; renderList(); });
+document.getElementById("srcToggle").addEventListener("click", () =>
+  document.getElementById("srcPanel").classList.toggle("open"));
 load();
 </script>
 </body>

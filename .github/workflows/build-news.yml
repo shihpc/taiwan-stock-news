@@ -6,7 +6,7 @@ on:
       lookback:
         description: '近 N 個交易日'
         required: false
-        default: '3'
+        default: '5'
   schedule:
     # 每週一到週五 22:30 台灣時間（UTC 14:30），排在 radar 掃描（21:30）之後，
     # 確保讀到當日最新的 scan_app.csv 股票池。
@@ -36,7 +36,7 @@ jobs:
         env:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
         run: |
-          python build_news.py --lookback "${{ github.event.inputs.lookback || '3' }}"
+          python build_news.py --lookback "${{ github.event.inputs.lookback || '5' }}" --hourly-budget 1400
 
       - name: Commit news.json
         run: |
