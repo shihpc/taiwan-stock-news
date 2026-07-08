@@ -39,6 +39,34 @@ DEFAULT_POOL_CSV = "https://raw.githubusercontent.com/shihpc/taiwan-stock-radar/
 
 OUTPUT_JSON = "news.json"
 
+# ── 分層：權值股（市值大、對大盤影響高，約當 0050 成分）──────────
+HEAVYWEIGHTS: frozenset[str] = frozenset({
+    "2330", "2317", "2454", "2308", "2382", "2881", "2303", "2882", "2891",
+    "3711", "2886", "2412", "2884", "1216", "2885", "3034", "2892", "2357",
+    "2890", "5880", "2345", "3231", "2327", "2379", "4938", "2883", "2887",
+    "3008", "2002", "1303", "1301", "2880", "2603", "3661", "3017", "2395",
+    "3045", "2912", "5876", "1101", "6669", "3037", "2301", "4904", "6505",
+    "5871", "2408", "2609", "2615", "6446",
+})
+
+# ── 對大盤影響度分類（per 新聞）─────────────────────────────────
+#  market：標題點到盤面/類股/大盤層級 → 最該優先看
+#  heavy ：權值股個股新聞（會牽動指數）
+#  stock ：一般個股新聞
+_MARKET_KEYWORDS = (
+    "台股", "大盤", "加權", "指數", "類股", "族群", "盤面", "盤後",
+    "盤中", "三大法人", "外資買超", "外資賣超", "資金", "權值",
+)
+
+
+def classify_impact(stock_id: str, title: str) -> str:
+    t = title or ""
+    if any(k in t for k in _MARKET_KEYWORDS):
+        return "market"
+    if stock_id in HEAVYWEIGHTS:
+        return "heavy"
+    return "stock"
+
 
 # ── 節流：一小時內請求數不超過 budget ────────────────────────
 class Throttle:
@@ -175,20 +203,24 @@ def main() -> None:
     stocks = []
     for code, items in by_stock.items():
         items.sort(key=lambda r: r["date"], reverse=True)
+        news = [{
+            "date": r["date"],
+            "source": normalize_source(r["source"]),
+            "title": r["title"],
+            "link": r["link"],
+            "impact": classify_impact(code, r["title"]),
+        } for r in items]
         stocks.append({
             "stock_id": code,
             "name": name_map.get(code, ""),
-            "industry": ind_map.get(code, ""),
-            "count": len(items),
-            "news": [{
-                "date": r["date"],
-                "source": normalize_source(r["source"]),
-                "title": r["title"],
-                "link": r["link"],
-            } for r in items],
+            "industry": ind_map.get(code, "") or "其他",
+            "heavyweight": code in HEAVYWEIGHTS,
+            "count": len(news),
+            "market_count": sum(1 for n in news if n["impact"] == "market"),
+            "news": news,
         })
-    # 新聞多者在前，其次股號
-    stocks.sort(key=lambda s: (-s["count"], s["stock_id"]))
+    # 權值股優先、其次新聞多者、再股號
+    stocks.sort(key=lambda s: (not s["heavyweight"], -s["count"], s["stock_id"]))
 
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -67,25 +67,24 @@ _NORMALIZE: dict[str, str] = {
 }
 
 # ── 2. 核心白名單（canonical，一律通過）──────────────────────
+# 註：2026-07 依實跑量能檢討，移除高量低訊號來源（富聯網、CMoney、
+#     CMoney投資網誌、sinotrade、Yahoo、財訊）以降低每日新聞量。
 CORE_WHITELIST: frozenset[str] = frozenset({
     "UDN", "經濟日報", "工商時報", "自由時報系", "中央社", "今周刊",
-    "財訊", "遠見雜誌", "商周財富網", "信傳媒", "理財周刊",
-    "MoneyDJ", "TechNews 科技新報", "鉅亨(cnyes)", "sinotrade.com.tw",
-    "優分析UAnalyze", "富聯網",
-    "CMoney",            # 非論壇；論壇由步驟 3 的標題關鍵字排除
-    "CMoney投資網誌",
+    "遠見雜誌", "商周財富網", "信傳媒", "理財周刊",
+    "MoneyDJ", "TechNews 科技新報", "鉅亨(cnyes)",
+    "優分析UAnalyze",
     "FTNN新聞", "富果直送",
-    "Yahoo",             # 需搭配跨來源去重（步驟 4）
 })
 
 # ── 3. Fallback Pool（canonical，僅核心 0 篇時啟用）───────────
+# 註：2026-07 移除 LINE TODAY、玩股網、台視、三立新聞、MSN、中時新聞網。
 FALLBACK_POOL: frozenset[str] = frozenset({
-    "LINE TODAY", "旺得富理財網", "玩股網",
+    "旺得富理財網",
     # 生技專業站
     "genetinfo.com", "環球生技月刊", "GeneOnline News",
-    "台視", "ETtoday", "三立新聞",
-    "東森", "TVBS新聞網", "民視",
-    "MSN", "中時新聞網", "鏡週刊/鏡報系",
+    "ETtoday", "東森", "TVBS新聞網", "民視",
+    "鏡週刊/鏡報系",
 })
 
 # ── 特殊規則常數 ─────────────────────────────────────────────

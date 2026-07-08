@@ -8,7 +8,7 @@
   :root{
     --bg:#0b1120; --bg2:#111a2e; --card:#16213a; --card-hover:#1d2b4a;
     --line:#243556; --txt:#e6edf7; --muted:#8aa0c0; --accent:#4f9cff;
-    --up:#ff5c7c; --chip:#1b2a49;
+    --mkt:#f59e0b; --chip:#1b2a49;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -23,28 +23,46 @@
   .top a.back:hover{color:var(--accent);border-color:var(--accent)}
   header h1{font-size:1.5rem;font-weight:700;letter-spacing:.5px}
   .sub{color:var(--muted);font-size:.85rem;margin-top:6px;line-height:1.6}
-  .stats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 10px}
+  .stats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 8px}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:11px;
-    padding:8px 12px;font-size:.8rem;color:var(--muted)}
-  .stat b{color:var(--txt);font-size:1rem;font-weight:700;margin-right:4px}
-  .searchbar{position:sticky;top:0;z-index:5;padding:8px 0 12px;
-    background:linear-gradient(var(--bg) 70%,transparent)}
+    padding:7px 11px;font-size:.78rem;color:var(--muted)}
+  .stat b{color:var(--txt);font-size:.95rem;font-weight:700;margin-right:4px}
+  .bar{position:sticky;top:0;z-index:5;padding:8px 0 10px;
+    background:linear-gradient(var(--bg) 78%,transparent)}
   #q{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;
-    padding:12px 14px;color:var(--txt);font-size:.95rem;outline:none;transition:border-color .15s}
+    padding:11px 14px;color:var(--txt);font-size:.95rem;outline:none;transition:border-color .15s}
   #q:focus{border-color:var(--accent)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 12px;
+    font-size:.8rem;color:var(--muted);cursor:pointer;transition:.15s;user-select:none;white-space:nowrap}
+  .chip:hover{border-color:#33507e}
+  .chip.active{color:var(--txt);border-color:var(--accent);background:var(--card-hover)}
+  .chip.active.mkt{border-color:var(--mkt)}
+  .chip b{color:var(--accent);margin-left:3px}
+  .chip.active.mkt b{color:var(--mkt)}
+  .indhead{display:flex;align-items:baseline;gap:8px;margin:20px 2px 8px}
+  .indname{font-size:1rem;font-weight:700;letter-spacing:.5px}
+  .indname::before{content:"▸";color:var(--accent);margin-right:6px;font-size:.85rem}
+  .indcount{color:var(--muted);font-size:.74rem}
   .stock{background:var(--card);border:1px solid var(--line);border-radius:16px;
-    padding:14px 16px;margin-bottom:12px;transition:border-color .15s}
+    padding:14px 16px;margin-bottom:10px;transition:border-color .15s}
+  .stock.hw{border-color:#2f4a78}
   .stock:hover{border-color:#33507e}
   .shead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .sid{font-family:"Space Mono",monospace;font-weight:700;color:var(--accent);font-size:1.05rem}
   .sname{font-weight:650;font-size:1.05rem}
-  .sind{color:var(--muted);font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .hwtag{background:rgba(79,156,255,.15);color:#8fc0ff;border:1px solid rgba(79,156,255,.3);
+    border-radius:6px;padding:1px 6px;font-size:.66rem}
   .cnt{margin-left:auto;color:var(--muted);font-size:.78rem}
   .cnt b{color:var(--txt)}
   .item{display:flex;flex-direction:column;gap:3px;padding:9px 0;border-top:1px solid rgba(36,53,86,.6)}
   .item:first-of-type{border-top:none}
-  .meta{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--muted)}
+  .meta{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--muted);flex-wrap:wrap}
   .src{background:var(--chip);color:#a9c4ef;border-radius:6px;padding:1px 7px;font-size:.7rem;white-space:nowrap}
+  .badge{border-radius:5px;padding:0 6px;font-size:.66rem;white-space:nowrap}
+  .badge.market{background:rgba(245,158,11,.16);color:#f0b45a}
+  .badge.heavy{background:rgba(79,156,255,.14);color:#8fc0ff}
+  .badge.stock{background:var(--chip);color:#8aa0c0}
   .item a.title{color:var(--txt);text-decoration:none;font-size:.92rem;line-height:1.45}
   .item a.title:hover{color:var(--accent);text-decoration:underline}
   .empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:.95rem}
@@ -59,13 +77,14 @@
   </div>
   <header>
     <h1>📰 台股新聞</h1>
-    <div class="sub">投信／外資連買股的近日新聞，經來源白名單過濾（排除論壇、內容農場、綜合社會媒體）。</div>
+    <div class="sub">投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。</div>
   </header>
 
   <div class="stats" id="stats"></div>
 
-  <div class="searchbar">
+  <div class="bar">
     <input id="q" type="search" placeholder="🔍 搜尋股號或名稱…" autocomplete="off">
+    <div class="chips" id="chips"></div>
   </div>
 
   <div id="list"><div class="empty">載入中…</div></div>
@@ -79,53 +98,104 @@
 
 <script>
 const fmtDate = s => (s || "").slice(0, 16).replace("T", " ");
+const IMPACT_LABEL = { market: "盤面", heavy: "權值", stock: "個股" };
 let DATA = null;
-
-function renderStats(d){
-  const el = document.getElementById("stats");
-  const gen = fmtDate(d.generated_at);
-  const days = (d.trading_days && d.trading_days.length)
-    ? d.trading_days[0] + " ~ " + d.trading_days[d.trading_days.length - 1] : "";
-  el.innerHTML =
-    `<div class="stat"><b>${d.stocks_with_news ?? 0}</b>檔有新聞</div>` +
-    `<div class="stat"><b>${d.total_news ?? 0}</b>則新聞</div>` +
-    `<div class="stat"><b>${d.lookback_days ?? "-"}</b>個交易日</div>` +
-    `<div class="stat">更新 ${gen} UTC</div>` +
-    (days ? `<div class="stat">${days}</div>` : "");
-}
+const state = { impact: "all", q: "" };
 
 function esc(s){
   return (s || "").replace(/[&<>"']/g, c => (
     {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-function stockCard(s){
-  const items = s.news.map(n => {
-    const t = n.link
-      ? `<a class="title" href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
-      : `<span class="title">${esc(n.title)}</span>`;
-    return `<div class="item">
-      <div class="meta"><span class="src">${esc(n.source)}</span><span>${esc(fmtDate(n.date))}</span></div>
-      ${t}</div>`;
-  }).join("");
-  return `<div class="stock" data-key="${esc((s.stock_id + " " + s.name).toLowerCase())}">
+function renderStats(d){
+  const gen = fmtDate(d.generated_at);
+  const days = (d.trading_days && d.trading_days.length)
+    ? d.trading_days[0] + " ~ " + d.trading_days[d.trading_days.length - 1] : "";
+  document.getElementById("stats").innerHTML =
+    `<div class="stat"><b>${d.stocks_with_news ?? 0}</b>檔</div>` +
+    `<div class="stat"><b>${d.total_news ?? 0}</b>則</div>` +
+    `<div class="stat"><b>${d.lookback_days ?? "-"}</b>個交易日</div>` +
+    (days ? `<div class="stat">${days}</div>` : "") +
+    `<div class="stat">更新 ${gen} UTC</div>`;
+}
+
+// 全部新聞攤平算各影響層數量
+function impactCounts(){
+  const c = { all: 0, market: 0, heavy: 0, stock: 0 };
+  DATA.stocks.forEach(s => s.news.forEach(n => { c.all++; c[n.impact] = (c[n.impact]||0)+1; }));
+  return c;
+}
+
+function renderChips(){
+  const c = impactCounts();
+  const defs = [
+    ["all",    "全部"],
+    ["market", "盤面"],
+    ["heavy",  "權值股"],
+    ["stock",  "個股"],
+  ];
+  document.getElementById("chips").innerHTML = defs.map(([k, label]) =>
+    `<span class="chip ${state.impact===k?"active":""} ${k==="market"?"mkt":""}" data-k="${k}">`
+    + `${label}<b>${c[k]||0}</b></span>`).join("");
+  document.querySelectorAll("#chips .chip").forEach(el =>
+    el.addEventListener("click", () => { state.impact = el.dataset.k; renderChips(); renderList(); }));
+}
+
+function newsItem(n){
+  const t = n.link
+    ? `<a class="title" href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
+    : `<span class="title">${esc(n.title)}</span>`;
+  return `<div class="item">
+    <div class="meta">
+      <span class="badge ${n.impact}">${IMPACT_LABEL[n.impact]||"個股"}</span>
+      <span class="src">${esc(n.source)}</span>
+      <span>${esc(fmtDate(n.date))}</span>
+    </div>${t}</div>`;
+}
+
+function stockCard(s, news){
+  return `<div class="stock ${s.heavyweight?"hw":""}">
     <div class="shead">
       <span class="sid">${esc(s.stock_id)}</span>
       <span class="sname">${esc(s.name)}</span>
-      ${s.industry ? `<span class="sind">${esc(s.industry)}</span>` : ""}
-      <span class="cnt"><b>${s.count}</b> 則</span>
-    </div>${items}</div>`;
+      ${s.heavyweight ? `<span class="hwtag">權值股</span>` : ""}
+      <span class="cnt"><b>${news.length}</b> 則</span>
+    </div>${news.map(newsItem).join("")}</div>`;
 }
 
-function renderList(filter){
+function renderList(){
   const list = document.getElementById("list");
-  if (!DATA || !DATA.stocks) { list.innerHTML = `<div class="empty">無資料</div>`; return; }
-  const f = (filter || "").trim().toLowerCase();
-  const rows = DATA.stocks.filter(s =>
-    !f || (s.stock_id + " " + (s.name || "")).toLowerCase().includes(f));
-  list.innerHTML = rows.length
-    ? rows.map(stockCard).join("")
-    : `<div class="empty">找不到「${esc(filter)}」相關個股</div>`;
+  if (!DATA || !DATA.stocks){ list.innerHTML = `<div class="empty">無資料</div>`; return; }
+  const q = state.q.trim().toLowerCase();
+
+  // 篩選：搜尋 + 影響層，並分組到產業別
+  const groups = {};   // industry -> [{stock, news}]
+  const order = [];
+  let shown = 0;
+  DATA.stocks.forEach(s => {
+    if (q && !(s.stock_id + " " + (s.name||"")).toLowerCase().includes(q)) return;
+    const news = state.impact === "all" ? s.news : s.news.filter(n => n.impact === state.impact);
+    if (!news.length) return;
+    const ind = s.industry || "其他";
+    if (!groups[ind]){ groups[ind] = []; order.push(ind); }
+    groups[ind].push({ s, news });
+    shown += news.length;
+  });
+
+  if (!order.length){
+    list.innerHTML = `<div class="empty">${q ? `找不到「${esc(state.q)}」相關個股` : "此分類目前無新聞"}</div>`;
+    return;
+  }
+  // 產業依新聞數多寡排序
+  order.sort((a, b) =>
+    groups[b].reduce((n,x)=>n+x.news.length,0) - groups[a].reduce((n,x)=>n+x.news.length,0));
+
+  list.innerHTML = order.map(ind => {
+    const total = groups[ind].reduce((n,x)=>n+x.news.length,0);
+    const body = groups[ind].map(x => stockCard(x.s, x.news)).join("");
+    return `<div class="indhead"><span class="indname">${esc(ind)}</span>`
+      + `<span class="indcount">${groups[ind].length} 檔 · ${total} 則</span></div>${body}`;
+  }).join("");
 }
 
 async function load(){
@@ -134,14 +204,15 @@ async function load(){
     if (!r.ok) throw new Error(r.status);
     DATA = await r.json();
     renderStats(DATA);
-    renderList("");
+    renderChips();
+    renderList();
   }catch(e){
     document.getElementById("list").innerHTML =
       `<div class="empty">尚無新聞資料（news.json 未產生或載入失敗）。<br>每日由 GitHub Actions 更新。</div>`;
   }
 }
 
-document.getElementById("q").addEventListener("input", e => renderList(e.target.value));
+document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; renderList(); });
 load();
 </script>
 </body>
