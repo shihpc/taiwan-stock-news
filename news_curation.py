@@ -78,12 +78,12 @@ CORE_WHITELIST: frozenset[str] = frozenset({
 })
 
 # ── 3. Fallback Pool（canonical，僅核心 0 篇時啟用）───────────
-# 註：2026-07 移除 LINE TODAY、玩股網、台視、三立新聞、MSN、中時新聞網。
+# 註：2026-07 移除 LINE TODAY、玩股網、台視、三立新聞、MSN、中時新聞網，
+#     再移除 旺得富理財網、東森、TVBS新聞網。
 FALLBACK_POOL: frozenset[str] = frozenset({
-    "旺得富理財網",
     # 生技專業站
     "genetinfo.com", "環球生技月刊", "GeneOnline News",
-    "ETtoday", "東森", "TVBS新聞網", "民視",
+    "ETtoday", "民視",
     "鏡週刊/鏡報系",
 })
 
