@@ -260,15 +260,29 @@ function newsItem(n){
     </div>${t}</div>`;
 }
 
+// 標題去尾巴(- 媒體名)+寬鬆正規化，跟 news_curation.py 的 strip_title_tail/_loose 同邏輯
+const TITLE_TAIL_RE = /^(.+?)\s+[-—–|]\s+([^-—–|]{1,20})$/;
+// 注意：JS 的 \W 是ASCII-only（即使加u旗標），會把中文也當非字元砍掉，
+// 跟 Python re.UNICODE 的 \W 語意不同；改用 \p{L}\p{N} 明確保留任何語言的字母數字。
+const LOOSE_RE = /[^\p{L}\p{N}]+/gu;
+function looseTitleKey(title){
+  const t = (title || "").trim();
+  const m = t.match(TITLE_TAIL_RE);
+  const body = m ? m[1].trim() : t;
+  return body.replace(LOOSE_RE, "").toLowerCase();
+}
+
 // 大盤與財金焦點：彙整所有 impact==="market" 的新聞（不分股票），去重＋依日期新到舊
 function marketNewsList(){
   const seen = new Set();
   const out = [];
   DATA.stocks.forEach(s => s.news.forEach(n => {
     if (n.impact !== "market" || !passNews(n)) return;
-    // 只用標題去重：同篇文章的多網址變體時間戳會不同，帶date會漏掉
-    if (seen.has(n.title)) return;
-    seen.add(n.title);
+    // 去尾巴(- 媒體名)+寬鬆正規化後比對，跟build_news.py的strip_title_tail/_loose同邏輯：
+    // 同篇文章常見同集團旗下站台轉載，標題尾巴媒體名不同（自由財經/自由時報、UDN/udn）
+    const key = looseTitleKey(n.title);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
     out.push(n);
   }));
   out.sort((a, b) => (b.date || "").localeCompare(a.date || ""));

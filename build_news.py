@@ -27,7 +27,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 import pandas as pd
 
-from news_curation import curate_news, normalize_source
+from news_curation import curate_news, normalize_source, strip_title_tail, _loose
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("build_news")
@@ -283,18 +283,21 @@ def main() -> None:
     kept = curate_news(raw)
     logger.info(f"過濾後保留 {len(kept)} 則")
 
-    # 依股票分組＋去重。key 只用標題不含連結：同一篇文章常有多種網址變體
-    # （/amp/、/print/、?from=追蹤參數、路徑大小寫），連結參與比對會漏掉這些重複。
-    # 先依日期新到舊排序再去重 → 同標題保留最新一筆。
+    # 依股票分組＋去重。key 用「去尾巴(- 媒體名)+寬鬆正規化」的標題（沿用
+    # news_curation 既有的 strip_title_tail/_loose）：同一篇文章常見同來源
+    # 集團旗下不同站台轉載（自由財經 vs 自由時報、UDN vs udn 大小寫），
+    # 標題尾巴的媒體名不同、連結也不同，純標題或標題+連結比對都攔不住。
+    # 先依日期新到舊排序再去重 → 同篇保留最新一筆。
     kept.sort(key=lambda r: r["date"], reverse=True)
     by_stock: dict[str, list[dict]] = {}
     seen_per_stock: dict[str, set[str]] = {}
     for rec in kept:
         sid = rec["stock_id"]
         seen = seen_per_stock.setdefault(sid, set())
-        if rec["title"] in seen:
+        key = _loose(strip_title_tail(rec["title"]))
+        if key and key in seen:
             continue
-        seen.add(rec["title"])
+        seen.add(key)
         by_stock.setdefault(sid, []).append(rec)
 
     stocks = []
