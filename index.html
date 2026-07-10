@@ -233,6 +233,30 @@ function newsItem(n){
     </div>${t}</div>`;
 }
 
+// 大盤與財金焦點：彙整所有 impact==="market" 的新聞（不分股票），去重＋依日期新到舊
+function marketNewsList(){
+  const seen = new Set();
+  const out = [];
+  DATA.stocks.forEach(s => s.news.forEach(n => {
+    if (n.impact !== "market" || !passNews(n)) return;
+    const key = n.date + "|" + n.title;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(n);
+  }));
+  out.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  return out;
+}
+
+function marketSection(){
+  if (state.impact !== "all" && state.impact !== "market") return "";
+  const list = marketNewsList();
+  if (!list.length) return "";
+  return `<div class="indhead"><span class="indname">📊 大盤與財金焦點</span>`
+    + `<span class="indcount">${list.length} 則</span></div>`
+    + `<div class="stock">${list.map(newsItem).join("")}</div>`;
+}
+
 function stockCard(s, news){
   return `<div class="stock ${s.heavyweight?"hw":""}">
     <div class="shead">
@@ -251,24 +275,30 @@ function renderList(){
   DATA.stocks.forEach(s => {
     if (q && !(s.stock_id + " " + (s.name||"")).toLowerCase().includes(q)) return;
     const news = s.news.filter(n =>
-      passNews(n) && (state.impact === "all" || n.impact === state.impact));
+      passNews(n) && n.impact !== "market" &&
+      (state.impact === "all" || n.impact === state.impact));
     if (!news.length) return;
     const ind = s.industry || "其他";
     if (!groups[ind]){ groups[ind] = []; order.push(ind); }
     groups[ind].push({ s, news });
   });
+  const marketHtml = marketSection();
+  let industryHtml;
   if (!order.length){
-    listEl.innerHTML = `<div class="empty">${q ? `找不到「${esc(state.q)}」相關個股` : "此條件下目前無新聞"}</div>`;
-    return;
+    industryHtml = marketHtml
+      ? ""
+      : `<div class="empty">${q ? `找不到「${esc(state.q)}」相關個股` : "此條件下目前無新聞"}</div>`;
+  } else {
+    order.sort((a,b) =>
+      groups[b].reduce((n,x)=>n+x.news.length,0) - groups[a].reduce((n,x)=>n+x.news.length,0));
+    industryHtml = order.map(ind => {
+      const total = groups[ind].reduce((n,x)=>n+x.news.length,0);
+      const body = groups[ind].map(x => stockCard(x.s, x.news)).join("");
+      return `<div class="indhead"><span class="indname">${esc(ind)}</span>`
+        + `<span class="indcount">${groups[ind].length} 檔 · ${total} 則</span></div>${body}`;
+    }).join("");
   }
-  order.sort((a,b) =>
-    groups[b].reduce((n,x)=>n+x.news.length,0) - groups[a].reduce((n,x)=>n+x.news.length,0));
-  listEl.innerHTML = order.map(ind => {
-    const total = groups[ind].reduce((n,x)=>n+x.news.length,0);
-    const body = groups[ind].map(x => stockCard(x.s, x.news)).join("");
-    return `<div class="indhead"><span class="indname">${esc(ind)}</span>`
-      + `<span class="indcount">${groups[ind].length} 檔 · ${total} 則</span></div>${body}`;
-  }).join("");
+  listEl.innerHTML = marketHtml + industryHtml;
 }
 
 async function load(){

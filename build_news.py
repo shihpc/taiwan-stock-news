@@ -108,6 +108,42 @@ def load_pool(pool_csv: str, max_pool: int) -> pd.DataFrame:
     return pool[["code", "name", "industry"]].reset_index(drop=True)
 
 
+def fetch_market_value_weights() -> dict[str, float]:
+    """抓全市場市值權重（TaiwanStockMarketValueWeight，不帶 data_id 一次拿全市場）。
+    此 dataset 必須帶 start_date（否則 API 回 400），近期任一日即可取得最新一期權重。
+    失敗時回傳空 dict，呼叫端 fallback 為排序時 weight_per 皆視為 0。"""
+    start = (datetime.now(timezone.utc) - timedelta(days=10)).strftime("%Y-%m-%d")
+    try:
+        r = requests.get(FINMIND_URL, params={
+            "dataset": "TaiwanStockMarketValueWeight",
+            "start_date": start,
+            "token": FINMIND_TOKEN,
+        }, timeout=30)
+        r.raise_for_status()
+        data = r.json().get("data", [])
+        # 視窗內可能橫跨多個發布日，同檔股票只取日期最新的一筆
+        latest_date: dict[str, str] = {}
+        weights: dict[str, float] = {}
+        for rec in data:
+            sid = str(rec.get("stock_id", "")).strip()
+            d = str(rec.get("date", ""))
+            if not sid:
+                continue
+            if sid in latest_date and d < latest_date[sid]:
+                continue
+            try:
+                w = float(rec.get("weight_per", 0) or 0)
+            except (TypeError, ValueError):
+                w = 0.0
+            latest_date[sid] = d
+            weights[sid] = w
+        logger.info(f"市值權重：取得 {len(weights)} 檔（基準日 {max(latest_date.values(), default='?')}）")
+        return weights
+    except Exception as e:
+        logger.warning(f"市值權重 API 失敗，排序將退化為依新聞數：{e}")
+        return {}
+
+
 def recent_trading_days(n: int) -> list[str]:
     """近 n 個交易日（以 FinMind TaiwanStockTradingDate 為準，退回平日近似）。"""
     end = datetime.now(timezone.utc)
@@ -168,6 +204,7 @@ def main() -> None:
         raise SystemExit(1)
 
     pool = load_pool(args.pool_csv, args.max_pool)
+    weight_map = fetch_market_value_weights()
     dates = recent_trading_days(args.lookback)
     logger.info(f"時間範圍：{dates[0]} ~ {dates[-1]}（{len(dates)} 個交易日）")
     throttle = Throttle(args.hourly_budget)
@@ -215,12 +252,13 @@ def main() -> None:
             "name": name_map.get(code, ""),
             "industry": ind_map.get(code, "") or "其他",
             "heavyweight": code in HEAVYWEIGHTS,
+            "weight_per": weight_map.get(code, 0.0),
             "count": len(news),
             "market_count": sum(1 for n in news if n["impact"] == "market"),
             "news": news,
         })
-    # 權值股優先、其次新聞多者、再股號
-    stocks.sort(key=lambda s: (not s["heavyweight"], -s["count"], s["stock_id"]))
+    # 市值權重高者優先（抓不到權重視為 0，排最後）；同權重時新聞多者優先，再股號
+    stocks.sort(key=lambda s: (-(s["weight_per"] or 0.0), -s["count"], s["stock_id"]))
 
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
