@@ -234,8 +234,15 @@ def main() -> None:
 
     # 依股票分組
     by_stock: dict[str, list[dict]] = {}
+    seen_per_stock: dict[str, set[tuple[str, str]]] = {}
     for rec in kept:
-        by_stock.setdefault(rec["stock_id"], []).append(rec)
+        sid = rec["stock_id"]
+        key = (rec["title"], rec["link"])
+        seen = seen_per_stock.setdefault(sid, set())
+        if key in seen:
+            continue  # 同一檔股票裡，跨查詢日期抓到重複文章（FinMind 單日查詢邊界會重疊）
+        seen.add(key)
+        by_stock.setdefault(sid, []).append(rec)
 
     stocks = []
     for code, items in by_stock.items():
