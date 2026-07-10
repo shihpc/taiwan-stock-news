@@ -4,7 +4,8 @@
 #  台股策展新聞 — 每日建置 news.json
 #
 #  流程：
-#   1. 讀 taiwan-stock-radar 公開的 scan_app.csv 取股票池（唯讀，不回寫）
+#   1. 自建股票池（build_pool_from_finmind：FinMind TaiwanStockInfo + 近3日投信/外資買賣超；
+#      taiwan-stock-radar repo 已刪除，不再依賴外部 repo 的 scan_app.csv）
 #      池 = 投信連買(trust_days>=2) ∪ 外資連買(foreign_days>=2)，排除 ETF
 #   2. 逐檔抓近 N 個交易日的 FinMind TaiwanStockNews（單日單請求）
 #   3. 套 news_curation.curate_news 白名單過濾
@@ -108,6 +109,55 @@ def load_pool(pool_csv: str, max_pool: int) -> pd.DataFrame:
     return pool[["code", "name", "industry"]].reset_index(drop=True)
 
 
+def build_pool_from_finmind(max_pool: int) -> pd.DataFrame:
+    """自建股票池（taiwan-stock-radar repo 已刪除，不再依賴外部 repo 的 scan_app.csv）。
+    邏輯與原 scan_app.csv 一致：TaiwanStockInfo 取名稱/產業分類，近3個交易日
+    TaiwanStockInstitutionalInvestorsBuySell 算投信/外資連買天數，篩選
+    (trust_days>=2 or foreign_days>=2) 且非ETF，依熱度(兩者天數合計)排序取前N。"""
+    r = requests.get(FINMIND_URL, params={"dataset": "TaiwanStockInfo", "token": FINMIND_TOKEN}, timeout=30)
+    r.raise_for_status()
+    name_map, ind_map, type_map = {}, {}, {}
+    for row in r.json().get("data", []):
+        sid = str(row.get("stock_id", ""))
+        if not sid or sid in name_map:  # 同代號可能重複列（雙產業分類等），取第一筆
+            continue
+        name_map[sid] = row.get("stock_name", "")
+        ind_map[sid] = row.get("industry_category", "")
+        type_map[sid] = row.get("type", "")
+    keep = {sid for sid, t in type_map.items()
+            if t in ("twse", "tpex") and sid[:1].isdigit() and "ETF" not in (ind_map.get(sid) or "")}
+
+    trust_days: dict[str, int] = {}
+    foreign_days: dict[str, int] = {}
+    for ds in recent_trading_days(3):
+        r = requests.get(FINMIND_URL, params={
+            "dataset": "TaiwanStockInstitutionalInvestorsBuySell",
+            "start_date": ds, "end_date": ds, "token": FINMIND_TOKEN,
+        }, timeout=30)
+        for rec in r.json().get("data", []):
+            sid = str(rec.get("stock_id", ""))
+            if sid not in keep:
+                continue
+            name = rec.get("name")
+            if name not in ("Investment_Trust", "Foreign_Investor"):
+                continue
+            net = (rec.get("buy") or 0) - (rec.get("sell") or 0)
+            if net > 0:
+                d = trust_days if name == "Investment_Trust" else foreign_days
+                d[sid] = d.get(sid, 0) + 1
+
+    rows = [{"code": sid, "name": name_map.get(sid, ""), "industry": ind_map.get(sid, ""),
+             "heat": trust_days.get(sid, 0) + foreign_days.get(sid, 0)}
+            for sid in keep if trust_days.get(sid, 0) >= 2 or foreign_days.get(sid, 0) >= 2]
+    df = pd.DataFrame(rows)
+    if df.empty:
+        logger.warning("股票池（FinMind自建）：0 檔，近3日投信/外資買賣超資料可能尚未settle")
+        return df.assign(code=[], name=[], industry=[]) if rows else pd.DataFrame(columns=["code", "name", "industry"])
+    df = df.sort_values("heat", ascending=False).head(max_pool)
+    logger.info(f"股票池（FinMind自建）：{len(df)} 檔（投信連買∪外資連買，非ETF，取熱度前{max_pool}）")
+    return df[["code", "name", "industry"]].reset_index(drop=True)
+
+
 def fetch_market_value_weights() -> dict[str, float]:
     """抓全市場市值權重（TaiwanStockMarketValueWeight，不帶 data_id 一次拿全市場）。
     此 dataset 必須帶 start_date（否則 API 回 400），近期任一日即可取得最新一期權重。
@@ -196,14 +246,15 @@ def main() -> None:
     ap.add_argument("--lookback", type=int, default=3, help="近 N 個交易日（預設 3）")
     ap.add_argument("--max-pool", type=int, default=150, help="股票池上限（預設 150）")
     ap.add_argument("--hourly-budget", type=int, default=550)
-    ap.add_argument("--pool-csv", default=DEFAULT_POOL_CSV)
+    ap.add_argument("--pool-csv", default=None,
+                     help="指定舊格式CSV(path或url)覆蓋預設；不指定則用FinMind自建股票池")
     args = ap.parse_args()
 
     if not FINMIND_TOKEN:
         logger.error("未設定 FINMIND_TOKEN 環境變數")
         raise SystemExit(1)
 
-    pool = load_pool(args.pool_csv, args.max_pool)
+    pool = load_pool(args.pool_csv, args.max_pool) if args.pool_csv else build_pool_from_finmind(args.max_pool)
     weight_map = fetch_market_value_weights()
     dates = recent_trading_days(args.lookback)
     logger.info(f"時間範圍：{dates[0]} ~ {dates[-1]}（{len(dates)} 個交易日）")
