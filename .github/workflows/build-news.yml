@@ -8,8 +8,9 @@ on:
         required: false
         default: '5'
   schedule:
-    # 每週一到週五 22:30 台灣時間（UTC 14:30），排在 radar 掃描（21:30）之後，
-    # 確保讀到當日最新的 scan_app.csv 股票池。
+    # 每週一到週五 22:30 台灣時間（UTC 14:30）。股票池改用FinMind自建
+    # （build_pool_from_finmind，2026-07-10 起，taiwan-stock-radar repo 已刪除），
+    # 不再依賴其他 repo 的排程順序。
     - cron: '30 14 * * 1-5'
 
 permissions:
