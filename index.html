@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>台股新聞 · 股市雷達</title>
+<title>新聞晨報 · 股市雷達</title>
 <style>
   :root{
     --bg:#0b1120; --bg2:#111a2e; --card:#16213a; --card-hover:#1d2b4a;
@@ -83,6 +83,22 @@
   .empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:.95rem}
   footer{margin-top:32px;color:var(--muted);font-size:.78rem;text-align:center;line-height:1.7}
   footer a{color:var(--accent);text-decoration:none}
+  .tabs{display:flex;gap:6px;margin:14px 0 4px}
+  .tab{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 16px;
+    font-size:.88rem;color:var(--muted);cursor:pointer;user-select:none;transition:.15s}
+  .tab:hover{border-color:#33507e}
+  .tab.active{color:var(--txt);border-color:var(--accent);background:var(--card-hover);font-weight:650}
+  .mcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+    margin:12px 0;font-size:.92rem;line-height:1.6}
+  .mcard b{color:var(--txt)}
+  .up{color:#ef5b5b}.down{color:#2fbf71}.mut{color:var(--muted)}
+  .mtable{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:4px}
+  .mtable th,.mtable td{padding:5px 6px;text-align:right;border-bottom:1px solid rgba(36,53,86,.5);white-space:nowrap}
+  .mtable th:first-child,.mtable td:first-child{text-align:left}
+  .mtable th{color:var(--muted);font-weight:600;font-size:.74rem}
+  .mtable .nm{color:var(--muted);font-size:.72rem;margin-left:5px}
+  .msection{margin:18px 2px 6px;font-size:1rem;font-weight:700}
+  .msection::before{content:"▸";color:var(--accent);margin-right:6px;font-size:.85rem}
 </style>
 </head>
 <body>
@@ -91,26 +107,37 @@
     <a class="back" href="https://shihpc.github.io/">← 回 Hub</a>
   </div>
   <header>
-    <h1>📰 台股新聞</h1>
-    <div class="sub">投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。</div>
+    <h1>🗞️ 新聞晨報</h1>
+    <div class="sub" id="pageSub">投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。</div>
   </header>
 
-  <div class="stats" id="stats"></div>
-
-  <div class="bar">
-    <input id="q" type="search" placeholder="🔍 搜尋股號或名稱…" autocomplete="off">
-    <div class="row" id="impactChips"></div>
-    <div class="row"><span class="lbl">天數</span><span id="dayChips" style="display:contents"></span>
-      <span class="srcbtn" id="srcToggle">來源 ▾</span></div>
-    <div class="panel" id="srcPanel"></div>
+  <div class="tabs">
+    <div class="tab active" data-tab="news">新聞</div>
+    <div class="tab" data-tab="morning">晨報</div>
   </div>
 
-  <div id="list"><div class="empty">載入中…</div></div>
+  <div id="newsView">
+    <div class="stats" id="stats"></div>
+
+    <div class="bar">
+      <input id="q" type="search" placeholder="🔍 搜尋股號或名稱…" autocomplete="off">
+      <div class="row" id="impactChips"></div>
+      <div class="row"><span class="lbl">天數</span><span id="dayChips" style="display:contents"></span>
+        <span class="srcbtn" id="srcToggle">來源 ▾</span></div>
+      <div class="panel" id="srcPanel"></div>
+    </div>
+
+    <div id="list"><div class="empty">載入中…</div></div>
+  </div>
+
+  <div id="morningView" style="display:none">
+    <div id="morningList"><div class="empty">載入中…</div></div>
+  </div>
 
   <footer>
-    資料來源：FinMind · TaiwanStockNews　|　過濾規格見
-    <a href="https://github.com/shihpc/taiwan-stock-news">taiwan-stock-news</a><br>
-    股票池取自 <a href="https://shihpc.github.io/taiwan-stock-radar/">綜合動態</a> 每日候選
+    資料來源：FinMind · TaiwanStockNews（新聞）／
+    <a href="https://github.com/shihpc/taiwan-flow-live-v2">taiwan-flow-live-v2</a>（晨報）｜過濾規格見
+    <a href="https://github.com/shihpc/taiwan-stock-news">taiwan-stock-news</a>
   </footer>
 </div>
 
@@ -322,6 +349,91 @@ async function load(){
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; renderList(); });
 document.getElementById("srcToggle").addEventListener("click", () =>
   setSrcPanel(!document.getElementById("srcPanel").classList.contains("open")));
+
+// ---- 晨報 tab（跨repo唯讀讀taiwan-flow-live-v2的raw資料，不搬遷該站的抓取管線）----
+const V2_BASE = "https://raw.githubusercontent.com/shihpc/taiwan-flow-live-v2/main/data";
+let MORNING = null, US = null;
+const sgn = (v, t) => `<span class="${v>0?"up":v<0?"down":"mut"}">${t}</span>`;
+const pct = v => v==null ? "—" : (v>0?"+":"")+v.toFixed(2)+"%";
+const numFmt = v => v==null ? "—" : Math.round(v).toLocaleString("en-US");
+
+function gapHtml(m){
+  if (!m || !m.gap) return "";
+  const g = m.gap, s = m.spot || {};
+  const dir = g.gap>50 ? "偏多" : g.gap<-50 ? "偏空" : "中性";
+  return `<div class="mcard"><b>開盤參考：${sgn(g.gap, dir+" "+(g.gap>0?"+":"")+g.gap+" 點")}</b>`
+    + `<div class="mut" style="font-size:.78rem;margin-top:4px">台指期夜盤（${esc(g.date||"")}）`
+    + `${g.close?g.close.toLocaleString("en-US"):"—"}（${(g.chg_pct>0?"+":"")+g.chg_pct}%）`
+    + ` vs 加權收盤 ${s.close?s.close.toLocaleString("en-US"):"—"}（${esc(s.date||"")}）</div></div>`;
+}
+
+function usHtml(u){
+  if (!u) return "";
+  let h = "";
+  if (u.brief) h += `<div class="mcard"><b>${esc(u.brief)}</b>`
+    + (u.session ? `<div class="mut" style="font-size:.8rem;margin-top:4px">${esc(u.session)}</div>` : "")
+    + `</div>`;
+  for (const g of (u.groups || [])) {
+    const isAdr = (g.g||"").includes("ADR");
+    h += `<div class="msection">${esc(g.g)}</div><table class="mtable"><thead><tr>`
+      + `<th>${esc(g.g)}</th><th>收盤</th><th>漲跌%</th>${isAdr?"<th>ADR溢價</th>":""}</tr></thead><tbody>`
+      + (g.rows||[]).map(r => `<tr><td>${esc(r.n)}<span class="nm">${esc((r.s||"").replace("^",""))}</span></td>`
+        + `<td>${r.c!=null?r.c.toLocaleString("en-US"):"—"}</td><td>${sgn(r.chg, pct(r.chg))}</td>`
+        + (isAdr ? `<td>${r.prem!=null?sgn(r.prem,(r.prem>0?"+":"")+r.prem.toFixed(2)+"%"):'<span class="mut">—</span>'}</td>` : "")
+        + `</tr>`).join("")
+      + `</tbody></table>`;
+  }
+  return h;
+}
+
+function chipsHtml(m){
+  const c = m.chips || {}, inst = c.inst;
+  let lines = [];
+  if (inst) lines.push(`法人（億）：外資 ${sgn(inst.foreign,(inst.foreign>0?"+":"")+inst.foreign)}`
+    + `｜投信 ${sgn(inst.trust,(inst.trust>0?"+":"")+inst.trust)}｜自營 ${sgn(inst.dealer,(inst.dealer>0?"+":"")+inst.dealer)}`);
+  if ((c.it3||[]).length) lines.push(`投信3日連買：${c.it3.map(x=>esc(x.n||x.c)).join("、")}`);
+  if ((c.it3_sell||[]).length) lines.push(`投信3日連賣：${c.it3_sell.map(x=>esc(x.n||x.c)).join("、")}`);
+  for (const l of (c.aetf||[])) lines.push(`主動ETF ${esc(l)}`);
+  if ((m.exdiv||[]).length) lines.push(`今日除權息：${m.exdiv.slice(0,8).map(x=>esc(x.n||x.c)+(x.div?`(${x.div}元)`:"")).join("、")}`);
+  if (!lines.length) return "";
+  return `<div class="mcard">${lines.map(x=>`<div>${x}</div>`).join("")}</div>`;
+}
+
+async function loadMorning(){
+  if (MORNING && US) { renderMorning(); return; }
+  try{
+    const [rm, ru] = await Promise.all([
+      fetch(V2_BASE + "/morning.json?t=" + Date.now()),
+      fetch(V2_BASE + "/us.json?t=" + Date.now()),
+    ]);
+    MORNING = rm.ok ? await rm.json() : null;
+    US = ru.ok ? await ru.json() : null;
+    renderMorning();
+  }catch(e){
+    document.getElementById("morningList").innerHTML =
+      `<div class="empty">晨報資料載入失敗（來源：taiwan-flow-live-v2）。</div>`;
+  }
+}
+
+function renderMorning(){
+  const el = document.getElementById("morningList");
+  if (!MORNING && !US) { el.innerHTML = `<div class="empty">尚無晨報資料。</div>`; return; }
+  const genAt = MORNING && MORNING.generated_at ? esc(MORNING.generated_at) : "";
+  el.innerHTML = (genAt ? `<div class="mut" style="font-size:.76rem;margin-top:4px">晨報產生於 ${genAt}</div>` : "")
+    + gapHtml(MORNING) + usHtml(US) + (MORNING ? chipsHtml(MORNING) : "");
+}
+
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
+  const tab = t.dataset.tab;
+  document.getElementById("newsView").style.display = tab === "news" ? "" : "none";
+  document.getElementById("morningView").style.display = tab === "morning" ? "" : "none";
+  document.getElementById("pageSub").textContent = tab === "news"
+    ? "投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。"
+    : "台股開盤前晨報：期指開盤參考、隔夜美股、法人籌碼與除權息（資料源：taiwan-flow-live-v2）。";
+  if (tab === "morning") loadMorning();
+});
+
 load();
 </script>
 </body>
