@@ -283,16 +283,18 @@ def main() -> None:
     kept = curate_news(raw)
     logger.info(f"過濾後保留 {len(kept)} 則")
 
-    # 依股票分組
+    # 依股票分組＋去重。key 只用標題不含連結：同一篇文章常有多種網址變體
+    # （/amp/、/print/、?from=追蹤參數、路徑大小寫），連結參與比對會漏掉這些重複。
+    # 先依日期新到舊排序再去重 → 同標題保留最新一筆。
+    kept.sort(key=lambda r: r["date"], reverse=True)
     by_stock: dict[str, list[dict]] = {}
-    seen_per_stock: dict[str, set[tuple[str, str]]] = {}
+    seen_per_stock: dict[str, set[str]] = {}
     for rec in kept:
         sid = rec["stock_id"]
-        key = (rec["title"], rec["link"])
         seen = seen_per_stock.setdefault(sid, set())
-        if key in seen:
-            continue  # 同一檔股票裡，跨查詢日期抓到重複文章（FinMind 單日查詢邊界會重疊）
-        seen.add(key)
+        if rec["title"] in seen:
+            continue
+        seen.add(rec["title"])
         by_stock.setdefault(sid, []).append(rec)
 
     stocks = []

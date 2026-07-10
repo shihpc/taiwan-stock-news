@@ -69,11 +69,11 @@ _NORMALIZE: dict[str, str] = {
 # ── 2. 核心白名單（canonical，一律通過）──────────────────────
 # 註：2026-07 依實跑量能檢討，移除高量低訊號來源（富聯網、CMoney、
 #     CMoney投資網誌、sinotrade、Yahoo、財訊）以降低每日新聞量。
+#     2026-07-10 使用者指示再移除：信傳媒、優分析UAnalyze。
 CORE_WHITELIST: frozenset[str] = frozenset({
     "UDN", "經濟日報", "工商時報", "自由時報系", "中央社", "今周刊",
-    "遠見雜誌", "商周財富網", "信傳媒", "理財周刊",
+    "遠見雜誌", "商周財富網", "理財周刊",
     "MoneyDJ", "TechNews 科技新報", "鉅亨(cnyes)",
-    "優分析UAnalyze",
     "FTNN新聞", "富果直送",
 })
 

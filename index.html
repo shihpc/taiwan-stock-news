@@ -266,9 +266,9 @@ function marketNewsList(){
   const out = [];
   DATA.stocks.forEach(s => s.news.forEach(n => {
     if (n.impact !== "market" || !passNews(n)) return;
-    const key = n.date + "|" + n.title;
-    if (seen.has(key)) return;
-    seen.add(key);
+    // 只用標題去重：同篇文章的多網址變體時間戳會不同，帶date會漏掉
+    if (seen.has(n.title)) return;
+    seen.add(n.title);
     out.push(n);
   }));
   out.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
@@ -373,12 +373,15 @@ function usHtml(u){
   if (u.brief) h += `<div class="mcard"><b>${esc(u.brief)}</b>`
     + (u.session ? `<div class="mut" style="font-size:.8rem;margin-top:4px">${esc(u.session)}</div>` : "")
     + `</div>`;
+  const vrCell = vr => vr==null ? '<span class="mut">—</span>' : `${vr.toFixed(2)}×`;
+  const ampCell = amp => amp==null ? '<span class="mut">—</span>' : amp.toFixed(2)+"%";
   for (const g of (u.groups || [])) {
     const isAdr = (g.g||"").includes("ADR");
     h += `<div class="msection">${esc(g.g)}</div><table class="mtable"><thead><tr>`
-      + `<th>${esc(g.g)}</th><th>收盤</th><th>漲跌%</th>${isAdr?"<th>ADR溢價</th>":""}</tr></thead><tbody>`
+      + `<th>${esc(g.g)}</th><th>收盤</th><th>漲跌%</th><th>量比</th><th>振幅</th>${isAdr?"<th>ADR溢價</th>":""}</tr></thead><tbody>`
       + (g.rows||[]).map(r => `<tr><td>${esc(r.n)}<span class="nm">${esc((r.s||"").replace("^",""))}</span></td>`
         + `<td>${r.c!=null?r.c.toLocaleString("en-US"):"—"}</td><td>${sgn(r.chg, pct(r.chg))}</td>`
+        + `<td>${vrCell(r.vr)}</td><td>${ampCell(r.amp)}</td>`
         + (isAdr ? `<td>${r.prem!=null?sgn(r.prem,(r.prem>0?"+":"")+r.prem.toFixed(2)+"%"):'<span class="mut">—</span>'}</td>` : "")
         + `</tr>`).join("")
       + `</tbody></table>`;
@@ -504,13 +507,25 @@ async function loadUsWatch(){
     }catch(e){ box.innerHTML = '<div class="mut" style="font-size:.8rem">自選載入失敗：' + esc(String(e.message||e)) + '</div>'; return; }
   }
   const rows = uswCache.rows;
+  // 中文名：先查 us.json 固定組（同代號沿用），再查常用自選對照，查不到只顯示代號
+  const USW_NAMES = { SMCI:"美超微", COIN:"Coinbase", USO:"原油ETF", DRAM:"DRAM ETF" };
+  const nameMap = {};
+  for (const g of ((US && US.groups) || [])) for (const r of (g.rows||[])) nameMap[r.s] = r.n;
+  const nameOf = s => nameMap[s] || USW_NAMES[s] || null;
   box.innerHTML = `<table class="mtable"><thead><tr><th>自選</th><th>收盤</th><th>漲跌%</th><th>量比</th><th>振幅</th><th></th></tr></thead><tbody>`
-    + rows.map(r => `<tr><td>${r.err?esc(r.s)+' <span class="mut">('+esc(r.err)+')</span>':'<b>'+esc(r.s)+'</b><span class="nm">'+esc(r.d||"")+'</span>'}</td>`
+    + rows.map(r => {
+      const nm = nameOf(r.s);
+      const first = r.err
+        ? esc(r.s)+' <span class="mut">('+esc(r.err)+')</span>'
+        : (nm ? `${esc(nm)}<span class="nm">${esc(r.s)}</span>` : `<b>${esc(r.s)}</b>`)
+          + `<span class="nm">${esc(r.d||"")}</span>`;
+      return `<tr><td>${first}</td>`
       + `<td>${r.c==null?'—':(r.c>=1000?r.c.toLocaleString("en-US",{maximumFractionDigits:0}):r.c.toLocaleString("en-US"))}</td>`
       + `<td>${r.chg==null?'—':sgn(r.chg,pct(r.chg))}</td>`
       + `<td>${r.vr==null?'—':r.vr.toFixed(2)+"×"}</td>`
       + `<td>${r.amp==null?'—':r.amp.toFixed(2)+"%"}</td>`
-      + `<td><span style="cursor:pointer;color:var(--muted)" data-uswdel="${esc(r.s)}">✕</span></td></tr>`).join("")
+      + `<td><span style="cursor:pointer;color:var(--muted)" data-uswdel="${esc(r.s)}">✕</span></td></tr>`;
+    }).join("")
     + `</tbody></table>`;
 }
 document.addEventListener("click", e => {
