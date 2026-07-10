@@ -420,8 +420,105 @@ function renderMorning(){
   if (!MORNING && !US) { el.innerHTML = `<div class="empty">尚無晨報資料。</div>`; return; }
   const genAt = MORNING && MORNING.generated_at ? esc(MORNING.generated_at) : "";
   el.innerHTML = (genAt ? `<div class="mut" style="font-size:.76rem;margin-top:4px">晨報產生於 ${genAt}</div>` : "")
-    + gapHtml(MORNING) + (MORNING ? chipsHtml(MORNING) : "") + usHtml(US);
+    + gapHtml(MORNING) + (MORNING ? chipsHtml(MORNING) : "") + usHtml(US) + usWatchHtml();
+  bindUsWatch();
+  loadUsWatch();
 }
+
+// ---- 美股自選（沿用 taiwan-flow-live-v2 Worker 的 /uswatch 報價與 /usersync 同步；
+//      localStorage key 沿用 tflive2_* 讓原站使用者的清單/同步碼無縫延續）----
+const USW_WORKER = "https://taiwan-flow-v2.shihpc.workers.dev";
+const uswList = () => { try{ return JSON.parse(localStorage.getItem("tflive2_uswatch")||"[]"); }catch(e){ return []; } };
+const uswSave = l => localStorage.setItem("tflive2_uswatch", JSON.stringify(l));
+const uswSyncCode = () => localStorage.getItem("tflive2_usw_sync") || "";
+let uswCache = null, uswPulled = false;
+const uswFetch = async u => { const r = await fetch(u); if(!r.ok) throw new Error(r.status); return r.json(); };
+async function uswRemotePull(){
+  if (!uswSyncCode() || uswPulled) return;
+  try{
+    const j = await uswFetch(USW_WORKER + "/usersync?k=" + encodeURIComponent(uswSyncCode()));
+    if (j && Array.isArray(j.list)) { uswSave(j.list); uswCache = null; }
+  }catch(e){}
+  uswPulled = true;
+}
+function uswRemotePush(){
+  if (!uswSyncCode()) return;
+  uswFetch(USW_WORKER + "/usersync?k=" + encodeURIComponent(uswSyncCode())
+    + "&set=" + encodeURIComponent(uswList().join(","))).catch(()=>{});
+}
+function usWatchHtml(){
+  const syncOn = !!uswSyncCode();
+  const inStyle = "background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:6px 9px;font-size:.82rem;flex:1;min-width:0;width:auto;outline:none";
+  const btnStyle = "background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 11px;font-size:.8rem;cursor:pointer;white-space:nowrap";
+  const syncUi = syncOn
+    ? `<span class="mut" style="font-size:.72rem;white-space:nowrap">☁${esc(uswSyncCode().slice(0,2))}***</span><button style="${btnStyle}" id="uswSyncOff">停用</button>`
+    : `<input id="uswSyncIn" placeholder="同步碼≥4字" style="${inStyle}" maxlength="64">
+       <button style="${btnStyle}" id="uswSyncEn">☁同步</button>`;
+  return `<div class="msection">自選<span class="mut" style="font-size:.74rem;font-weight:400">（${syncOn?"跨裝置同步":"僅存本機"}）</span></div>
+  <div style="display:flex;gap:5px;margin:6px 0 8px;align-items:center">
+    <input id="uswIn" placeholder="代號如PLTR" style="${inStyle}" maxlength="8">
+    <button style="${btnStyle}" id="uswAdd">加入</button>
+    ${syncUi}
+  </div>
+  <div id="uswBox">${uswList().length||uswSyncCode()?'<div class="mut" style="font-size:.8rem">載入自選…</div>':'<div class="mut" style="font-size:.8rem">尚無自選。輸入美股代號加入（上限 12 檔）；設同步碼可跨裝置共用清單。</div>'}</div>`;
+}
+function bindUsWatch(){
+  const btn = document.getElementById("uswAdd"), inp = document.getElementById("uswIn");
+  if (!btn) return;
+  const add = () => {
+    const v = (inp.value||"").trim().toUpperCase();
+    if (!/^[A-Z0-9^.\-]{1,8}$/.test(v)) { alert("代號格式不對"); return; }
+    const l = uswList();
+    if (l.includes(v)) return;
+    if (l.length >= 12) { alert("自選上限 12 檔"); return; }
+    l.push(v); uswSave(l); uswRemotePush(); uswCache = null; inp.value = "";
+    renderMorning();
+  };
+  btn.onclick = add;
+  inp.onkeydown = e => { if (e.key === "Enter") add(); };
+  const en = document.getElementById("uswSyncEn");
+  if (en) en.onclick = async () => {
+    const v = (document.getElementById("uswSyncIn").value||"").trim();
+    if (v.length < 4) { alert("同步碼至少 4 個字"); return; }
+    localStorage.setItem("tflive2_usw_sync", v);
+    try{
+      const j = await uswFetch(USW_WORKER + "/usersync?k=" + encodeURIComponent(v));
+      if (j && Array.isArray(j.list) && j.list.length) uswSave(j.list);
+      else uswRemotePush();
+    }catch(e){ alert("同步啟用失敗：" + (e.message||e)); }
+    uswPulled = true; uswCache = null; renderMorning();
+  };
+  const off = document.getElementById("uswSyncOff");
+  if (off) off.onclick = () => { localStorage.removeItem("tflive2_usw_sync"); uswPulled = false; renderMorning(); };
+}
+async function loadUsWatch(){
+  await uswRemotePull();
+  const box = document.getElementById("uswBox"), l = uswList();
+  if (!box) return;
+  if (!l.length) { box.innerHTML = '<div class="mut" style="font-size:.8rem">尚無自選。輸入美股代號加入（上限 12 檔）。</div>'; return; }
+  const key = l.join(",");
+  if (!uswCache || uswCache.key !== key) {
+    try{
+      const j = await uswFetch(USW_WORKER + "/uswatch?t=" + encodeURIComponent(key));
+      uswCache = { key, rows: j.rows || [] };
+    }catch(e){ box.innerHTML = '<div class="mut" style="font-size:.8rem">自選載入失敗：' + esc(String(e.message||e)) + '</div>'; return; }
+  }
+  const rows = uswCache.rows;
+  box.innerHTML = `<table class="mtable"><thead><tr><th>自選</th><th>收盤</th><th>漲跌%</th><th>量比</th><th>振幅</th><th></th></tr></thead><tbody>`
+    + rows.map(r => `<tr><td>${r.err?esc(r.s)+' <span class="mut">('+esc(r.err)+')</span>':'<b>'+esc(r.s)+'</b><span class="nm">'+esc(r.d||"")+'</span>'}</td>`
+      + `<td>${r.c==null?'—':(r.c>=1000?r.c.toLocaleString("en-US",{maximumFractionDigits:0}):r.c.toLocaleString("en-US"))}</td>`
+      + `<td>${r.chg==null?'—':sgn(r.chg,pct(r.chg))}</td>`
+      + `<td>${r.vr==null?'—':r.vr.toFixed(2)+"×"}</td>`
+      + `<td>${r.amp==null?'—':r.amp.toFixed(2)+"%"}</td>`
+      + `<td><span style="cursor:pointer;color:var(--muted)" data-uswdel="${esc(r.s)}">✕</span></td></tr>`).join("")
+    + `</tbody></table>`;
+}
+document.addEventListener("click", e => {
+  const d = e.target.closest("[data-uswdel]");
+  if (!d) return;
+  uswSave(uswList().filter(x => x !== d.dataset.uswdel));
+  uswRemotePush(); uswCache = null; renderMorning();
+});
 
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
   document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
