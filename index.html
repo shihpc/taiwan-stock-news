@@ -420,7 +420,7 @@ function renderMorning(){
   if (!MORNING && !US) { el.innerHTML = `<div class="empty">尚無晨報資料。</div>`; return; }
   const genAt = MORNING && MORNING.generated_at ? esc(MORNING.generated_at) : "";
   el.innerHTML = (genAt ? `<div class="mut" style="font-size:.76rem;margin-top:4px">晨報產生於 ${genAt}</div>` : "")
-    + gapHtml(MORNING) + usHtml(US) + (MORNING ? chipsHtml(MORNING) : "");
+    + gapHtml(MORNING) + (MORNING ? chipsHtml(MORNING) : "") + usHtml(US);
 }
 
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
