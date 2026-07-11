@@ -99,6 +99,27 @@
   .mtable .nm{color:var(--muted);font-size:.72rem;margin-left:5px}
   .msection{margin:18px 2px 6px;font-size:1rem;font-weight:700}
   .msection::before{content:"▸";color:var(--accent);margin-right:6px;font-size:.85rem}
+  .qrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .qrow input{flex:1;min-width:140px;background:var(--bg);border:1px solid var(--line);color:var(--txt);
+    border-radius:9px;padding:8px 12px;font-size:.88rem;outline:none}
+  .qbtn{background:var(--card-hover);border:1px solid var(--accent);color:var(--txt);border-radius:9px;
+    padding:7px 16px;font-size:.86rem;cursor:pointer;user-select:none;white-space:nowrap}
+  .qbtn:hover{background:#24365c}
+  /* 摘要分析 */
+  .insight-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:10px 0;line-height:1.75;font-size:.92rem}
+  .insight-md h2{font-size:1.02rem;color:var(--accent);margin:16px 0 6px;font-weight:700}
+  .insight-md h2:first-child{margin-top:0}
+  .insight-md h3{font-size:.94rem;color:var(--txt);margin:12px 0 4px;font-weight:650}
+  .insight-md ul{margin:4px 0 8px;padding-left:20px}
+  .insight-md li{margin:3px 0}
+  .insight-md p{margin:6px 0}
+  .insight-md strong{color:var(--txt)}
+  .insight-md code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-family:Consolas,monospace;font-size:.86rem;color:var(--accent)}
+  .insight-md table{border-collapse:collapse;width:100%;margin:8px 0;font-size:.84rem}
+  .insight-md th,.insight-md td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+  .insight-md th{background:var(--chip);color:var(--muted)}
+  .insight-note{color:var(--muted);font-size:.74rem;margin:8px 4px;line-height:1.6}
+  .insight-meta{color:var(--muted);font-size:.76rem;margin:2px 4px 10px}
 </style>
 </head>
 <body>
@@ -114,6 +135,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="news">新聞</div>
     <div class="tab" data-tab="morning">晨報</div>
+    <div class="tab" data-tab="insight">摘要分析</div>
   </div>
 
   <div id="newsView">
@@ -134,6 +156,8 @@
     <div id="morningList"><div class="empty">載入中…</div></div>
   </div>
 
+  <div id="insightView" style="display:none"></div>
+
   <footer>
     資料來源：FinMind · TaiwanStockNews（新聞）／
     <a href="https://github.com/shihpc/taiwan-flow-live-v2">taiwan-flow-live-v2</a>（晨報）｜過濾規格見
@@ -147,11 +171,15 @@ const day10 = s => (s || "").slice(0, 10);
 const IMPACT_LABEL = { market: "盤面", heavy: "權值", stock: "個股" };
 const LS_DAYS = "tsn_days", LS_DISABLED = "tsn_disabled";
 let DATA = null, TDAYS = [];
+const INSIGHT_MODELS = [["claude-opus-4-8","Opus 4.8（最佳判讀，約NT$3/次）"],["claude-sonnet-5","Sonnet 5（近Opus、約半價更快）"]];
 const state = {
   impact: "all",
   q: "",
   days: parseInt(localStorage.getItem(LS_DAYS) || "3", 10),
   disabled: new Set(JSON.parse(localStorage.getItem(LS_DISABLED) || "[]")),
+  // 摘要分析（API key 用全站共用名 anthropic_key/insight_model，非 tsn_ 前綴，三站同 origin 共用）
+  insight: null, insightLoading: false, insightErr: null,
+  insightModel: localStorage.getItem("insight_model") || "claude-opus-4-8",
 };
 
 function esc(s){
@@ -549,15 +577,208 @@ document.addEventListener("click", e => {
   uswRemotePush(); uswCache = null; renderMorning();
 });
 
+// ---------- 摘要分析（前端即時呼叫 Claude API；框架照搬 postmkt） ----------
+// key 只存本機 localStorage，只隨查詢送給 Anthropic，不進 repo、不傳第三方。
+const anthKey = () => localStorage.getItem("anthropic_key") || "";
+// 台灣時間 "YYYY-MM-DD HH:MM:SS"（sv-SE locale 給 ISO 樣式，指定 Asia/Taipei 時區）
+const twNow = () => new Date().toLocaleString("sv-SE", { timeZone:"Asia/Taipei" });
+// 極簡 markdown→HTML（LLM 輸出用）：標題/清單/粗體/行內碼/表格/段落。夠用即可，不引入外部庫。
+function mdToHtml(md){
+  const esc2 = s => s.replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  const inline = s => esc2(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
+    .replace(/`([^`]+)`/g,"<code>$1</code>");
+  const lines = String(md||"").split("\n");
+  let html = "", i = 0;
+  while (i < lines.length){
+    const ln = lines[i];
+    if (/^\s*\|.*\|\s*$/.test(ln) && i+1<lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i+1])){
+      const cell = r => r.replace(/^\s*\|/,"").replace(/\|\s*$/,"").split("|").map(c=>c.trim());
+      const head = cell(ln); i += 2;
+      let body = "";
+      while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])){ body += "<tr>"+cell(lines[i]).map(c=>`<td>${inline(c)}</td>`).join("")+"</tr>"; i++; }
+      html += `<table><thead><tr>${head.map(c=>`<th>${inline(c)}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table>`;
+      continue;
+    }
+    let m;
+    if ((m = ln.match(/^##\s+(.*)/))) html += `<h2>${inline(m[1])}</h2>`;
+    else if ((m = ln.match(/^###\s+(.*)/))) html += `<h3>${inline(m[1])}</h3>`;
+    else if (/^\s*[-*]\s+/.test(ln)){
+      let items = "";
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])){ items += `<li>${inline(lines[i].replace(/^\s*[-*]\s+/,""))}</li>`; i++; }
+      html += `<ul>${items}</ul>`; continue;
+    }
+    else if (ln.trim()==="") { /* skip */ }
+    else html += `<p>${inline(ln)}</p>`;
+    i++;
+  }
+  return html;
+}
+// 從本頁記憶體資料彙整成給 LLM 的精簡文字（不 dump 全量，只取關鍵訊號欄位）。
+// 日期對齊：以新聞主資料日(primary＝最新交易日)為準，各段標注自己的資料日；
+// 不同日的段落明確標警告，避免 LLM 跨不同交易日直接比較。回傳 {text, primary, dates}。
+function insightGatherContext(){
+  const d = DATA || {};
+  const primary = (TDAYS.length ? TDAYS[TDAYS.length-1] : "") || day10(d.generated_at || "");
+  const dates = {};
+  // 日期比較用正規化（跨repo資料可能用斜線 2026/07/13，本站用連字號 2026-07-09，
+  // 格式不同會誤判成不同日，比較前統一成連字號）。
+  const norm = s => String(s||"").replace(/\//g,"-");
+  const dlabel = (name, secDate) => {
+    dates[name] = secDate || "?";
+    if (!secDate) return `【${name}（資料日不明）】`;
+    if (norm(secDate) === norm(primary)) return `【${name}（資料日 ${secDate}）】`;
+    return `【${name}（⚠資料日 ${secDate}，與主資料日 ${primary} 不同，請勿與其他段落跨日直接比較）】`;
+  };
+  const parts = [];
+  // a. 大盤與財金焦點新聞：全部 impact=market，去重（同文轉載）後依日期新→舊取前12
+  const mkt = [], seen = new Set();
+  (d.stocks||[]).forEach(s => (s.news||[]).forEach(n => {
+    if (n.impact !== "market") return;
+    const key = looseTitleKey(n.title);
+    if (key && seen.has(key)) return;
+    if (key) seen.add(key);
+    mkt.push(n);
+  }));
+  mkt.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  if (mkt.length){
+    parts.push(`${dlabel("大盤與財金焦點新聞 前12（新→舊）", primary)}\n`
+      + mkt.slice(0,12).map(n=>`${day10(n.date)}|${n.source}|${n.title}`).join("\n"));
+  }
+  // b. 個股新聞熱度：依新聞則數前15，每檔附產業/權重/最新2則標題
+  const tops = (d.stocks||[]).slice()
+    .sort((a,b)=>(b.count||(b.news||[]).length) - (a.count||(a.news||[]).length)).slice(0,15);
+  if (tops.length){
+    const line = s => {
+      const ns = (s.news||[]).slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,2)
+        .map(n=>`${day10(n.date)}《${n.title}》`).join("；");
+      return `${s.stock_id}${s.name||""}${s.heavyweight?"[權值]":""}|${s.industry||"—"}`
+        + `|大盤權重${s.weight_per!=null?s.weight_per+"%":"—"}|新聞${s.count||(s.news||[]).length}則|最新：${ns||"—"}`;
+    };
+    parts.push(`${dlabel("個股新聞熱度 前15（依新聞則數）", primary)}\n`+tops.map(line).join("\n"));
+  }
+  // c. 晨報籌碼（跨repo讀v2；晨報資料日常與新聞主資料日不同，dlabel會標警告）
+  if (MORNING){
+    const mDate = day10(MORNING.generated_at || "");
+    const c = MORNING.chips || {}, lines = [];
+    if (MORNING.gap){
+      const g = MORNING.gap, s = MORNING.spot || {};
+      lines.push(`期指開盤參考：台指期夜盤${g.close!=null?g.close:"—"}（${g.chg_pct>0?"+":""}${g.chg_pct}%）`
+        + ` vs 加權收盤${s.close!=null?s.close:"—"}，價差${g.gap>0?"+":""}${g.gap}點`);
+    }
+    if (c.inst) lines.push(`三大法人買賣超（億）：外資${c.inst.foreign>0?"+":""}${c.inst.foreign}`
+      + `｜投信${c.inst.trust>0?"+":""}${c.inst.trust}｜自營${c.inst.dealer>0?"+":""}${c.inst.dealer}`);
+    if ((c.it3||[]).length) lines.push(`投信3日連買：${c.it3.map(x=>(x.c||"")+(x.n||"")).join("、")}`);
+    if ((c.it3_sell||[]).length) lines.push(`投信3日連賣：${c.it3_sell.map(x=>(x.c||"")+(x.n||"")).join("、")}`);
+    if ((c.aetf||[]).length) lines.push(`主動ETF動向：${c.aetf.join("；")}`);
+    if (lines.length) parts.push(`${dlabel("晨報籌碼", mDate)}\n`+lines.join("\n"));
+    // d. 隔夜美股（與晨報同批產生，沿用晨報資料日；美股本質為隔夜資料，SYS已禁跨日串連）
+    if (US){
+      const uLines = [];
+      if (US.brief) uLines.push(US.brief + (US.session ? `（${US.session}）` : ""));
+      for (const g of (US.groups||[])){
+        uLines.push(`${g.g}：${(g.rows||[]).slice(0,3)
+          .map(r=>`${r.n}${r.chg!=null?(r.chg>0?"+":"")+r.chg.toFixed(2)+"%":"—"}`).join("、")}`);
+      }
+      if (uLines.length) parts.push(`${dlabel("隔夜美股", mDate)}\n`+uLines.join("\n"));
+    }
+  } else {
+    parts.push("【晨報籌碼】（晨報資料未載入，本段略過，僅分析新聞面）");
+  }
+  return { text: parts.join("\n\n"), primary, dates };
+}
+// 打開 adaptive thinking：Opus 4.8 省略 thinking=不思考，故明確指定；effort medium 平衡
+// 深度與延遲；只取 text block(thinking display 預設 omitted，不渲染思考)。max_tokens 拉高
+// 給思考+輸出留空間。
+async function callClaude(key, model, system, userMsg){
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{ "content-type":"application/json", "x-api-key":key,
+      "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
+    body: JSON.stringify({ model, max_tokens:8000,
+      thinking:{ type:"adaptive" }, output_config:{ effort:"medium" },
+      system, messages:[{role:"user",content:userMsg}] })
+  });
+  const j = await r.json();
+  if (!r.ok || (j.type==="error")) throw new Error((j.error && j.error.message) || ("HTTP "+r.status));
+  if (j.stop_reason === "refusal") throw new Error("模型基於安全政策婉拒本次請求");
+  const text = (j.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
+  return { text, usage: j.usage || null };
+}
+async function runInsight(){
+  if (!anthKey()){ alert("請先輸入並儲存 Anthropic API token"); return; }
+  state.insightLoading = true; state.insightErr = null; renderInsight();
+  try{
+    // 晨報資料未載入（使用者沒開過晨報tab）就先補抓；失敗不擋新聞面分析
+    if (!MORNING && typeof loadMorning === "function"){ try{ await loadMorning(); }catch(e){} }
+    const g = insightGatherContext();
+    if (!g.text.trim()) throw new Error("本頁資料尚未載入完成，請稍候再試");
+    const SYS = "你是積極的台股新聞與籌碼交叉分析師。任務：彙整本頁新聞焦點與晨報籌碼資料，產出以「找出具新聞催化＋籌碼支持的 alpha 標的」為核心的洞見與可操作建議。要求：(1) 進出建議一律以『同向共振』為基礎——新聞催化與籌碼方向一致才算有效訊號（例：個股利多新聞密集＋投信連買或主動ETF加碼＝催化與籌碼共振偏多；利空新聞＋法人賣超＝共振偏空）。(2) 只聚焦同向共振訊號；背離（如利多新聞但法人大賣）不適合作為進出參考，一律略過、不呈現、不描述、不列背離段落。(3) 依資料呈現的傾向做方向性判斷，對共振標的給偏多／偏空看法與明確進出建議。(4) 每條洞見／建議必須點名個股代號＋可追溯的具體依據(新聞標題與日期、法人買賣超數字、連買天數等)，禁止空泛臆測。(5) 洞見與建議合計不超過 10 條，挑共振最強、依據最紮實的。(6) 建議個股以 alpha 為首要考量，優先納入中小型標的；大型權值股(台灣50成分、2330台積電/2317鴻海/2454聯發科、金控股等)合計不得超過清單一半——上限而非目標，不必硬湊。(7) 新聞僅代表資訊面、非事實核實，判讀須註明消息面屬性；美股與晨報資料若與主資料日不同，僅可單獨解讀、嚴禁跨日串連成訊號。(8) 繁體中文、markdown(## 標題、- 清單、**粗體**、可用表格)。結構：## 核心洞見與操作建議(≤10 條，每條＝個股代號名稱 ｜ 共振訊號 ｜ 依據 ｜ 方向與進出建議；大型股≤一半)／## 訊號邏輯(簡述共振推論)。不要有背離段落。最後一行附免責：以上為新聞與籌碼交叉的模型即時研判、未經歷史回測、非投資建議、非保證獲利，僅供你自行參考。";
+    const USER = `主資料日（以此為準）：${g.primary}\n各段資料日：${JSON.stringify(g.dates)}\n（凡標注「與主資料日不同」的段落，僅可單獨解讀，勿跨日比較）\n\n${g.text}`;
+    const res = await callClaude(anthKey(), state.insightModel, SYS, USER);
+    state.insight = { text: res.text, usage: res.usage, at: twNow(), date: g.primary, model: state.insightModel };
+  }catch(e){
+    state.insightErr = String(e.message || e);
+  }
+  state.insightLoading = false; renderInsight();
+}
+function insightHtml(){
+  const primary = (TDAYS.length ? TDAYS[TDAYS.length-1] : "") || (DATA ? day10(DATA.generated_at||"") : "");
+  let h = `<div class="msection">摘要分析${primary?`<span class="mut" style="font-size:.74rem;font-weight:400;margin-left:6px">${esc(primary)}</span>`:""}</div>`;
+  // token 輸入區
+  if (!anthKey()){
+    h += `<div class="mcard" style="font-size:.84rem">此功能會用你自己的 Anthropic API token 即時呼叫 Claude 產生分析。`
+      + `token 只存在你這台瀏覽器的 localStorage，不會寫入網站或傳給 Anthropic 以外的任何地方。`
+      + `<div class="qrow" style="margin-top:8px"><input id="anthTok" type="password" placeholder="貼上 Anthropic API token（sk-ant-…）">`
+      + `<span class="qbtn" data-anth-save>儲存</span></div></div>`;
+  }
+  const modelOpts = INSIGHT_MODELS.map(([v,l])=>`<option value="${v}"${state.insightModel===v?" selected":""}>${esc(l)}</option>`).join("");
+  h += `<div class="mcard" style="padding:12px 14px"><div class="qrow">`
+    + `<span class="qbtn" data-insight-run>${state.insight?"🔄 重新分析":"🔍 產生 AI 摘要分析"}</span>`
+    + `<select id="insightModelSel" style="background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 10px;font-size:.84rem;outline:none;cursor:pointer">${modelOpts}</select>`
+    + (anthKey()?`<span class="mut" style="font-size:.74rem;cursor:pointer" data-anth-clear>Anthropic token已設定（點此清除）</span>`:"")
+    + `</div><div class="insight-note">分析範圍：大盤財金焦點新聞、個股新聞熱度、晨報籌碼(法人/投信連買賣/主動ETF/期指)、隔夜美股。`
+    + `已開啟 adaptive thinking（模型先推理再輸出，命中率較高、略慢）；資料自動對齊最近交易日、不同日段落會標警告。每次分析約消耗數千 token（費用計入你的 Anthropic 帳戶）。</div></div>`;
+  if (state.insightLoading){ h += `<div class="empty">Claude 分析中…（依資料量約需 10-30 秒）</div>`; return h; }
+  if (state.insightErr){ h += `<div class="empty" style="text-align:left;padding:14px">分析失敗：${esc(state.insightErr)}</div>`; return h; }
+  if (state.insight){
+    const u = state.insight.usage;
+    const tok = u ? `輸入 ${numFmt((u.input_tokens||0)+(u.cache_read_input_tokens||0)+(u.cache_creation_input_tokens||0))}／輸出 ${numFmt(u.output_tokens||0)} token` : "token數不明";
+    h += `<div class="insight-meta">生成時間 ${esc(state.insight.at)}（台灣）· 資料日 ${esc(state.insight.date||"—")} · 模型 ${esc(state.insight.model||state.insightModel)} · 本次 ${tok}</div>`;
+    h += `<div class="insight-card insight-md">${mdToHtml(state.insight.text)}</div>`;
+  }
+  return h;
+}
+// news 是多 view 容器模式（非 postmkt 全站單容器 re-render）：insightHtml 塞進 #insightView
+function renderInsight(){ document.getElementById("insightView").innerHTML = insightHtml(); }
+document.addEventListener("click", e => {
+  const rn = e.target.closest("[data-insight-run]");
+  if (rn){ runInsight(); return; }
+  const sv = e.target.closest("[data-anth-save]");
+  if (sv){ const i=document.getElementById("anthTok"); if(i&&i.value.trim()){ localStorage.setItem("anthropic_key", i.value.trim()); renderInsight(); } return; }
+  const cl = e.target.closest("[data-anth-clear]");
+  if (cl){ localStorage.removeItem("anthropic_key"); renderInsight(); return; }
+});
+document.addEventListener("change", e => {
+  if (e.target.id === "insightModelSel"){ state.insightModel = e.target.value; localStorage.setItem("insight_model", e.target.value); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key==="Enter" && e.target.id==="anthTok"){ const b=document.querySelector("[data-anth-save]"); if(b) b.click(); }
+});
+
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
   document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
   const tab = t.dataset.tab;
   document.getElementById("newsView").style.display = tab === "news" ? "" : "none";
   document.getElementById("morningView").style.display = tab === "morning" ? "" : "none";
-  document.getElementById("pageSub").textContent = tab === "news"
-    ? "投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。"
-    : "台股開盤前晨報：期指開盤參考、隔夜美股、法人籌碼與除權息（資料源：taiwan-flow-live-v2）。";
+  document.getElementById("insightView").style.display = tab === "insight" ? "" : "none";
+  const SUBS = {
+    news: "投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。",
+    morning: "台股開盤前晨報：期指開盤參考、隔夜美股、法人籌碼與除權息（資料源：taiwan-flow-live-v2）。",
+    insight: "AI 摘要分析：彙整新聞焦點與晨報籌碼，由 Claude 生成洞見。token 自備、只存本機。非投資建議。",
+  };
+  document.getElementById("pageSub").textContent = SUBS[tab] || SUBS.news;
   if (tab === "morning") loadMorning();
+  if (tab === "insight") renderInsight();
 });
 
 load();

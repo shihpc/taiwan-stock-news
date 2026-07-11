@@ -15,8 +15,9 @@ news.json            ← 每日由 GitHub Actions 產出並 commit
 ```
 
 ## 資料流
-1. 股票池：讀 `taiwan-stock-radar` 公開的 `scan_app.csv`（唯讀，不回寫），
-   取投信連買(`trust_days>=2`) ∪ 外資連買(`foreign_days>=2`)、排除 ETF。
+1. 股票池：`build_pool_from_finmind()` 自建（FinMind `TaiwanStockInfo` 取名稱/產業＋
+   近 3 個交易日投信/外資買賣超，排除 ETF）。原依賴 `taiwan-stock-radar` 的 `scan_app.csv`
+   已於 2026-07-10 隨該 repo 刪除而改為自建（`--pool-csv` 參數仍可指定外部 CSV 覆蓋）。
 2. 逐檔抓近 N 個交易日（預設 3）的 `TaiwanStockNews`（單日單請求，含 550/hr 節流）。
 3. `news_curation.curate_news` 白名單過濾：
    - source 正規化 → 核心白名單 → CMoney「股市爆料同學會」論壇次級過濾
@@ -33,4 +34,14 @@ news.json            ← 每日由 GitHub Actions 產出並 commit
 FINMIND_TOKEN=xxx python build_news.py --lookback 3
 ```
 
-白名單規格與盤點依據見 `taiwan-stock-radar` 的 `output/news_source_findings.md`。
+## 快速接手（2026-07-12）
+
+- `index.html` 現有 3 個 tab：新聞、晨報（跨 repo 讀 taiwan-flow-live-v2 `data/morning.json`）、
+  **摘要分析**（2026-07-12 新增）。摘要分析為前端直呼 Claude，框架與 postmkt 逐字同源
+  （callClaude/mdToHtml/Opus 4.8-Sonnet 5 模型切換）；localStorage key
+  `anthropic_key`/`insight_model` 與 postmkt、taiwan-flow-live-v2 同 origin 共用（設一次三站通用）。
+- insightGatherContext 彙整：大盤財金焦點新聞（impact=market 去重前12）、個股新聞熱度前15、
+  晨報籌碼（gap/法人/投信連買賣/主動ETF；MORNING 未載入會先 `await loadMorning()` 再判空略過）、
+  隔夜美股（各族群前3）。SYS prompt 為「新聞×籌碼共振」語境。
+- 已知觀察項（輕微、未修）：晨報籌碼段資料日標 `MORNING.generated_at`，
+  但法人數字實為前一交易日（晨報本質即彙整昨日籌碼），更嚴謹可改標 `chips.inst.date`。
