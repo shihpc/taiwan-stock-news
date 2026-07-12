@@ -18,7 +18,9 @@ news.json            ← 每日由 GitHub Actions 產出並 commit
 1. 股票池：`build_pool_from_finmind()` 自建（FinMind `TaiwanStockInfo` 取名稱/產業＋
    近 3 個交易日投信/外資買賣超，排除 ETF）。原依賴 `taiwan-stock-radar` 的 `scan_app.csv`
    已於 2026-07-10 隨該 repo 刪除而改為自建（`--pool-csv` 參數仍可指定外部 CSV 覆蓋）。
-2. 逐檔抓近 N 個交易日（預設 3）的 `TaiwanStockNews`（單日單請求，含 550/hr 節流）。
+2. 逐檔抓 `TaiwanStockNews`（單日單請求，含 550/hr 節流）；日期範圍為涵蓋近 N 個
+   交易日（預設 3）的**日曆日**區間（含夾雜與尾隨的週末/假日），排程每天 22:30 台北跑
+   （含週末，2026-07-12 起），週六日發布的新聞也收得到。
 3. `news_curation.curate_news` 白名單過濾：
    - source 正規化 → 核心白名單 → CMoney「股市爆料同學會」論壇次級過濾
    - Yahoo 跨來源標題去重 →（核心 0 篇時）fallback pool → 仍 0 則留空

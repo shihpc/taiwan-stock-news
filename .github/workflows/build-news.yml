@@ -8,10 +8,11 @@ on:
         required: false
         default: '5'
   schedule:
-    # 每週一到週五 22:30 台灣時間（UTC 14:30）。股票池改用FinMind自建
-    # （build_pool_from_finmind，2026-07-10 起，taiwan-stock-radar repo 已刪除），
-    # 不再依賴其他 repo 的排程順序。
-    - cron: '30 14 * * 1-5'
+    # 每天 22:30 台灣時間（UTC 14:30），週末也跑（2026-07-12 起，
+    # 抓取範圍改為涵蓋近 N 個交易日的日曆日區間，週六日發布的新聞也收得到）。
+    # 股票池用 FinMind 自建（build_pool_from_finmind，2026-07-10 起，
+    # taiwan-stock-radar repo 已刪除），不依賴其他 repo 的排程順序。
+    - cron: '30 14 * * *'
 
 permissions:
   contents: write
@@ -19,7 +20,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 90 分：連假時日曆日區間變長（池150×最多10日曆日>hourly-budget 1400），
+    # Throttle 會睡到滿小時，60 分可能不夠
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4

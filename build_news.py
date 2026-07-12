@@ -7,7 +7,9 @@
 #   1. 自建股票池（build_pool_from_finmind：FinMind TaiwanStockInfo + 近3日投信/外資買賣超；
 #      taiwan-stock-radar repo 已刪除，不再依賴外部 repo 的 scan_app.csv）
 #      池 = 投信連買(trust_days>=2) ∪ 外資連買(foreign_days>=2)，排除 ETF
-#   2. 逐檔抓近 N 個交易日的 FinMind TaiwanStockNews（單日單請求）
+#   2. 逐檔抓 FinMind TaiwanStockNews（單日單請求）；日期範圍＝涵蓋近 N 個
+#      交易日的「日曆日」區間（第 N 個交易日起到今天，含夾雜與尾隨的週末/假日），
+#      週末排程執行時也能收到週六日發布的新聞
 #   3. 套 news_curation.curate_news 白名單過濾
 #   4. 輸出 news.json 給前端 dashboard 讀取
 #
@@ -220,6 +222,22 @@ def recent_trading_days(n: int) -> list[str]:
     return sorted(out)
 
 
+def news_calendar_days(trading_days: list[str]) -> list[str]:
+    """涵蓋近 N 個交易日的「日曆日」區間：從 trading_days[0]（含）到今天（含）
+    的每一個日曆日（交易日＋夾雜與尾隨的週末/假日）。
+    例：週日執行、lookback=3（週三四五）→ 回傳 週三、四、五、六、日 共 5 天，
+    讓週末發布的新聞也抓得到。「今天」以 UTC 為準（排程 22:30 台北＝14:30 UTC，
+    兩地同日）。"""
+    start = datetime.strptime(trading_days[0], "%Y-%m-%d").date()
+    end = datetime.now(timezone.utc).date()
+    out: list[str] = []
+    d = start
+    while d <= end:
+        out.append(d.strftime("%Y-%m-%d"))
+        d += timedelta(days=1)
+    return out
+
+
 def fetch_news_one(stock_id: str, date: str, throttle: Throttle) -> list[dict]:
     """抓單檔單日新聞（TaiwanStockNews 單日單請求）。"""
     throttle.wait()
@@ -256,8 +274,9 @@ def main() -> None:
 
     pool = load_pool(args.pool_csv, args.max_pool) if args.pool_csv else build_pool_from_finmind(args.max_pool)
     weight_map = fetch_market_value_weights()
-    dates = recent_trading_days(args.lookback)
-    logger.info(f"時間範圍：{dates[0]} ~ {dates[-1]}（{len(dates)} 個交易日）")
+    tdays = recent_trading_days(args.lookback)          # 交易日（trading_days 欄位、前端 TDAYS 依賴）
+    dates = news_calendar_days(tdays)                   # 抓新聞用日曆日（含週末/假日）
+    logger.info(f"時間範圍：{dates[0]} ~ {dates[-1]}（{len(tdays)} 個交易日、共 {len(dates)} 個日曆日）")
     throttle = Throttle(args.hourly_budget)
 
     name_map = dict(zip(pool["code"], pool["name"]))
@@ -326,7 +345,7 @@ def main() -> None:
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "lookback_days": args.lookback,
-        "trading_days": dates,
+        "trading_days": tdays,
         "pool_size": int(len(pool)),
         "stocks_with_news": len(stocks),
         "total_news": len(kept),
