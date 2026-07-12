@@ -43,5 +43,11 @@ FINMIND_TOKEN=xxx python build_news.py --lookback 3
 - insightGatherContext 彙整：大盤財金焦點新聞（impact=market 去重前12）、個股新聞熱度前15、
   晨報籌碼（gap/法人/投信連買賣/主動ETF；MORNING 未載入會先 `await loadMorning()` 再判空略過）、
   隔夜美股（各族群前3）。SYS prompt 為「新聞×籌碼共振」語境。
+- 個股外連＋雲端儲存（2026-07-12）：insight 渲染中個股代號自動變連結，外開 Yahoo 技術分析頁
+  （`linkifyStocks(html, knownSet)`，三站逐字一致、改動需三站同步）。分析結果自動存
+  **postmkt repo** `data/analyses/insight-news-YYYYMMDD.json`（當日陣列、單日上限10筆、
+  保留近3日），寫入用 localStorage `gh_token`（GitHub Fine-grained PAT，三站同 origin 共用、
+  未設靜默跳過）；tab 內「雲端歷史（近3日）」免 token 列本站檔、點擊展開（raw CDN 約 5 分快取）。
+  PAT 建法與維護細節見 postmkt `README.md`。
 - 已知觀察項（輕微、未修）：晨報籌碼段資料日標 `MORNING.generated_at`，
   但法人數字實為前一交易日（晨報本質即彙整昨日籌碼），更嚴謹可改標 `chips.inst.date`。
