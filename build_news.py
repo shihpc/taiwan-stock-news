@@ -8,8 +8,9 @@
 #      taiwan-stock-radar repo 已刪除，不再依賴外部 repo 的 scan_app.csv）
 #      池 = 投信連買(trust_days>=2) ∪ 外資連買(foreign_days>=2)，排除 ETF
 #   2. 逐檔抓 FinMind TaiwanStockNews（單日單請求）；日期範圍＝涵蓋近 N 個
-#      交易日的「日曆日」區間（第 N 個交易日起到今天，含夾雜與尾隨的週末/假日），
-#      週末排程執行時也能收到週六日發布的新聞
+#      交易日的「日曆日」區間（第 N 個交易日前一天起到今天，含夾雜與尾隨的
+#      週末/假日），週末排程執行時也能收到週六日發布的新聞。
+#      FinMind 的 date 是 UTC，寫入前轉台北時間（finmind_news_date_to_taipei）
 #   3. 套 news_curation.curate_news 白名單過濾
 #   4. 輸出 news.json 給前端 dashboard 讀取
 #
@@ -36,6 +37,23 @@ logger = logging.getLogger("build_news")
 
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 FINMIND_URL = "https://api.finmindtrade.com/api/v4/data"
+
+# 台北時區（台灣無夏令時間，固定 UTC+8）
+TAIPEI_TZ = timezone(timedelta(hours=8))
+
+
+def finmind_news_date_to_taipei(s: str) -> str:
+    """FinMind TaiwanStockNews 的 date 欄位是「UTC 時間戳」的 naive 字串
+    （2026-07-13 抽樣驗證：鉅亨網/FTNN/工商時報/MoneyDJ/UDN 等主要來源
+    +8 小時後與文章頁的台北發布時間分秒吻合；自由時報頁內 publishAt 更直接
+    帶 Z 後綴證實為 UTC）。此函式把它轉成台北時間，輸出格式維持
+    'YYYY-MM-DD HH:MM:SS' 不變（前端 fmtDate 切字串顯示，無需調整）。
+    解析失敗時原樣回傳（防禦：格式異常寧可顯示原值也不要丟資料）。"""
+    try:
+        dt = datetime.strptime(str(s), "%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError):
+        return str(s)
+    return dt.replace(tzinfo=timezone.utc).astimezone(TAIPEI_TZ).strftime("%Y-%m-%d %H:%M:%S")
 
 # taiwan-stock-radar 每日產出的候選清單（公開、唯讀）
 DEFAULT_POOL_CSV = "https://raw.githubusercontent.com/shihpc/taiwan-stock-radar/main/scan_app.csv"
@@ -223,12 +241,18 @@ def recent_trading_days(n: int) -> list[str]:
 
 
 def news_calendar_days(trading_days: list[str]) -> list[str]:
-    """涵蓋近 N 個交易日的「日曆日」區間：從 trading_days[0]（含）到今天（含）
-    的每一個日曆日（交易日＋夾雜與尾隨的週末/假日）。
-    例：週日執行、lookback=3（週三四五）→ 回傳 週三、四、五、六、日 共 5 天，
+    """涵蓋近 N 個交易日的「日曆日」區間：從 trading_days[0] 的「前一天」（含）
+    到今天（含）的每一個日曆日（交易日＋夾雜與尾隨的週末/假日）。
+    例：週日執行、lookback=3（週三四五）→ 回傳 週二~週日 共 6 天，
     讓週末發布的新聞也抓得到。「今天」以 UTC 為準（排程 22:30 台北＝14:30 UTC，
-    兩地同日）。"""
-    start = datetime.strptime(trading_days[0], "%Y-%m-%d").date()
+    兩地同日）。
+
+    為何往前多含一天：FinMind 的單日切片以其儲存的 UTC 日為準，而新聞 date
+    轉台北(+8)後，台北 D 日清晨 00:00~07:59 的新聞落在 FinMind 的 D-1(UTC)
+    切片裡；不多抓一天會漏掉首個交易日清晨的新聞。多抓那天裡台北時間仍在
+    trading_days[0] 之前的新聞，會在 main() 轉換後依台北日過濾掉。
+    尾端不用多抓：執行時刻（UTC 當日內）之前發布的新聞，其 UTC 日必 <= 今天(UTC)。"""
+    start = datetime.strptime(trading_days[0], "%Y-%m-%d").date() - timedelta(days=1)
     end = datetime.now(timezone.utc).date()
     out: list[str] = []
     d = start
@@ -287,8 +311,14 @@ def main() -> None:
         cnt = 0
         for d in dates:
             for rec in fetch_news_one(code, d, throttle):
+                # FinMind date 是 UTC → 轉台北（見 finmind_news_date_to_taipei 註解）
+                date_tpe = finmind_news_date_to_taipei(rec.get("date", ""))
+                # 視窗以「台北日」為準：多抓的前一個 UTC 日切片裡，台北時間
+                # 仍早於 trading_days[0] 的新聞不在視窗內，這裡丟掉
+                if date_tpe[:10] < tdays[0]:
+                    continue
                 raw.append({
-                    "date": str(rec.get("date", "")),
+                    "date": date_tpe,
                     "stock_id": str(rec.get("stock_id", code)),
                     "source": str(rec.get("source", "")).strip(),
                     "title": str(rec.get("title", "")).strip(),
