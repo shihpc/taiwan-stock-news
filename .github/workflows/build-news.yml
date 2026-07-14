@@ -8,19 +8,24 @@ on:
         required: false
         default: '5'
   schedule:
-    # 每天三班（台灣時間，2026-07-12 起）：06:30 收清晨新聞（餵晨報時段）、
-    # 15:00 收盤後第一波新聞、22:37 收全天新聞（2026-07-14 起晚班由 22:30 改
-    # 22:37，純錯開 GitHub cron 整點/半點壅塞，非資料時序需求）。週末也跑
-    # （抓取範圍為涵蓋近 N 個交易日的日曆日區間，週六日發布的新聞也收得到）。
-    # GitHub cron 常態延遲 1~2 小時，實際完成時間比排程晚。
+    # 主力觸發改為 Cloudflare Worker 定點 dispatch（2026-07-15 起）：
+    # taiwan-flow-live-v2 worker 每天（含週末）台北 06:07–22:07 每小時 :07
+    # workflow_dispatch 本檔，準點不受 GitHub cron 延遲影響。
+    # 此處只留一班 22:37 台北當備援兜底（Worker 掛掉時每天至少收一次全天新聞）；
+    # GitHub cron 常態延遲 1~2 小時，備援實際完成時間比排程晚。
+    # 週末也跑（抓取範圍為涵蓋近 N 個交易日的日曆日區間，週六日發布的新聞也收得到）。
     # 股票池用 FinMind 自建（build_pool_from_finmind，2026-07-10 起，
     # taiwan-stock-radar repo 已刪除），不依賴其他 repo 的排程順序。
-    - cron: '30 22 * * *'   # 06:30 台北（前一日 UTC 22:30）
-    - cron: '0 7 * * *'     # 15:00 台北
-    - cron: '37 14 * * *'   # 22:37 台北
+    - cron: '37 14 * * *'   # 22:37 台北（備援）
 
 permissions:
   contents: write
+
+# Worker 每小時 dispatch＋備援 cron 可能重疊（單次建置最長 90 分），
+# 同 group 排隊不並行、不取消進行中的（後到的等前一輪跑完再跑）
+concurrency:
+  group: build-news
+  cancel-in-progress: false
 
 jobs:
   build:
