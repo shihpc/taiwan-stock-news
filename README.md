@@ -5,6 +5,9 @@
 
 線上：https://shihpc.github.io/taiwan-stock-news/
 
+`news.json` 的 `generated_at`（台北 +08:00）／`trading_days`／新聞 `date` 等日期欄語意，
+以及跨站產出檔的日期對照，見 postmkt repo 的 `docs/date-semantics.md`（五 repo 統一對照表）。
+
 ## 架構
 ```
 build_news.py        ← 每日 pipeline：讀股票池 → 抓新聞 → 過濾 → 產 news.json

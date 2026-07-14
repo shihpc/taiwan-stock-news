@@ -373,7 +373,7 @@ def main() -> None:
     stocks.sort(key=lambda s: (-(s["weight_per"] or 0.0), -s["count"], s["stock_id"]))
 
     payload = {
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": datetime.now(TAIPEI_TZ).isoformat(timespec="seconds"),
         "lookback_days": args.lookback,
         "trading_days": tdays,
         "pool_size": int(len(pool)),

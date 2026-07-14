@@ -168,6 +168,12 @@
 
 <script>
 const fmtDate = s => (s || "").slice(0, 16).replace("T", " ");
+// generated_at 顯示：解析 ISO（相容舊 UTC 尾綴 Z／+00:00 與新台北 +08:00）後一律轉台北時間到分
+const fmtGenTaipei = s => {
+  const t = Date.parse(s);
+  return isNaN(t) ? (s || "").slice(0, 16).replace("T", " ")
+    : new Date(t).toLocaleString("sv-SE", { timeZone:"Asia/Taipei" }).slice(0, 16);
+};
 const day10 = s => (s || "").slice(0, 10);
 const IMPACT_LABEL = { market: "盤面", heavy: "權值", stock: "個股" };
 const LS_DAYS = "tsn_days", LS_DISABLED = "tsn_disabled";
@@ -212,14 +218,14 @@ function passNews(n){
 }
 
 function renderStats(d){
-  const gen = fmtDate(d.generated_at);
+  const gen = fmtGenTaipei(d.generated_at);
   const days = TDAYS.length ? TDAYS[0] + " ~ " + TDAYS[TDAYS.length-1] : "";
   document.getElementById("stats").innerHTML =
     `<div class="stat"><b>${d.stocks_with_news ?? 0}</b>檔</div>` +
     `<div class="stat"><b>${d.total_news ?? 0}</b>則</div>` +
     `<div class="stat"><b>${TDAYS.length}</b>交易日</div>` +
     (days ? `<div class="stat">${days}</div>` : "") +
-    `<div class="stat">更新 ${gen} UTC</div>`;
+    `<div class="stat">更新 ${gen}（台灣）</div>`;
 }
 
 function renderImpactChips(){
@@ -439,6 +445,7 @@ function chipsHtml(m){
     + `｜投信 ${sgn(inst.trust,(inst.trust>0?"+":"")+inst.trust)}｜自營 ${sgn(inst.dealer,(inst.dealer>0?"+":"")+inst.dealer)}`);
   if ((c.it3||[]).length) lines.push(`投信3日連買：${c.it3.map(x=>esc(x.n||x.c)).join("、")}`);
   if ((c.it3_sell||[]).length) lines.push(`投信3日連賣：${c.it3_sell.map(x=>esc(x.n||x.c)).join("、")}`);
+  if ((c.aetf||[]).length && c.aetf_date) lines.push(`主動ETF基準日：${esc(c.aetf_date)}`);
   for (const l of (c.aetf||[])) lines.push(`主動ETF ${esc(l)}`);
   if ((m.exdiv||[]).length) lines.push(`今日除權息：${m.exdiv.slice(0,8).map(x=>esc(x.n||x.c)+(x.div?`(${x.div}元)`:"")).join("、")}`);
   if (!lines.length) return "";
@@ -767,8 +774,10 @@ function insightGatherContext(){
     if ((c.it3||[]).length) lines.push(`投信3日連買：${c.it3.map(x=>(x.c||"")+(x.n||"")).join("、")}`);
     if ((c.it3_sell||[]).length) lines.push(`投信3日連賣：${c.it3_sell.map(x=>(x.c||"")+(x.n||"")).join("、")}`);
     if ((c.aetf||[]).length) lines.push(`主動ETF動向：${c.aetf.join("；")}`);
-    if (lines.length) parts.push(`${dlabel("晨報籌碼", mDate)}\n`+lines.join("\n"));
-    // d. 隔夜美股（與晨報同批產生，沿用晨報資料日；美股本質為隔夜資料，SYS已禁跨日串連）
+    // 晨報籌碼資料日：法人買賣超日優先，無則現貨收盤日，再無則產出日（generated_at 台北日）
+    const chipDate = (c.inst && c.inst.date) || (MORNING.spot && MORNING.spot.date) || mDate;
+    if (lines.length) parts.push(`${dlabel("晨報籌碼", chipDate)}\n`+lines.join("\n"));
+    // d. 隔夜美股（美股本質為隔夜資料，資料日以 us.date=美股交易日為準，SYS已禁跨日串連）
     if (US){
       const uLines = [];
       if (US.brief) uLines.push(US.brief + (US.session ? `（${US.session}）` : ""));
@@ -776,7 +785,7 @@ function insightGatherContext(){
         uLines.push(`${g.g}：${(g.rows||[]).slice(0,3)
           .map(r=>`${r.n}${r.chg!=null?(r.chg>0?"+":"")+r.chg.toFixed(2)+"%":"—"}`).join("、")}`);
       }
-      if (uLines.length) parts.push(`${dlabel("隔夜美股", mDate)}\n`+uLines.join("\n"));
+      if (uLines.length) parts.push(`${dlabel("隔夜美股", US.date)}\n`+uLines.join("\n"));
     }
   } else {
     parts.push("【晨報籌碼】（晨報資料未載入，本段略過，僅分析新聞面）");
