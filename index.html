@@ -401,7 +401,7 @@ document.getElementById("srcToggle").addEventListener("click", () =>
 
 // ---- 晨報 tab（跨repo唯讀讀taiwan-flow-live-v2的raw資料，不搬遷該站的抓取管線）----
 const V2_BASE = "https://raw.githubusercontent.com/shihpc/taiwan-flow-live-v2/main/data";
-let MORNING = null, US = null;
+let MORNING = null, US = null, DAYSUM = null;
 const sgn = (v, t) => `<span class="${v>0?"up":v<0?"down":"mut"}">${t}</span>`;
 const pct = v => v==null ? "—" : (v>0?"+":"")+v.toFixed(2)+"%";
 const numFmt = v => v==null ? "—" : Math.round(v).toLocaleString("en-US");
@@ -452,15 +452,35 @@ function chipsHtml(m){
   return `<div class="mcard">${lines.map(x=>`<div>${x}</div>`).join("")}</div>`;
 }
 
+// 第八期：昨日資金流向總結（讀 v2 data/daysummary/latest.json；讀不到整段隱藏不擋晨報）
+function flowSumHtml(d){
+  if (!d || !d.tone) return "";
+  const p1 = v => (v>0?"+":"")+v.toFixed(1);
+  const lines = [`<div>${esc(d.tone)}</div>`];
+  const rank = (arr, label) => {
+    if (!(arr||[]).length) return;
+    lines.push(`<div>${label}：${arr.map(r=>`${esc(r.n)} ${sgn(r.pts, p1(r.pts))}`).join("、")}</div>`);
+  };
+  rank(d.stocks_top5, "貢獻前5");
+  rank(d.stocks_bot3, "拖累後3");
+  rank(d.subs_top5, "次產業貢獻前5");
+  rank(d.subs_bot3, "次產業拖累後3");
+  lines.push(`<div class="mut" style="font-size:.76rem;margin-top:4px">資料日 ${esc(d.date||"—")}`
+    + `｜來源：即時類股動態收盤定格（收盤總結卡同口徑）</div>`);
+  return `<div class="msection">昨日資金流向</div><div class="mcard">${lines.join("")}</div>`;
+}
+
 async function loadMorning(){
   if (MORNING && US) { renderMorning(); return; }
   try{
-    const [rm, ru] = await Promise.all([
+    const [rm, ru, rd] = await Promise.all([
       fetch(V2_BASE + "/morning.json?t=" + Date.now()),
       fetch(V2_BASE + "/us.json?t=" + Date.now()),
+      fetch(V2_BASE + "/daysummary/latest.json?t=" + Date.now()).catch(() => null),
     ]);
     MORNING = rm.ok ? await rm.json() : null;
     US = ru.ok ? await ru.json() : null;
+    try { DAYSUM = rd && rd.ok ? await rd.json() : null; } catch(e){ DAYSUM = null; }
     renderMorning();
   }catch(e){
     document.getElementById("morningList").innerHTML =
@@ -473,7 +493,7 @@ function renderMorning(){
   if (!MORNING && !US) { el.innerHTML = `<div class="empty">尚無晨報資料。</div>`; return; }
   const genAt = MORNING && MORNING.generated_at ? esc(MORNING.generated_at) : "";
   el.innerHTML = (genAt ? `<div class="mut" style="font-size:.76rem;margin-top:4px">晨報產生於 ${genAt}</div>` : "")
-    + gapHtml(MORNING) + (MORNING ? chipsHtml(MORNING) : "") + usHtml(US) + usWatchHtml();
+    + gapHtml(MORNING) + (MORNING ? chipsHtml(MORNING) : "") + flowSumHtml(DAYSUM) + usHtml(US) + usWatchHtml();
   bindUsWatch();
   loadUsWatch();
 }
