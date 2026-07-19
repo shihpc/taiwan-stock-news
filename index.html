@@ -92,6 +92,7 @@
     margin:12px 0;font-size:.92rem;line-height:1.6}
   .mcard b{color:var(--txt)}
   .up{color:#ef5b5b}.down{color:#2fbf71}.mut{color:var(--muted)}
+  .tst{color:var(--txt);font-weight:600}  /* 技術面中性狀態詞：中性色，不用紅綠避免暗示買賣 */
   .mtable{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:4px}
   .mtable th,.mtable td{padding:5px 6px;text-align:right;border-bottom:1px solid rgba(36,53,86,.5);white-space:nowrap}
   .mtable th:first-child,.mtable td:first-child{text-align:left}
@@ -1025,6 +1026,19 @@ async function loadChips(c){
   }catch(e){ CHIPS.err[c] = "載入失敗（Worker 無回應）"; }
   finally{ delete CHIPS.loading[c]; renderTrack(); }
 }
+// 第三批：技術面（走 v2 Worker /technical 即時代理，7 項指標全在 Worker 算；前端絕不碰 FinMind
+// token）。同籌碼面 lazy 取：切到技術面分頁時才逐股取，每股結果快取於本頁。
+const TECH = { data: {}, err: {}, loading: {} };
+async function loadTech(c){
+  if (!c || (c in TECH.data) || (c in TECH.err) || TECH.loading[c]) return;
+  TECH.loading[c] = true; renderTrack();
+  try{
+    const r = await fetch(`${USW_WORKER}/technical?id=${encodeURIComponent(c)}&t=${Date.now()}`);
+    const j = await r.json();
+    if (j && j.error) TECH.err[c] = j.error; else if (j && j.id) TECH.data[c] = j; else TECH.err[c] = "查無資料";
+  }catch(e){ TECH.err[c] = "載入失敗（Worker 無回應）"; }
+  finally{ delete TECH.loading[c]; renderTrack(); }
+}
 
 function trackWatch(){ try{ const v = JSON.parse(localStorage.getItem(WATCH_KEY) || "[]"); return Array.isArray(v) ? [...new Set(v.filter(Boolean).map(String))] : []; }catch(e){ return []; } }
 function trackSaveWatch(a){ localStorage.setItem(WATCH_KEY, JSON.stringify([...new Set(a.map(String))])); }
@@ -1085,8 +1099,9 @@ function renderTrack(){
     h += `<div class="msection" style="margin-top:22px">${esc(TRACK.sel)} ${esc(nm)}</div>`;
     h += `<div class="trk-vtabs">`
       + `<span class="chip trk-vt${TRACK.view === "fund" ? " active" : ""}" data-trk-view="fund">基本面</span>`
-      + `<span class="chip trk-vt${TRACK.view === "chips" ? " active" : ""}" data-trk-view="chips">籌碼面</span></div>`;
-    h += `<div id="trkDetail">${TRACK.view === "chips" ? trackChipsHtml(TRACK.sel) : trackDetailHtml(TRACK.sel)}</div>`;
+      + `<span class="chip trk-vt${TRACK.view === "chips" ? " active" : ""}" data-trk-view="chips">籌碼面</span>`
+      + `<span class="chip trk-vt${TRACK.view === "tech" ? " active" : ""}" data-trk-view="tech">技術面</span></div>`;
+    h += `<div id="trkDetail">${TRACK.view === "chips" ? trackChipsHtml(TRACK.sel) : TRACK.view === "tech" ? trackTechHtml(TRACK.sel) : trackDetailHtml(TRACK.sel)}</div>`;
   } else if (watch.length || holds.length){
     h += `<div class="mut" style="margin:16px 4px;font-size:.86rem">點選上方任一檔，顯示基本面（新聞／營收／財報）與籌碼面（法人／融資券／借券當沖／持股）。</div>`;
   }
@@ -1094,8 +1109,8 @@ function renderTrack(){
   const add = document.getElementById("trkAdd"), inp = document.getElementById("trkInput");
   if (add) add.onclick = trackAdd;
   if (inp) inp.onkeydown = e => { if (e.key === "Enter") trackAdd(); };
-  el.querySelectorAll("[data-trk-sel]").forEach(x => x.onclick = () => { TRACK.sel = x.dataset.trkSel; renderTrack(); loadTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); });
-  el.querySelectorAll("[data-trk-view]").forEach(x => x.onclick = () => { TRACK.view = x.dataset.trkView; renderTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); });
+  el.querySelectorAll("[data-trk-sel]").forEach(x => x.onclick = () => { TRACK.sel = x.dataset.trkSel; renderTrack(); loadTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); if (TRACK.view === "tech") loadTech(TRACK.sel); });
+  el.querySelectorAll("[data-trk-view]").forEach(x => x.onclick = () => { TRACK.view = x.dataset.trkView; renderTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); if (TRACK.view === "tech") loadTech(TRACK.sel); });
   el.querySelectorAll("[data-trk-del]").forEach(x => x.onclick = e => { e.stopPropagation(); trackDel(x.dataset.trkDel); });
 }
 
@@ -1311,6 +1326,92 @@ function trackHoldHtml(fh, big, bigNote){
   if (big) h += `；<b>千張大戶為週資料</b>（資料週 ${esc(big.date)}，週變化為對上一週 pp 差）`;
   h += `。以上為歷史統計現況描述，非投資建議。</div></div>`;
   return h;
+}
+// ==== 個股追蹤（第三批：技術面）====
+// 資料走 v2 Worker /technical（7 項指標全在 Worker 算，任何台股皆可即時代理）。誠實原則（專案鐵律）：
+// 技術指標一律以「現況描述」呈現、明確標示「非買賣訊號、僅供參考」，狀態詞為指標數學狀態的中性描述，
+// 不做預測宣稱、不寫該買該賣。紅綠僅用於距離%正負（現價相對均線/高低的位置），狀態詞用中性色。
+const techNum = (v, d = 2) => v == null ? "—" : Number(v).toFixed(d);
+const techPct = v => v == null ? `<span class="mut">—</span>` : sgn(v, (v > 0 ? "+" : "") + Number(v).toFixed(2) + "%");   // 距離%：正紅負綠
+const techState = s => `<span class="tst">${esc(s || "—")}</span>`;   // 中性狀態詞：中性色
+const techLot = v => v == null ? "—" : Math.round(v / 1000).toLocaleString("en-US") + " 張";   // 原始量→張
+
+function trackTechHtml(c){
+  const h0 = `<div class="msection">技術面</div>`;
+  const disc = `<div class="mcard" style="background:var(--tech-disc-bg,rgba(120,120,120,.08));border-left:3px solid var(--muted)"><div class="mut" style="font-size:.78rem;line-height:1.5">技術指標為<b>現況描述、非買賣訊號，僅供參考</b>；狀態詞（超買／超賣／黃金交叉／死亡交叉／黏合／排列…）為描述指標的數學狀態，非行動建議、非預測。</div></div>`;
+  if (TECH.err[c]) return h0 + disc + `<div class="mcard mut">查無 ${esc(c)} 的技術面資料（${esc(TECH.err[c])}）。此代號可能非上市櫃普通股，或 FinMind 暫無價格資料。</div>`;
+  const d = TECH.data[c];
+  if (!d) return h0 + disc + `<div class="mcard mut">載入中…</div>`;
+  const dm = `<div class="mut" style="font-size:.72rem;margin-top:6px">資料日 ${esc(d.date || "—")}${d.price != null ? `，收盤 ${techNum(d.price)}` : ""}。以上為歷史統計現況描述，非投資建議。</div>`;
+  return h0 + disc + trackMaHtml(d.ma) + trackKdHtml(d.kd) + trackMacdHtml(d.macd) + trackRsiHtml(d.rsi) + trackBollHtml(d.boll) + trackVolHtml(d.volume) + trackR52Html(d.range52) + `<div class="mcard" style="padding-top:0">${dm}</div>`;
+}
+// 1. 均線：MA5/10/20/60＋現價距離%＋多空排列（中性描述）
+function trackMaHtml(m){
+  const h0 = `<div class="msection2">均線（MA）</div>`;
+  if (!m) return h0 + `<div class="mcard mut">資料不足。</div>`;
+  const rows = [["MA5", m.ma5, m.dist5], ["MA10", m.ma10, m.dist10], ["MA20", m.ma20, m.dist20], ["MA60", m.ma60, m.dist60]];
+  let h = h0 + `<div class="mcard"><table class="mtable"><thead><tr><th>均線</th><th>數值</th><th>現價距離</th></tr></thead><tbody>`;
+  for (const [label, v, dist] of rows) h += `<tr><td>${label}</td><td>${v == null ? "—（資料不足）" : "<b>" + techNum(v) + "</b>"}</td><td>${dist == null ? "—" : techPct(dist)}</td></tr>`;
+  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">排列狀態：${techState(m.arrange)}（多頭＝MA5>10>20>60；現價距離正紅負綠）。</div></div>`;
+  return h;
+}
+// 2. KD（9,3,3）
+function trackKdHtml(kd){
+  const h0 = `<div class="msection2">KD（9,3,3）</div>`;
+  if (!kd) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
+  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+    + `<tr><td>K 值</td><td><b>${techNum(kd.k, 1)}</b></td><td rowspan="2" style="vertical-align:middle">${techState(kd.state)}</td></tr>`
+    + `<tr><td>D 值</td><td><b>${techNum(kd.d, 1)}</b></td></tr>`
+    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">K/D 介於 0–100；>80 高檔、<20 低檔為數學區間描述。</div></div>`;
+}
+// 3. MACD（12,26,9）
+function trackMacdHtml(m){
+  const h0 = `<div class="msection2">MACD（12,26,9）</div>`;
+  if (!m) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
+  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+    + `<tr><td>DIF（快慢線差）</td><td><b>${techNum(m.dif)}</b></td></tr>`
+    + `<tr><td>MACD（訊號線）</td><td><b>${techNum(m.macd)}</b></td></tr>`
+    + `<tr><td>柱狀體（DIF−MACD）</td><td>${sgn(m.hist, techNum(m.hist))}</td></tr>`
+    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(m.state)}（柱狀正紅負綠；翻正/翻負＝跨零軸的數學描述）。</div></div>`;
+}
+// 4. RSI（5,10）
+function trackRsiHtml(r){
+  const h0 = `<div class="msection2">RSI（5,10）</div>`;
+  if (!r) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
+  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+    + `<tr><td>RSI5</td><td><b>${r.rsi5 == null ? "—（資料不足）" : techNum(r.rsi5, 1)}</b></td><td rowspan="2" style="vertical-align:middle">${techState(r.state)}</td></tr>`
+    + `<tr><td>RSI10</td><td><b>${r.rsi10 == null ? "—（資料不足）" : techNum(r.rsi10, 1)}</b></td></tr>`
+    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">RSI 介於 0–100；>70 超買、<30 超賣為數學區間描述；背離不自動判定。</div></div>`;
+}
+// 5. 布林通道（20,2）
+function trackBollHtml(b){
+  const h0 = `<div class="msection2">布林通道（20,2）</div>`;
+  if (!b) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
+  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+    + `<tr><td>上軌</td><td><b>${techNum(b.upper)}</b></td></tr>`
+    + `<tr><td>中軌（MA20）</td><td><b>${techNum(b.mid)}</b></td></tr>`
+    + `<tr><td>下軌</td><td><b>${techNum(b.lower)}</b></td></tr>`
+    + `<tr><td>%b（通道位置）</td><td><b>${techNum(b.pb)}</b></td></tr>`
+    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(b.state)}（%b=1 觸上軌、0 觸下軌、0.5 中軌，為位置描述）。</div></div>`;
+}
+// 6. 量能
+function trackVolHtml(v){
+  const h0 = `<div class="msection2">量能</div>`;
+  if (!v) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
+  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+    + `<tr><td>近5日均量</td><td><b>${techLot(v.avg5)}</b></td></tr>`
+    + `<tr><td>20日均量</td><td><b>${techLot(v.avg20)}</b></td></tr>`
+    + `<tr><td>量能比（5日÷20日）</td><td><b>${techNum(v.ratio)}</b> 倍</td></tr>`
+    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(v.state)}（爆量＝比≥2 且價漲、量縮＝比≤0.5，為量能數學描述）。</div></div>`;
+}
+// 7. 距 52 週高/低
+function trackR52Html(r){
+  const h0 = `<div class="msection2">距 52 週高/低</div>`;
+  if (!r) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
+  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+    + `<tr><td>52 週高</td><td><b>${techNum(r.high)}</b></td><td>距高 ${techPct(r.distHigh)}</td></tr>`
+    + `<tr><td>52 週低</td><td><b>${techNum(r.low)}</b></td><td>距低 ${techPct(r.distLow)}</td></tr>`
+    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">波段相對位置（距高≤0、距低≥0，正紅負綠），為現況描述。</div></div>`;
 }
 // ==== 個股追蹤 結束 ====
 

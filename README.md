@@ -41,8 +41,8 @@ taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手」。
   FinMind 付費層，Worker token 可取到（取不到則顯示 `big_note` 降級文字，其餘欄不受影響）。
 
 **誠實原則**：純現況描述、各項標資料日、千張大戶標週資料、非投資建議。前端仍**絕不碰 FinMind token**。
-詳端點規格見 taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手（/chips）」。**後續批次**：技術面（第三批）
-採描述性統計傾向、留待回測驗證（比照 postmkt 持股診斷），分頁地基已可直接加第三個分頁。
+詳端點規格見 taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手（/chips）」。技術面（第三批）已於
+2026-07-20 上線（見下）；三批（基本/籌碼/技術）至此完整。
 
 ## 個股追蹤 基本面 refine（4 點回饋，2026-07-20）
 
@@ -60,6 +60,22 @@ taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手」。
 
 Worker 端 additive 擴充與 cache 升版（`fund:4:`）、新聞窗 5 日/保留名額等細節見 v2 `PROJECT_SUMMARY.md`。
 **未解**：殖利率欄暫未做（需股價）；冷門股媒體新聞覆蓋率仍依 FinMind（靠業績事件墊底保證有內容）。
+
+## 個股追蹤（第三批：技術面，2026-07-20）
+
+選中股詳情框第三分頁「技術面」（`TRACK.view==='tech'`，沿用第二批分頁機制；基本面/籌碼面不變）。
+技術面走 v2 Worker `/technical?id=`（`loadTech` 逐股 lazy 取，非整批預抓；每股結果快取於 `TECH.data`），
+**前端絕不碰 FinMind token**，7 項指標全在 Worker 算好回傳，前端只渲染。渲染函式：`trackTechHtml`＋
+`trackMaHtml/trackKdHtml/trackMacdHtml/trackRsiHtml/trackBollHtml/trackVolHtml/trackR52Html`。
+
+**誠實原則（專案鐵律）**：分頁頂部固定免責卡「技術指標為現況描述、非買賣訊號，僅供參考」；狀態詞
+（超買/超賣/黃金交叉/死亡交叉/黏合/多空排列…）＝描述指標數學狀態的中性詞（`.tst` 中性色，不用紅綠），
+**不寫該買該賣、不做預測**。紅漲綠跌（`sgn`）僅用於「現價距離%」正負與距 52 週高低%。7 項＝均線
+MA5/10/20/60＋距離%＋排列、KD(9,3,3)、MACD(12,26,9)、RSI(5,10)、布林(20,2 %b)、量能(5/20日均量比)、
+距 52 週高/低%。資料日標註；資料不足指標顯示「—（資料不足）」。
+
+詳端點規格見 v2 `PROJECT_SUMMARY.md`「快速接手（/technical）」。**續作**：回測技術指標對波動的有效性
+（7b 一併，先驗證再宣稱，比照 postmkt 持股診斷）。
 
 ## 架構
 ```
