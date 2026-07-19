@@ -138,6 +138,10 @@
   .trk-bar-fill{width:72%;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px}
   .trk-bar-lbl{font-size:.6rem;color:var(--muted);margin-top:2px}
   .trk-spark{vertical-align:middle}
+  .trk-vtabs{display:flex;gap:8px;margin:8px 2px 4px}
+  .trk-vt{cursor:pointer;padding:6px 16px}
+  .msection2{margin:16px 2px 5px;font-size:.9rem;font-weight:700;color:var(--muted)}
+  .msection2::before{content:"·";margin-right:5px}
 </style>
 </head>
 <body>
@@ -1006,7 +1010,20 @@ document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
 const WATCH_KEY = "news_watchlist";
 const SEENQ_KEY = "news_track_seenq";   // {代號:最新季別} 記錄前次已見，判定季財報「新季別」
 const TRK_NEW_DAYS = 14;                 // 月營收公布日在近 N 日內 → 標「新公布」
-const TRACK = { sel: null, data: {}, err: {}, loading: false };
+const TRACK = { sel: null, view: "fund", data: {}, err: {}, loading: false };
+// 第二批：籌碼面（走 v2 Worker /chips 即時代理，前端絕不碰 FinMind token）。籌碼較重（7 個
+// dataset），採「選中股 + 切到籌碼面分頁」時才逐股 lazy 取，非整批預抓；每股結果快取於本頁。
+const CHIPS = { data: {}, err: {}, loading: {} };
+async function loadChips(c){
+  if (!c || (c in CHIPS.data) || (c in CHIPS.err) || CHIPS.loading[c]) return;
+  CHIPS.loading[c] = true; renderTrack();
+  try{
+    const r = await fetch(`${USW_WORKER}/chips?id=${encodeURIComponent(c)}&t=${Date.now()}`);
+    const j = await r.json();
+    if (j && j.error) CHIPS.err[c] = j.error; else if (j && j.id) CHIPS.data[c] = j; else CHIPS.err[c] = "查無資料";
+  }catch(e){ CHIPS.err[c] = "載入失敗（Worker 無回應）"; }
+  finally{ delete CHIPS.loading[c]; renderTrack(); }
+}
 
 function trackWatch(){ try{ const v = JSON.parse(localStorage.getItem(WATCH_KEY) || "[]"); return Array.isArray(v) ? [...new Set(v.filter(Boolean).map(String))] : []; }catch(e){ return []; } }
 function trackSaveWatch(a){ localStorage.setItem(WATCH_KEY, JSON.stringify([...new Set(a.map(String))])); }
@@ -1057,16 +1074,21 @@ function renderTrack(){
   if (!watch.length && !holds.length)
     h += `<div class="empty">加入自選股，或到「盤後分析」站設定持股診斷，即可在此追蹤每日新聞／每月營收／每季財報。</div>`;
   if (TRACK.sel){
-    h += `<div class="msection" style="margin-top:22px">${esc(TRACK.sel)} ${esc(trackName(TRACK.sel) !== TRACK.sel ? trackName(TRACK.sel) : "")} 基本面</div>`;
-    h += `<div id="trkDetail">${trackDetailHtml(TRACK.sel)}</div>`;
+    const nm = trackName(TRACK.sel) !== TRACK.sel ? trackName(TRACK.sel) : "";
+    h += `<div class="msection" style="margin-top:22px">${esc(TRACK.sel)} ${esc(nm)}</div>`;
+    h += `<div class="trk-vtabs">`
+      + `<span class="chip trk-vt${TRACK.view === "fund" ? " active" : ""}" data-trk-view="fund">基本面</span>`
+      + `<span class="chip trk-vt${TRACK.view === "chips" ? " active" : ""}" data-trk-view="chips">籌碼面</span></div>`;
+    h += `<div id="trkDetail">${TRACK.view === "chips" ? trackChipsHtml(TRACK.sel) : trackDetailHtml(TRACK.sel)}</div>`;
   } else if (watch.length || holds.length){
-    h += `<div class="mut" style="margin:16px 4px;font-size:.86rem">點選上方任一檔，顯示每日新聞／每月營收／每季財報三區塊。</div>`;
+    h += `<div class="mut" style="margin:16px 4px;font-size:.86rem">點選上方任一檔，顯示基本面（新聞／營收／財報）與籌碼面（法人／融資券／借券當沖／持股）。</div>`;
   }
   el.innerHTML = h;
   const add = document.getElementById("trkAdd"), inp = document.getElementById("trkInput");
   if (add) add.onclick = trackAdd;
   if (inp) inp.onkeydown = e => { if (e.key === "Enter") trackAdd(); };
-  el.querySelectorAll("[data-trk-sel]").forEach(x => x.onclick = () => { TRACK.sel = x.dataset.trkSel; renderTrack(); loadTrack(); });
+  el.querySelectorAll("[data-trk-sel]").forEach(x => x.onclick = () => { TRACK.sel = x.dataset.trkSel; renderTrack(); loadTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); });
+  el.querySelectorAll("[data-trk-view]").forEach(x => x.onclick = () => { TRACK.view = x.dataset.trkView; renderTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); });
   el.querySelectorAll("[data-trk-del]").forEach(x => x.onclick = e => { e.stopPropagation(); trackDel(x.dataset.trkDel); });
 }
 
@@ -1182,6 +1204,85 @@ function trackFinHtml(c, d){
   }
   h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:8px">單季值；季財報無明確公布日，「新季別」以最新季別 vs 前次瀏覽已見季別判定`
     + `${firstSeen ? "（本檔首次瀏覽不標新）" : ""}。三率＝各項÷營收；QoQ/YoY 中三率為百分點(pp)差、其餘為相對%。以上為歷史統計，非投資建議。</div></div>`;
+  return h;
+}
+// ==== 個股追蹤（第二批：籌碼面）====
+// 資料走 v2 Worker /chips（任何台股皆可即時代理）。純現況描述、各項標資料日、千張大戶標週資料，
+// 不做預測宣稱。紅增綠減沿用 sgn()。單位：三大法人/融資/借券以「張」（=1000股）、比率以 %。
+const lot = v => v == null ? "—" : (v > 0 ? "+" : "") + Math.round(v).toLocaleString("en-US") + " 張";
+const lotAbs = v => v == null ? "—" : Math.round(v).toLocaleString("en-US") + " 張";
+const pp = v => v == null ? "—" : (v > 0 ? "+" : "") + v.toFixed(2) + "pp";
+// 連續買賣天數：streak>0 連買（紅）、<0 連賣（綠）；|天數|≥3 視為顯著，加粗高亮
+function streakCell(s){
+  if (!s) return `<span class="mut">—</span>`;
+  const n = Math.abs(s), txt = `連${n}日${s > 0 ? "買" : "賣"}`;
+  return `<span class="${s > 0 ? "up" : "down"}"${n >= 3 ? ' style="font-weight:700"' : ""}>${txt}</span>`;
+}
+
+function trackChipsHtml(c){
+  const h0 = `<div class="msection">籌碼面</div>`;
+  if (CHIPS.err[c]) return h0 + `<div class="mcard mut">查無 ${esc(c)} 的籌碼資料（${esc(CHIPS.err[c])}）。此代號可能非上市櫃普通股，或 FinMind 暫無資料。</div>`;
+  const d = CHIPS.data[c];
+  if (!d) return h0 + `<div class="mcard mut">載入中…（籌碼資料含 7 個資料集，稍候）</div>`;
+  return h0 + trackInstHtml(d.inst) + trackMarginHtml(d.margin) + trackFlowHtml(d.sbl, d.daytrade) + trackHoldHtml(d.foreign_hold, d.big, d.big_note);
+}
+
+// 三大法人近日進出：外資/投信/自營 × 最新日淨買賣（張，買超紅賣超綠）＋連續天數＋近5日合計＋迷你趨勢
+function trackInstHtml(inst){
+  const h0 = `<div class="msection2">三大法人近日進出</div>`;
+  if (!inst) return h0 + `<div class="mcard mut">無三大法人資料。</div>`;
+  const rows = [["外資", "foreign"], ["投信", "trust"], ["自營商", "dealer"]];
+  const lastD = (inst.foreign && inst.foreign.length) ? inst.foreign[inst.foreign.length - 1].d : "";
+  let h = h0 + `<div class="mcard"><table class="mtable"><thead><tr><th>法人</th><th>最新日淨</th><th>連續</th><th>近5日合計</th><th>近${Math.min((inst.foreign || []).length, 20)}日</th></tr></thead><tbody>`;
+  for (const [label, key] of rows){
+    const arr = inst[key] || [], last = arr.length ? arr[arr.length - 1].v : null;
+    h += `<tr><td>${label}</td><td>${sgn(last, lot(last))}</td>`
+      + `<td>${streakCell(inst.streak ? inst.streak[key] : 0)}</td>`
+      + `<td>${sgn(inst.sum5 ? inst.sum5[key] : null, lot(inst.sum5 ? inst.sum5[key] : null))}</td>`
+      + `<td>${trackSpark(arr.map(x => x.v))}</td></tr>`;
+  }
+  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">淨買賣＝買−賣（張）；買超紅、賣超綠。資料日 ${esc(lastD || "—")}。</div></div>`;
+  return h;
+}
+
+// 融資融券：融資餘額＋增減、融券餘額＋增減、券資比＋近20日融資餘額趨勢（增紅減綠）
+function trackMarginHtml(m){
+  const h0 = `<div class="msection2">融資融券</div>`;
+  if (!m) return h0 + `<div class="mcard mut">無融資融券資料。</div>`;
+  let h = h0 + `<div class="mcard"><table class="mtable"><tbody>`
+    + `<tr><td>融資餘額</td><td><b>${lotAbs(m.bal)}</b></td><td>${sgn(m.chg, lot(m.chg))}</td></tr>`
+    + `<tr><td>融券餘額</td><td><b>${lotAbs(m.short_bal)}</b></td><td>${sgn(m.short_chg, lot(m.short_chg))}</td></tr>`
+    + `<tr><td>券資比</td><td colspan="2"><b>${m.credit_ratio == null ? "—" : m.credit_ratio.toFixed(2) + "%"}</b> <span class="mut" style="font-size:.72rem">（融券÷融資，軋空參考）</span></td></tr>`
+    + `</tbody></table>`;
+  if (m.series && m.series.length > 1)
+    h += `<div class="mut" style="font-size:.72rem;margin-top:8px">近 ${m.series.length} 日融資餘額趨勢</div>${trackSpark(m.series.map(x => x.v))}`;
+  h += `<div class="mut" style="font-size:.72rem;margin-top:6px">餘額增紅減綠。資料日 ${esc(m.date || "—")}。</div></div>`;
+  return h;
+}
+
+// 借券賣出 + 當沖比
+function trackFlowHtml(sbl, dt){
+  const h0 = `<div class="msection2">借券賣出／當沖</div>`;
+  let h = h0 + `<div class="mcard"><table class="mtable"><tbody>`;
+  if (sbl) h += `<tr><td>借券賣出餘額</td><td><b>${lotAbs(sbl.bal)}</b></td><td>${sgn(sbl.chg, lot(sbl.chg))}</td></tr>`;
+  else h += `<tr><td>借券賣出餘額</td><td colspan="2" class="mut">無資料</td></tr>`;
+  if (dt) h += `<tr><td>當沖比</td><td colspan="2"><b>${dt.ratio == null ? "—" : dt.ratio.toFixed(2) + "%"}</b> <span class="mut" style="font-size:.72rem">（當沖量÷成交量）</span></td></tr>`;
+  else h += `<tr><td>當沖比</td><td colspan="2" class="mut">無資料</td></tr>`;
+  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">借券餘額增紅減綠。資料日 ${esc((sbl && sbl.date) || (dt && dt.date) || "—")}。</div></div>`;
+  return h;
+}
+
+// 持股結構：外資持股率＋區間變化、千張大戶持股比＋週變化（標 T-1 週；付費層取不到降級標註）
+function trackHoldHtml(fh, big, bigNote){
+  const h0 = `<div class="msection2">持股結構</div>`;
+  let h = h0 + `<div class="mcard"><table class="mtable"><tbody>`;
+  if (fh) h += `<tr><td>外資持股率</td><td><b>${fh.ratio == null ? "—" : fh.ratio.toFixed(2) + "%"}</b></td><td>${sgn(fh.chg, pp(fh.chg))}</td></tr>`;
+  else h += `<tr><td>外資持股率</td><td colspan="2" class="mut">無資料</td></tr>`;
+  if (big) h += `<tr><td>千張大戶持股比</td><td><b>${big.ratio == null ? "—" : big.ratio.toFixed(2) + "%"}</b></td><td>${sgn(big.wchg, pp(big.wchg))}</td></tr>`;
+  else h += `<tr><td>千張大戶持股比</td><td colspan="2" class="mut">${esc(bigNote || "無資料")}</td></tr>`;
+  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">外資持股率為區間 pp 變化，資料日 ${esc((fh && fh.date) || "—")}`;
+  if (big) h += `；<b>千張大戶為週資料</b>（資料週 ${esc(big.date)}，週變化為對上一週 pp 差）`;
+  h += `。以上為歷史統計現況描述，非投資建議。</div></div>`;
   return h;
 }
 // ==== 個股追蹤 結束 ====

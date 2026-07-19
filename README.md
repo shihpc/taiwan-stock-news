@@ -25,8 +25,24 @@
 
 **資料架構**：月營收/季財報走 v2 Worker `/fundamentals?ids=`（`USW_WORKER` 常數，即時代理 FinMind，
 任何台股皆可）；前端**絕不碰 FinMind token**。QoQ/YoY 由 Worker 算並附回。詳端點規格見
-taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手」。**後續批次**：籌碼面／技術面（技術面採描述性、
-留待回測驗證，比照 postmkt 持股診斷）另分期，tab 地基已可直接加區塊。
+taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手」。
+
+## 個股追蹤（第二批：籌碼面，2026-07-20）
+
+選中股詳情框改為 `基本面 / 籌碼面` **分頁**（`TRACK.view`＋`.trk-vtabs`；基本面沿用第一批不變）。
+籌碼面走 v2 Worker `/chips?id=`（`loadChips` 逐股 lazy 取，非整批預抓；每股結果快取於 `CHIPS.data`），
+四區塊（`trackChipsHtml` → `trackInstHtml/trackMarginHtml/trackFlowHtml/trackHoldHtml`）：
+
+- **三大法人近日進出**：外資/投信/自營 × 最新日淨（張，買超紅賣超綠）＋連續買賣天數（|天數|≥3 加粗高亮）
+  ＋近 5 日合計＋近 20 日迷你趨勢。
+- **融資融券**：融資/融券餘額＋增減（增紅減綠）＋券資比（融券÷融資，軋空參考）＋近 20 日融資餘額趨勢。
+- **借券賣出／當沖**：借券賣出餘額＋增減、當沖比（當沖量÷成交量）。
+- **持股結構**：外資持股率＋區間 pp 變化；**千張大戶持股比＋週變化（標「T-1 週資料」）**——千張大戶為
+  FinMind 付費層，Worker token 可取到（取不到則顯示 `big_note` 降級文字，其餘欄不受影響）。
+
+**誠實原則**：純現況描述、各項標資料日、千張大戶標週資料、非投資建議。前端仍**絕不碰 FinMind token**。
+詳端點規格見 taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手（/chips）」。**後續批次**：技術面（第三批）
+採描述性統計傾向、留待回測驗證（比照 postmkt 持股診斷），分頁地基已可直接加第三個分頁。
 
 ## 架構
 ```
