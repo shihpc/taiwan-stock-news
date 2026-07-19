@@ -133,10 +133,11 @@
   .trk-x:hover{color:#ef5b5b}
   .trk-news{padding:7px 0;border-bottom:1px solid rgba(36,53,86,.4);line-height:1.5}
   .trk-news:last-child{border-bottom:none}
-  .trk-bars{display:flex;align-items:flex-end;gap:3px;height:70px;margin-top:6px}
+  .trk-bars{display:flex;align-items:flex-end;gap:3px;height:104px;margin-top:6px}
   .trk-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
   .trk-bar-fill{width:72%;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px}
   .trk-bar-lbl{font-size:.6rem;color:var(--muted);margin-top:2px}
+  .trk-bar-val{font-size:.54rem;color:var(--txt);white-space:nowrap;transform:rotate(-55deg);transform-origin:center bottom;height:18px;line-height:1;margin-bottom:1px;font-variant-numeric:tabular-nums}
   .trk-spark{vertical-align:middle}
   .trk-vtabs{display:flex;gap:8px;margin:8px 2px 4px}
   .trk-vt{cursor:pointer;padding:6px 16px}
@@ -1003,8 +1004,8 @@ document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
 });
 
 // ==== 個股追蹤（第一批：基本面）====
-// 資料架構：月營收/季財報走 v2 Worker 即時代理（/fundamentals，任何台股皆可），前端絕不碰
-// FinMind token；新聞讀本站 news.json（僅 ~150 檔法人熱門股，不在池內誠實降級標註）。
+// 資料架構：新聞/月營收/季財報/股利/名稱全走 v2 Worker 即時代理（/fundamentals，任何台股皆可），
+// 前端絕不碰 FinMind token；新聞＝媒體新聞（TaiwanStockNews）＋業績事件墊底，保證 ≥3、無「不在池」死路。
 // 兩組來源：自選股（localStorage news_watchlist，可增刪）＋持股診斷股（讀同 origin pm_holdings，
 // 唯讀，管理權留 postmkt）。QoQ/YoY 由 Worker 計算並附回（EPS/營收/稅後淨利相對%、三率百分點差）。
 const WATCH_KEY = "news_watchlist";
@@ -1029,7 +1030,13 @@ function trackWatch(){ try{ const v = JSON.parse(localStorage.getItem(WATCH_KEY)
 function trackSaveWatch(a){ localStorage.setItem(WATCH_KEY, JSON.stringify([...new Set(a.map(String))])); }
 // 持股診斷股：讀 postmkt 存的 pm_holdings（格式 [{c,sh,...}]），本站唯讀
 function trackHoldings(){ try{ const v = JSON.parse(localStorage.getItem("pm_holdings") || "[]"); return Array.isArray(v) ? [...new Set(v.filter(h => h && h.c).map(h => String(h.c)))] : []; }catch(e){ return []; } }
-function trackName(c){ const s = ((DATA||{}).stocks||[]).find(x => String(x.stock_id) === String(c)); return s && s.name ? s.name : c; }
+// 名稱：優先用 Worker /fundamentals 回傳的 name（涵蓋任一台股），退回本站 news.json，再退回代號
+function trackName(c){
+  const w = TRACK.data && TRACK.data[c];
+  if (w && w.name) return w.name;
+  const s = ((DATA||{}).stocks||[]).find(x => String(x.stock_id) === String(c));
+  return s && s.name ? s.name : c;
+}
 function daysAgo(s){ const t = Date.parse(s); return isNaN(t) ? 9999 : Math.floor((Date.now() - t) / 86400e3); }
 
 async function loadTrack(){
@@ -1110,34 +1117,39 @@ function trackDel(c){
 }
 
 function trackDetailHtml(c){
-  if (TRACK.err[c]) return `<div class="mcard mut">查無 ${esc(c)} 的基本面資料（${esc(TRACK.err[c])}）。此代號可能非上市櫃普通股，或 FinMind 暫無資料。</div>` + trackNewsHtml(c);
+  if (TRACK.err[c]) return `<div class="mcard mut">查無 ${esc(c)} 的基本面資料（${esc(TRACK.err[c])}）。此代號可能非上市櫃普通股，或 FinMind 暫無資料。</div>`;
   const d = TRACK.data[c];
   if (!d) return `<div class="empty">載入中…</div>`;
-  return trackNewsHtml(c) + trackRevenueHtml(d) + trackFinHtml(c, d);
+  return trackNewsHtml(c, d) + trackRevenueHtml(d) + trackFinHtml(c, d);
 }
 
-// 區塊1：每日新聞追蹤（讀本站 news.json，僅 ~150 檔法人熱門股，不在池內誠實降級）
-function trackNewsHtml(c){
+// 區塊1：每日新聞追蹤（走 v2 Worker /fundamentals 的 news：媒體新聞 TaiwanStockNews＋業績事件
+// 墊底，任一台股皆 ≥3 條、無「不在新聞池」死路）。媒體新聞掛外連；業績事件標「業績事件」不外連。
+const EVT_BADGE = `<span class="chip" style="padding:1px 7px;font-size:.66rem;color:var(--accent);border-color:var(--accent);margin-left:6px">業績事件</span>`;
+function trackNewsHtml(c, d){
   const h0 = `<div class="msection">每日新聞追蹤</div>`;
-  const d = DATA;
-  if (!d || !Array.isArray(d.stocks)) return h0 + `<div class="mcard mut">新聞資料尚未載入。</div>`;
-  const ent = d.stocks.find(s => String(s.stock_id) === String(c));
-  const days = (d.trading_days || []).slice().sort().slice(-3);
-  if (!ent) return h0 + `<div class="mcard mut">此股近日不在新聞追蹤池（本站新聞僅涵蓋近期約 150 檔法人熱門股）。</div>`;
-  const news = (ent.news || []).filter(n => days.includes(day10(n.date))).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  if (!news.length) return h0 + `<div class="mcard mut">${esc(c)} 近 ${days.length} 交易日於追蹤池內無新聞。</div>`;
-  return h0 + `<div class="mcard">` + news.map(n =>
-    `<div class="trk-news"><span class="mut" style="font-size:.74rem">${esc(day10(n.date))} · ${esc(n.source || "")}</span>`
-    + `<br><a href="${esc(n.link || "#")}" target="_blank" rel="noopener" class="slink">${esc(n.title || "")}</a></div>`).join("") + `</div>`;
+  const news = (d && Array.isArray(d.news)) ? d.news : [];
+  if (!news.length) return h0 + `<div class="mcard mut">暫無新聞資料。</div>`;
+  return h0 + `<div class="mcard">` + news.map(n => {
+    const date = esc((n.date || "").slice(0, 10)), src = esc(n.source || "");
+    const title = n.event
+      ? `<span>${esc(n.title || "")}</span>`
+      : `<a href="${esc(n.link || "#")}" target="_blank" rel="noopener" class="slink">${esc(n.title || "")}</a>`;
+    return `<div class="trk-news"><span class="mut" style="font-size:.74rem">${date} · ${src}</span>${n.event ? EVT_BADGE : ""}<br>${title}</div>`;
+  }).join("") + `</div>`
+    + `<div class="mut" style="font-size:.7rem;margin-top:4px">媒體新聞來源 FinMind TaiwanStockNews（冷門股覆蓋率較低）；「業績事件」由月營收／季財報／股利數據生成，保證有內容。</div>`;
 }
 
-// 迷你柱狀（月營收近12月，億元）
+// 迷你柱狀（月營收近12月，億元）：每根柱頂標該月營收金額（億元），過長以斜排呈現
+const barYi = v => (v == null || !isFinite(v)) ? "—"
+  : (Math.abs(v) >= 100 ? Math.round(v).toLocaleString("en-US") : (Math.round(v * 10) / 10).toString());
 function trackBars(vals, labels){
   const finite = vals.filter(v => v != null && isFinite(v));
   const max = finite.length ? Math.max(...finite, 0) : 1;
   return `<div class="trk-bars">` + vals.map((v, i) => {
     const hp = v != null && isFinite(v) && max > 0 ? Math.max(4, Math.round(v / max * 100)) : 0;
     return `<div class="trk-bar" title="${esc(labels[i] || "")}：${v != null ? Math.round(v).toLocaleString("en-US") : "—"} 億">`
+      + `<span class="trk-bar-val">${esc(barYi(v))}</span>`
       + `<div class="trk-bar-fill" style="height:${hp}%"></div><span class="trk-bar-lbl">${esc((labels[i] || "").slice(-2))}</span></div>`;
   }).join("") + `</div>`;
 }
@@ -1171,6 +1183,20 @@ function trackRevenueHtml(d){
   return h;
 }
 
+// 季財報內股利列（走 Worker /fundamentals 的 dividend：TaiwanStockDividend 最新配發）：現金＋股票
+// 股利＋除息日＋配發年度季別；取不到則不顯示（不佔版面）。
+function trackDividendRow(dv){
+  if (!dv || (!dv.cash && !dv.stock)) return "";
+  const bits = [];
+  if (dv.cash) bits.push(`現金股利 <b>${(+dv.cash).toFixed(2)} 元</b>`);
+  if (dv.stock) bits.push(`股票股利 <b>${(+dv.stock).toFixed(2)} 元</b>`);
+  let tail = "";
+  if (dv.exDate) tail += ` ｜ 除息日 ${esc(dv.exDate)}`;
+  if (dv.payDate) tail += ` ｜ 發放 ${esc(dv.payDate)}`;
+  return `<div style="font-size:.86rem;margin-bottom:8px;padding:7px 9px;border:1px solid var(--line);border-radius:7px">`
+    + `<span class="mut" style="font-size:.74rem">股利（配發 ${esc(dv.year || "—")}）</span><br>${bits.join("　")}${tail}</div>`;
+}
+
 // 區塊3：每季財報（EPS/營收/毛利率/營益率/淨利率/稅後淨利 × 本季/上季QoQ/去年同季YoY＋近8季趨勢）
 function trackFinHtml(c, d){
   const h0 = `<div class="msection">每季財報追蹤</div>`;
@@ -1195,6 +1221,7 @@ function trackFinHtml(c, d){
     : sgn(val, `${val > 0 ? "▲" : val < 0 ? "▼" : ""}${(val > 0 ? "+" : "") + val.toFixed(2)}${isPp ? "pp" : "%"}`);
   const badge = ` <span class="chip" style="padding:2px 8px;font-size:.7rem;color:#ef5b5b;border-color:#ef5b5b">新季別</span>`;
   let h = h0 + `<div class="mcard"><div style="font-size:.92rem;margin-bottom:6px"><b>最新季別 ${esc(last.q)}</b>${isNew ? badge : ""}</div>`;
+  h += trackDividendRow(d.dividend);
   h += `<table class="mtable"><thead><tr><th>項目</th><th>本季</th><th>上季 QoQ</th><th>去年同季 YoY</th><th>近${Math.min(arr.length, 8)}季</th></tr></thead><tbody>`;
   for (const [label, key, fmt, isPp] of rows){
     h += `<tr><td>${esc(label)}</td><td><b>${fmt(last[key])}</b></td>`
