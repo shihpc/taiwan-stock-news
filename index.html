@@ -462,9 +462,10 @@ function flowSumHtml(d){
     lines.push(`<div>${label}：${arr.map(r=>`${esc(r.n)} ${sgn(r.pts, p1(r.pts))}`).join("、")}</div>`);
   };
   rank(d.stocks_top5, "貢獻前5");
-  rank(d.stocks_bot3, "拖累後3");
+  // 2026-07-19：v2 端拖累取項 3→5（欄位名 *_bot3 不變）；label 依實際筆數動態顯示，新舊資料檔皆相容
+  rank(d.stocks_bot3, `拖累前${(d.stocks_bot3||[]).length}`);
   rank(d.subs_top5, "次產業貢獻前5");
-  rank(d.subs_bot3, "次產業拖累後3");
+  rank(d.subs_bot3, `次產業拖累前${(d.subs_bot3||[]).length}`);
   lines.push(`<div class="mut" style="font-size:.76rem;margin-top:4px">資料日 ${esc(d.date||"—")}`
     + `｜來源：即時類股動態收盤定格（收盤總結卡同口徑）</div>`);
   return `<div class="msection">昨日資金流向</div><div class="mcard">${lines.join("")}</div>`;
