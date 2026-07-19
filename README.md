@@ -44,6 +44,23 @@ taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手」。
 詳端點規格見 taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手（/chips）」。**後續批次**：技術面（第三批）
 採描述性統計傾向、留待回測驗證（比照 postmkt 持股診斷），分頁地基已可直接加第三個分頁。
 
+## 個股追蹤 基本面 refine（4 點回饋，2026-07-20）
+
+第一批基本面上線後的 4 點改進，全部走 v2 Worker `/fundamentals`（前端仍**絕不碰 FinMind token**）：
+
+1. **每日新聞升級（消除「不在新聞池」死路）**：`trackNewsHtml(c,d)` 改讀 Worker 回的 `d.news`
+   （媒體新聞 TaiwanStockNews＋業績事件墊底，保證 ≥3）。媒體新聞掛外連、**業績事件**（`n.event`）
+   標「業績事件」badge 不外連。舊「不在新聞追蹤池」死路已移除；不再依賴本站 news.json 的 ~150 檔池。
+2. **月營收柱狀每根標金額**：`trackBars` 每柱加 `.trk-bar-val`（億元，`barYi` 格式化；CSS `rotate(-55deg)`
+   斜排避重疊，容器高 104px）。
+3. **季財報加股利列**：`trackDividendRow(d.dividend)` 於 `trackFinHtml` 內呼叫，顯示現金/股票股利
+   ＋除息日＋配發年度季別（資料 TaiwanStockDividend）。
+4. **自選股顯示名稱**：`trackName` 優先用 Worker 回的 `name`（TaiwanStockInfo），chip 與詳情標題顯示
+   「代號 名稱」；新增自選股後 fundamentals 載入即解析名稱重繪。
+
+Worker 端 additive 擴充與 cache 升版（`fund:4:`）、新聞窗 5 日/保留名額等細節見 v2 `PROJECT_SUMMARY.md`。
+**未解**：殖利率欄暫未做（需股價）；冷門股媒體新聞覆蓋率仍依 FinMind（靠業績事件墊底保證有內容）。
+
 ## 架構
 ```
 build_news.py        ← 每日 pipeline：讀股票池 → 抓新聞 → 過濾 → 產 news.json
