@@ -121,6 +121,23 @@
   .insight-md th{background:var(--chip);color:var(--muted)}
   .insight-note{color:var(--muted);font-size:.74rem;margin:8px 4px;line-height:1.6}
   .insight-meta{color:var(--muted);font-size:.76rem;margin:2px 4px 10px}
+  /* 個股追蹤（基本面）*/
+  .trk-add{display:flex;gap:8px}
+  .trk-add input{flex:1;background:var(--bg,#0f1626);border:1px solid var(--line);border-radius:9px;padding:8px 10px;color:var(--txt);font-size:.9rem}
+  .trk-btn{background:var(--accent);border:none;border-radius:9px;padding:8px 16px;color:#fff;font-weight:600;cursor:pointer;font-size:.86rem}
+  .trk-btn:hover{opacity:.9}
+  .trk-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .trk-chip{cursor:pointer}
+  .trk-chip .nm{color:var(--muted);font-size:.74rem;margin-left:4px}
+  .trk-x{margin-left:7px;color:var(--muted);font-weight:700;cursor:pointer}
+  .trk-x:hover{color:#ef5b5b}
+  .trk-news{padding:7px 0;border-bottom:1px solid rgba(36,53,86,.4);line-height:1.5}
+  .trk-news:last-child{border-bottom:none}
+  .trk-bars{display:flex;align-items:flex-end;gap:3px;height:70px;margin-top:6px}
+  .trk-bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .trk-bar-fill{width:72%;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px}
+  .trk-bar-lbl{font-size:.6rem;color:var(--muted);margin-top:2px}
+  .trk-spark{vertical-align:middle}
 </style>
 </head>
 <body>
@@ -137,6 +154,7 @@
     <div class="tab active" data-tab="news">新聞</div>
     <div class="tab" data-tab="morning">晨報</div>
     <div class="tab" data-tab="insight">摘要分析</div>
+    <div class="tab" data-tab="track">個股追蹤</div>
   </div>
 
   <div id="newsView">
@@ -158,6 +176,8 @@
   </div>
 
   <div id="insightView" style="display:none"></div>
+
+  <div id="trackView" style="display:none"></div>
 
   <footer>
     資料來源：FinMind · TaiwanStockNews（新聞）／
@@ -965,15 +985,206 @@ document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
   document.getElementById("newsView").style.display = tab === "news" ? "" : "none";
   document.getElementById("morningView").style.display = tab === "morning" ? "" : "none";
   document.getElementById("insightView").style.display = tab === "insight" ? "" : "none";
+  document.getElementById("trackView").style.display = tab === "track" ? "" : "none";
   const SUBS = {
     news: "投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。",
     morning: "台股開盤前晨報：期指開盤參考、隔夜美股、法人籌碼與除權息（資料源：taiwan-flow-live-v2）。",
     insight: "AI 摘要分析：彙整新聞焦點與晨報籌碼，由 Claude 生成洞見。token 自備、只存本機。非投資建議。",
+    track: "個股追蹤（第一批：基本面）：自選股＋持股診斷股的每日新聞、每月營收、每季財報。資料經 taiwan-flow-live-v2 Worker 即時代理 FinMind。非投資建議。",
   };
   document.getElementById("pageSub").textContent = SUBS[tab] || SUBS.news;
   if (tab === "morning") loadMorning();
   if (tab === "insight") renderInsight();
+  if (tab === "track") loadTrack();
 });
+
+// ==== 個股追蹤（第一批：基本面）====
+// 資料架構：月營收/季財報走 v2 Worker 即時代理（/fundamentals，任何台股皆可），前端絕不碰
+// FinMind token；新聞讀本站 news.json（僅 ~150 檔法人熱門股，不在池內誠實降級標註）。
+// 兩組來源：自選股（localStorage news_watchlist，可增刪）＋持股診斷股（讀同 origin pm_holdings，
+// 唯讀，管理權留 postmkt）。QoQ/YoY 由 Worker 計算並附回（EPS/營收/稅後淨利相對%、三率百分點差）。
+const WATCH_KEY = "news_watchlist";
+const SEENQ_KEY = "news_track_seenq";   // {代號:最新季別} 記錄前次已見，判定季財報「新季別」
+const TRK_NEW_DAYS = 14;                 // 月營收公布日在近 N 日內 → 標「新公布」
+const TRACK = { sel: null, data: {}, err: {}, loading: false };
+
+function trackWatch(){ try{ const v = JSON.parse(localStorage.getItem(WATCH_KEY) || "[]"); return Array.isArray(v) ? [...new Set(v.filter(Boolean).map(String))] : []; }catch(e){ return []; } }
+function trackSaveWatch(a){ localStorage.setItem(WATCH_KEY, JSON.stringify([...new Set(a.map(String))])); }
+// 持股診斷股：讀 postmkt 存的 pm_holdings（格式 [{c,sh,...}]），本站唯讀
+function trackHoldings(){ try{ const v = JSON.parse(localStorage.getItem("pm_holdings") || "[]"); return Array.isArray(v) ? [...new Set(v.filter(h => h && h.c).map(h => String(h.c)))] : []; }catch(e){ return []; } }
+function trackName(c){ const s = ((DATA||{}).stocks||[]).find(x => String(x.stock_id) === String(c)); return s && s.name ? s.name : c; }
+function daysAgo(s){ const t = Date.parse(s); return isNaN(t) ? 9999 : Math.floor((Date.now() - t) / 86400e3); }
+
+async function loadTrack(){
+  renderTrack();   // 先畫清單骨架（即使尚無資料/空清單）
+  const ids = [...new Set([...trackWatch(), ...trackHoldings()])].slice(0, 30);
+  const need = ids.filter(id => !(id in TRACK.data) && !(id in TRACK.err));
+  if (!need.length) return;
+  TRACK.loading = true; renderTrack();
+  try{
+    const r = await fetch(`${USW_WORKER}/fundamentals?ids=${need.join(",")}&t=${Date.now()}`);
+    const j = await r.json();
+    for (const s of (j.stocks || [])){ if (s && s.error) TRACK.err[s.id] = s.error; else if (s && s.id) TRACK.data[s.id] = s; }
+    for (const id of need) if (!(id in TRACK.data) && !(id in TRACK.err)) TRACK.err[id] = "查無資料";
+  }catch(e){ for (const id of need) TRACK.err[id] = "載入失敗（Worker 無回應）"; }
+  TRACK.loading = false; renderTrack();
+}
+
+function trackChip(c, kind){
+  const nm = trackName(c);
+  const del = kind === "watch" ? `<span class="trk-x" data-trk-del="${esc(c)}" title="移除">×</span>` : "";
+  return `<span class="chip trk-chip${TRACK.sel === c ? " active" : ""}" data-trk-sel="${esc(c)}">${esc(c)}`
+    + `${nm && nm !== c ? `<span class="nm">${esc(nm)}</span>` : ""}${del}</span>`;
+}
+
+function renderTrack(){
+  const el = document.getElementById("trackView");
+  const watch = trackWatch(), holds = trackHoldings();
+  if (TRACK.sel && !watch.includes(TRACK.sel) && !holds.includes(TRACK.sel)) TRACK.sel = null;
+  let h = "";
+  h += `<div class="msection">自選股</div><div class="mcard">`
+    + `<div class="trk-add"><input id="trkInput" type="text" inputmode="numeric" placeholder="輸入股票代號（如 2330、00878）" maxlength="7" autocomplete="off">`
+    + `<button id="trkAdd" class="trk-btn">加入</button></div>`
+    + `<div id="trkAddMsg" class="mut" style="font-size:.76rem;margin-top:6px"></div>`;
+  h += watch.length ? `<div class="trk-chips" style="margin-top:10px">${watch.map(c => trackChip(c, "watch")).join("")}</div>`
+    : `<div class="mut" style="font-size:.82rem;margin-top:8px">尚未加入自選股。輸入代號按「加入」即可追蹤任一台股的基本面。</div>`;
+  h += `</div>`;
+  h += `<div class="msection">持股診斷股 <span class="mut" style="font-size:.72rem;font-weight:400">來自持股診斷（唯讀）</span></div><div class="mcard">`;
+  h += holds.length ? `<div class="trk-chips">${holds.map(c => trackChip(c, "hold")).join("")}</div>`
+      + `<div class="mut" style="font-size:.74rem;margin-top:8px">此區代號來自「盤後分析」站的持股診斷，本站唯讀；增刪請至該站管理。</div>`
+    : `<div class="mut" style="font-size:.82rem">尚無持股診斷股（於「盤後分析」站設定持股後，同一瀏覽器此處自動顯示）。</div>`;
+  h += `</div>`;
+  if (!watch.length && !holds.length)
+    h += `<div class="empty">加入自選股，或到「盤後分析」站設定持股診斷，即可在此追蹤每日新聞／每月營收／每季財報。</div>`;
+  if (TRACK.sel){
+    h += `<div class="msection" style="margin-top:22px">${esc(TRACK.sel)} ${esc(trackName(TRACK.sel) !== TRACK.sel ? trackName(TRACK.sel) : "")} 基本面</div>`;
+    h += `<div id="trkDetail">${trackDetailHtml(TRACK.sel)}</div>`;
+  } else if (watch.length || holds.length){
+    h += `<div class="mut" style="margin:16px 4px;font-size:.86rem">點選上方任一檔，顯示每日新聞／每月營收／每季財報三區塊。</div>`;
+  }
+  el.innerHTML = h;
+  const add = document.getElementById("trkAdd"), inp = document.getElementById("trkInput");
+  if (add) add.onclick = trackAdd;
+  if (inp) inp.onkeydown = e => { if (e.key === "Enter") trackAdd(); };
+  el.querySelectorAll("[data-trk-sel]").forEach(x => x.onclick = () => { TRACK.sel = x.dataset.trkSel; renderTrack(); loadTrack(); });
+  el.querySelectorAll("[data-trk-del]").forEach(x => x.onclick = e => { e.stopPropagation(); trackDel(x.dataset.trkDel); });
+}
+
+function trackAdd(){
+  const inp = document.getElementById("trkInput"), msg = document.getElementById("trkAddMsg");
+  const raw = (inp.value || "").trim().toUpperCase();
+  if (!raw) return;
+  if (!/^[0-9]{4,6}[A-Z]?$/.test(raw)){ msg.innerHTML = `<span class="up">格式不符：請輸入 4~6 位數字代號（如 2330、00878）。</span>`; return; }
+  const watch = trackWatch();
+  if (watch.includes(raw)){ msg.textContent = `${raw} 已在自選股中。`; inp.value = ""; TRACK.sel = raw; renderTrack(); return; }
+  watch.push(raw); trackSaveWatch(watch); inp.value = "";
+  TRACK.sel = raw;
+  renderTrack(); loadTrack();   // 存在性驗證：Worker 回 error 時，下方詳情區會顯示「查無資料」提示，不炸
+}
+function trackDel(c){
+  trackSaveWatch(trackWatch().filter(x => x !== c));
+  if (TRACK.sel === c) TRACK.sel = null;
+  renderTrack();
+}
+
+function trackDetailHtml(c){
+  if (TRACK.err[c]) return `<div class="mcard mut">查無 ${esc(c)} 的基本面資料（${esc(TRACK.err[c])}）。此代號可能非上市櫃普通股，或 FinMind 暫無資料。</div>` + trackNewsHtml(c);
+  const d = TRACK.data[c];
+  if (!d) return `<div class="empty">載入中…</div>`;
+  return trackNewsHtml(c) + trackRevenueHtml(d) + trackFinHtml(c, d);
+}
+
+// 區塊1：每日新聞追蹤（讀本站 news.json，僅 ~150 檔法人熱門股，不在池內誠實降級）
+function trackNewsHtml(c){
+  const h0 = `<div class="msection">每日新聞追蹤</div>`;
+  const d = DATA;
+  if (!d || !Array.isArray(d.stocks)) return h0 + `<div class="mcard mut">新聞資料尚未載入。</div>`;
+  const ent = d.stocks.find(s => String(s.stock_id) === String(c));
+  const days = (d.trading_days || []).slice().sort().slice(-3);
+  if (!ent) return h0 + `<div class="mcard mut">此股近日不在新聞追蹤池（本站新聞僅涵蓋近期約 150 檔法人熱門股）。</div>`;
+  const news = (ent.news || []).filter(n => days.includes(day10(n.date))).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  if (!news.length) return h0 + `<div class="mcard mut">${esc(c)} 近 ${days.length} 交易日於追蹤池內無新聞。</div>`;
+  return h0 + `<div class="mcard">` + news.map(n =>
+    `<div class="trk-news"><span class="mut" style="font-size:.74rem">${esc(day10(n.date))} · ${esc(n.source || "")}</span>`
+    + `<br><a href="${esc(n.link || "#")}" target="_blank" rel="noopener" class="slink">${esc(n.title || "")}</a></div>`).join("") + `</div>`;
+}
+
+// 迷你柱狀（月營收近12月，億元）
+function trackBars(vals, labels){
+  const finite = vals.filter(v => v != null && isFinite(v));
+  const max = finite.length ? Math.max(...finite, 0) : 1;
+  return `<div class="trk-bars">` + vals.map((v, i) => {
+    const hp = v != null && isFinite(v) && max > 0 ? Math.max(4, Math.round(v / max * 100)) : 0;
+    return `<div class="trk-bar" title="${esc(labels[i] || "")}：${v != null ? Math.round(v).toLocaleString("en-US") : "—"} 億">`
+      + `<div class="trk-bar-fill" style="height:${hp}%"></div><span class="trk-bar-lbl">${esc((labels[i] || "").slice(-2))}</span></div>`;
+  }).join("") + `</div>`;
+}
+// 迷你趨勢線（近8季某指標）：末值≥首值紅、否則綠
+function trackSpark(vals){
+  const nums = vals.map(v => (v == null ? null : +v));
+  const valid = nums.filter(v => v != null && isFinite(v));
+  if (valid.length < 2) return `<span class="mut">—</span>`;
+  const min = Math.min(...valid), max = Math.max(...valid), rng = max - min || 1, W = 60, H = 20, n = nums.length;
+  const pts = nums.map((v, i) => (v == null || !isFinite(v)) ? null
+    : `${(n === 1 ? 0 : i / (n - 1) * W).toFixed(1)},${(H - (v - min) / rng * (H - 2) - 1).toFixed(1)}`).filter(Boolean).join(" ");
+  const up = valid[valid.length - 1] >= valid[0];
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="trk-spark"><polyline points="${pts}" fill="none" stroke="${up ? "#ef5b5b" : "#2fbf71"}" stroke-width="1.5"/></svg>`;
+}
+
+// 區塊2：每月營收追蹤（最新月＋MoM＋YoY＋近12月柱狀；公布日近 N 日標「新公布」；金額億元）
+function trackRevenueHtml(d){
+  const h0 = `<div class="msection">每月營收追蹤</div>`;
+  const arr = d.revenue || [];
+  if (!arr.length) return h0 + `<div class="mcard mut">無月營收資料。</div>`;
+  const last = arr[arr.length - 1];
+  const yi = v => v == null ? "—" : (Math.round(v / 1e8 * 10) / 10).toLocaleString("en-US") + " 億";
+  const isNew = last.announce && daysAgo(last.announce) <= TRK_NEW_DAYS;
+  const badge = ` <span class="chip" style="padding:2px 8px;font-size:.7rem;color:#ef5b5b;border-color:#ef5b5b">新公布</span>`;
+  let h = h0 + `<div class="mcard"><div style="font-size:1.05rem"><b>${esc(last.ym)} 營收 ${yi(last.rev)}</b>${isNew ? badge : ""}</div>`
+    + `<div style="margin-top:6px;font-size:.9rem">MoM ${sgn(last.mom, pct(last.mom))} ｜ YoY ${sgn(last.yoy, pct(last.yoy))}</div>`;
+  if (last.announce) h += `<div class="mut" style="font-size:.74rem;margin-top:4px">公布日 ${esc(last.announce)}</div>`;
+  const recent = arr.slice(-12);
+  h += `<div class="mut" style="font-size:.74rem;margin-top:10px">近 ${recent.length} 月營收趨勢（億元）</div>`
+    + trackBars(recent.map(x => x.rev / 1e8), recent.map(x => x.ym.slice(2))) + `</div>`;
+  return h;
+}
+
+// 區塊3：每季財報（EPS/營收/毛利率/營益率/淨利率/稅後淨利 × 本季/上季QoQ/去年同季YoY＋近8季趨勢）
+function trackFinHtml(c, d){
+  const h0 = `<div class="msection">每季財報追蹤</div>`;
+  const arr = d.financials || [];
+  if (!arr.length) return h0 + `<div class="mcard mut">無季財報資料。</div>`;
+  const last = arr[arr.length - 1], prevQ = arr.length >= 2 ? arr[arr.length - 2] : null;
+  const [ly, lq] = last.q.split("Q").map(Number);
+  const yoyQ = arr.find(x => x.q === `${ly - 1}Q${lq}`) || null;
+  let seen = {}; try{ seen = JSON.parse(localStorage.getItem(SEENQ_KEY) || "{}"); }catch(e){}
+  const firstSeen = !seen[c], isNew = seen[c] && seen[c] !== last.q;
+  seen[c] = last.q; try{ localStorage.setItem(SEENQ_KEY, JSON.stringify(seen)); }catch(e){}
+  const yiN = v => v == null ? "—" : Math.round(v / 1e8).toLocaleString("en-US");
+  const rows = [
+    ["EPS（元）", "eps", v => v == null ? "—" : (+v).toFixed(2), false],
+    ["營收（億）", "rev", yiN, false],
+    ["毛利率", "gross_margin", v => v == null ? "—" : (+v).toFixed(1) + "%", true],
+    ["營益率", "op_margin", v => v == null ? "—" : (+v).toFixed(1) + "%", true],
+    ["淨利率", "net_margin", v => v == null ? "—" : (+v).toFixed(1) + "%", true],
+    ["稅後淨利（億）", "net", yiN, false],
+  ];
+  const chgCell = (val, isPp) => val == null ? `<span class="mut">—</span>`
+    : sgn(val, `${val > 0 ? "▲" : val < 0 ? "▼" : ""}${(val > 0 ? "+" : "") + val.toFixed(2)}${isPp ? "pp" : "%"}`);
+  const badge = ` <span class="chip" style="padding:2px 8px;font-size:.7rem;color:#ef5b5b;border-color:#ef5b5b">新季別</span>`;
+  let h = h0 + `<div class="mcard"><div style="font-size:.92rem;margin-bottom:6px"><b>最新季別 ${esc(last.q)}</b>${isNew ? badge : ""}</div>`;
+  h += `<table class="mtable"><thead><tr><th>項目</th><th>本季</th><th>上季 QoQ</th><th>去年同季 YoY</th><th>近${Math.min(arr.length, 8)}季</th></tr></thead><tbody>`;
+  for (const [label, key, fmt, isPp] of rows){
+    h += `<tr><td>${esc(label)}</td><td><b>${fmt(last[key])}</b></td>`
+      + `<td>${fmt(prevQ ? prevQ[key] : null)}<br>${chgCell(last.qoq ? last.qoq[key] : null, isPp)}</td>`
+      + `<td>${fmt(yoyQ ? yoyQ[key] : null)}<br>${chgCell(last.yoy ? last.yoy[key] : null, isPp)}</td>`
+      + `<td>${trackSpark(arr.slice(-8).map(x => x[key]))}</td></tr>`;
+  }
+  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:8px">單季值；季財報無明確公布日，「新季別」以最新季別 vs 前次瀏覽已見季別判定`
+    + `${firstSeen ? "（本檔首次瀏覽不標新）" : ""}。三率＝各項÷營收；QoQ/YoY 中三率為百分點(pp)差、其餘為相對%。以上為歷史統計，非投資建議。</div></div>`;
+  return h;
+}
+// ==== 個股追蹤 結束 ====
 
 load();
 </script>

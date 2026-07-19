@@ -8,6 +8,26 @@
 `news.json` 的 `generated_at`（台北 +08:00）／`trading_days`／新聞 `date` 等日期欄語意，
 以及跨站產出檔的日期對照，見 postmkt repo 的 `docs/date-semantics.md`（五 repo 統一對照表）。
 
+## 個股追蹤（第一批：基本面，2026-07-19）
+
+`index.html` 第四個 tab「個股追蹤」（純前端插入式，`#trackView`＋`loadTrack`/`renderTrack` 等
+`trk*` 函式群，三站同步函式零改動）。**兩組來源、視覺區分**：
+
+- **自選股**：localStorage key `news_watchlist`（代號陣列），輸入框可增/刪（格式驗證，存在性由
+  Worker 回傳判定，查不到顯示提示不炸）。
+- **持股診斷股**：讀同 origin 的 `pm_holdings`（postmkt 存，格式 `[{c,sh,...}]`），**本站唯讀**
+  （不可增刪，管理權留 postmkt），標註「來自持股診斷」。
+
+點選任一檔 → 下方三區塊（基本面）：① 每日新聞追蹤（讀本站 `news.json`，僅 ~150 檔法人熱門股，
+不在池內誠實降級標註）② 每月營收追蹤（最新月＋MoM＋YoY＋近 12 月柱狀＋近 14 日公布標「新公布」，
+億元）③ 每季財報追蹤（EPS/營收/毛利率/營益率/淨利率/稅後淨利 × 本季/上季QoQ/去年同季YoY＋近 8 季
+迷你趨勢，紅增綠減）。
+
+**資料架構**：月營收/季財報走 v2 Worker `/fundamentals?ids=`（`USW_WORKER` 常數，即時代理 FinMind，
+任何台股皆可）；前端**絕不碰 FinMind token**。QoQ/YoY 由 Worker 算並附回。詳端點規格見
+taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手」。**後續批次**：籌碼面／技術面（技術面採描述性、
+留待回測驗證，比照 postmkt 持股診斷）另分期，tab 地基已可直接加區塊。
+
 ## 架構
 ```
 build_news.py        ← 每日 pipeline：讀股票池 → 抓新聞 → 過濾 → 產 news.json
