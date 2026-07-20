@@ -111,6 +111,12 @@ FINMIND_TOKEN=xxx python build_news.py --lookback 3
 
 ## 快速接手（2026-07-12）
 
+- **時區修正（2026-07-20）**：`build_news.py` 的 `news_calendar_days()`／`recent_trading_days()`
+  原本以 **UTC** 判定「今天」，台北清晨 8 點前（UTC 仍是前一天）算出的今天會是昨天，導致清晨的
+  班天生慢一天。新增 `taipei_today()` 統一改用台北時間（UTC+8）判定，`lookback_days` 語意不變。
+  commit `b64c4ef`（taiwan-stock-news）。上游觸發端 taiwan-flow-live-v2 同日另修
+  `dispatchNews`/`dispatchMorning` 失敗重試 1 次（見該 repo `PROJECT_SUMMARY.md`），解決
+  dispatch 無聲失敗的問題；兩者為配套修正、不同檔案。
 - 晨報「昨日資金流向」段（2026-07-18 第八期）：跨 repo 讀 taiwan-flow-live-v2
   `data/daysummary/latest.json`（`flowSumHtml()`，插在籌碼卡與美股段之間；讀不到/解析失敗
   整段隱藏不擋晨報，卡片標「資料日 YYYY-MM-DD」）。上游為該 repo `daysummary.yml`（平日
