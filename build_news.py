@@ -55,6 +55,12 @@ def finmind_news_date_to_taipei(s: str) -> str:
         return str(s)
     return dt.replace(tzinfo=timezone.utc).astimezone(TAIPEI_TZ).strftime("%Y-%m-%d %H:%M:%S")
 
+
+def taipei_today():
+    """台北時間的今天。所有「今天/回看 N 日」判定一律走這裡，避免用 UTC 日期
+    在台北清晨 8 點前（UTC 仍是前一天）把今天誤判成昨天，導致清晨的班天生慢一天。"""
+    return datetime.now(TAIPEI_TZ).date()
+
 # taiwan-stock-radar 每日產出的候選清單（公開、唯讀）
 DEFAULT_POOL_CSV = "https://raw.githubusercontent.com/shihpc/taiwan-stock-radar/main/scan_app.csv"
 
@@ -216,7 +222,7 @@ def fetch_market_value_weights() -> dict[str, float]:
 
 def recent_trading_days(n: int) -> list[str]:
     """近 n 個交易日（以 FinMind TaiwanStockTradingDate 為準，退回平日近似）。"""
-    end = datetime.now(timezone.utc)
+    end = datetime.now(TAIPEI_TZ)
     start = end - timedelta(days=n * 2 + 20)
     try:
         r = requests.get(FINMIND_URL, params={
@@ -232,7 +238,7 @@ def recent_trading_days(n: int) -> list[str]:
     except Exception as e:
         logger.warning(f"交易日 API 失敗，改用平日近似：{e}")
     out: list[str] = []
-    d = datetime.now(timezone.utc).date()
+    d = taipei_today()
     while len(out) < n:
         if d.weekday() < 5:
             out.append(d.strftime("%Y-%m-%d"))
@@ -244,16 +250,17 @@ def news_calendar_days(trading_days: list[str]) -> list[str]:
     """涵蓋近 N 個交易日的「日曆日」區間：從 trading_days[0] 的「前一天」（含）
     到今天（含）的每一個日曆日（交易日＋夾雜與尾隨的週末/假日）。
     例：週日執行、lookback=3（週三四五）→ 回傳 週二~週日 共 6 天，
-    讓週末發布的新聞也抓得到。「今天」以 UTC 為準（排程 22:30 台北＝14:30 UTC，
-    兩地同日）。
+    讓週末發布的新聞也抓得到。「今天」以台北時間為準（見 taipei_today()）——
+    若用 UTC 判定，台北清晨 8 點前 UTC 仍是前一天，會把今天誤判成昨天，
+    導致清晨的班天生慢一天。
 
     為何往前多含一天：FinMind 的單日切片以其儲存的 UTC 日為準，而新聞 date
     轉台北(+8)後，台北 D 日清晨 00:00~07:59 的新聞落在 FinMind 的 D-1(UTC)
     切片裡；不多抓一天會漏掉首個交易日清晨的新聞。多抓那天裡台北時間仍在
     trading_days[0] 之前的新聞，會在 main() 轉換後依台北日過濾掉。
-    尾端不用多抓：執行時刻（UTC 當日內）之前發布的新聞，其 UTC 日必 <= 今天(UTC)。"""
+    尾端不用多抓：執行時刻之前發布的新聞，其台北日必 <= 今天(台北)。"""
     start = datetime.strptime(trading_days[0], "%Y-%m-%d").date() - timedelta(days=1)
-    end = datetime.now(timezone.utc).date()
+    end = taipei_today()
     out: list[str] = []
     d = start
     while d <= end:
