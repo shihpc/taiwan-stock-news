@@ -80,7 +80,34 @@ jobs:
           git add news.json
           if git diff --cached --quiet; then
             echo "news.json 無變化，跳過 commit"
-          else
-            git commit -m "news update $(date -u '+%Y-%m-%d %H:%M UTC')"
-            git push origin HEAD:${GITHUB_REF_NAME}
+            exit 0
           fi
+          git commit -m "news update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          # push 補 rebase 重試（2026-08-09 事故：同時段其他 commit 先進 main，
+          # non-fast-forward 直接 exit 1、整班產物丟掉）。沿用 taiwan-flow-live-v2
+          # 資料班慣例（aetf.yml 等）：pull --rebase → push，最多 5 次、間隔 4 秒。
+          pushed=0
+          for i in 1 2 3 4 5; do
+            if git pull --rebase origin "${GITHUB_REF_NAME}"; then
+              if git push origin HEAD:"${GITHUB_REF_NAME}"; then pushed=1; break; fi
+            else
+              # rebase 撞衝突：本班 commit 只含 news.json（整檔重新生成的資料），
+              # 衝突必在 news.json，以本班剛產的版本為準。
+              # ⚠ rebase 期間 --ours/--theirs 語意反轉：rebase 是把本班 commit
+              # replay 到 origin 最新 commit 之上，「ours」＝origin 那邊、
+              # 「theirs」才是本班 commit——所以「取本班版本」要用 --theirs。
+              if git checkout --theirs -- news.json && git add news.json; then
+                # 解完衝突續走；若本班版本與 origin 已相同會變空 commit →
+                # continue 失敗時改 skip（origin 已有等值內容，跳過即可）
+                GIT_EDITOR=true git rebase --continue \
+                  || git rebase --skip \
+                  || git rebase --abort || true
+              else
+                # 非預期狀況（如 fetch 失敗、衝突不在 news.json）→ abort 清理
+                # 回到乾淨狀態，睡 4 秒進下一輪重試
+                git rebase --abort || true
+              fi
+            fi
+            sleep 4
+          done
+          if [ "$pushed" != "1" ]; then echo "::error::push failed after 5 retries"; exit 1; fi
