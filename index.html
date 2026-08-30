@@ -1057,7 +1057,7 @@ window.addEventListener("message", e => {
 });
 
 // ==== 個股追蹤（第一批：基本面）====
-// 資料架構：新聞/月營收/季財報/股利/名稱全走 v2 Worker 即時代理（/fundamentals，任何台股皆可），
+// 資料架構：新聞/月營收/季財報/股利/殖利率/名稱全走 v2 Worker 即時代理（/fundamentals，任何台股皆可），
 // 前端絕不碰 FinMind token；新聞＝媒體新聞（TaiwanStockNews）＋業績事件墊底，保證 ≥3、無「不在池」死路。
 // 兩組來源：自選股（localStorage news_watchlist，可增刪）＋持股診斷股（讀同 origin pm_holdings，
 // 唯讀，管理權留 postmkt）。QoQ/YoY 由 Worker 計算並附回（EPS/營收/稅後淨利相對%、三率百分點差）。
@@ -1251,17 +1251,40 @@ function trackRevenueHtml(d){
 }
 
 // 季財報內股利列（走 Worker /fundamentals 的 dividend：TaiwanStockDividend 最新配發）：現金＋股票
-// 股利＋除息日＋配發年度季別；取不到則不顯示（不佔版面）。
-function trackDividendRow(dv){
-  if (!dv || (!dv.cash && !dv.stock)) return "";
+// 股利＋除息日＋配發年度季別＋殖利率；取不到的個別欄位就不顯示（不讓整列消失）。
+// **殖利率口徑（2026-08-30 實查，與同列的「最新一筆現金股利」基準不同，務必照實標示）**：
+// 走 Worker 的 dy（FinMind TaiwanStockPER 的 dividend_yield），該表是證交所
+// 「個股日本益比、殖利率及股價淨值比」（BWIBBU_d）的轉發——2026-08-28 台積電
+// FinMind 0.91／PER 28.05／PBR 9.76 與證交所同日同檔逐欄同值，證交所該列另有「股利年度＝114」，
+// 且 0.91% × 收盤 2,420 ≒ 22.0 元＝民國 114 年四季現金股利合計。
+// 即「最近一個股利年度全年配發現金 ÷ 當日收盤價」，**不是**「最新公告一筆現金股利 ÷ 股價」。
+// 上櫃同口徑（6488 環球晶 2026-08-28：0.79% × 972 ≒ 7.7＝114 年 公積 2.0＋盈餘 5.7），
+// 且**分子含公積配發的現金**——本列的「現金股利」只取 CashEarningsDistribution（盈餘分配），
+// 兩者本來就不可直接相除比對。
+// 誠實原則：只陳述數字與口徑，不加任何「高殖利率＝值得買」之類評語，也不上漲跌色。
+function trackDividendRow(dv, dy){
+  const hasDv = dv && (dv.cash || dv.stock);
+  const hasDy = dy && dy.dy != null && isFinite(dy.dy);
+  if (!hasDv && !hasDy) return "";
   const bits = [];
-  if (dv.cash) bits.push(`現金股利 <b>${(+dv.cash).toFixed(2)} 元</b>`);
-  if (dv.stock) bits.push(`股票股利 <b>${(+dv.stock).toFixed(2)} 元</b>`);
+  if (hasDv && dv.cash) bits.push(`現金股利 <b>${(+dv.cash).toFixed(2)} 元</b>`);
+  if (hasDv && dv.stock) bits.push(`股票股利 <b>${(+dv.stock).toFixed(2)} 元</b>`);
   let tail = "";
-  if (dv.exDate) tail += ` ｜ 除息日 ${esc(dv.exDate)}`;
-  if (dv.payDate) tail += ` ｜ 發放 ${esc(dv.payDate)}`;
+  if (hasDv && dv.exDate) tail += ` ｜ 除息日 ${esc(dv.exDate)}`;
+  if (hasDv && dv.payDate) tail += ` ｜ 發放 ${esc(dv.payDate)}`;
+  // 可見欄位說明＝口徑本身（手機無 hover，不能只靠 tooltip）；tooltip 補來源與「基準不同」的提醒
+  const dyCap = `最近一個股利年度全年配發現金 ÷ 當日收盤價${dy && dy.date ? `；資料日 ${dy.date}` : ""}`;
+  const dyTip = "資料來源：FinMind TaiwanStockPER，即證交所／櫃買「個股日本益比、殖利率及股價淨值比」。"
+    + "分子＝最近一個股利年度全年配發之現金（含盈餘分配與公積配發），與本列「現金股利」"
+    + "（僅最新一筆盈餘分配）基準不同，兩者不可直接相除比對。";
+  const dyBit = hasDy
+    ? `<div style="margin-top:4px">殖利率 <b>${(+dy.dy).toFixed(2)}%</b>`
+      + `<span class="mut" style="font-size:.72rem" title="${esc(dyTip)}">（${esc(dyCap)}）</span></div>`
+    : "";
+  const head = hasDv ? `股利（配發 ${esc(dv.year || "—")}）` : "股利";
   return `<div style="font-size:.86rem;margin-bottom:8px;padding:7px 9px;border:1px solid var(--line);border-radius:7px">`
-    + `<span class="mut" style="font-size:.74rem">股利（配發 ${esc(dv.year || "—")}）</span><br>${bits.join("　")}${tail}</div>`;
+    + `<span class="mut" style="font-size:.74rem">${head}</span>`
+    + `${bits.length || tail ? `<br>${bits.join("　")}${tail}` : ""}${dyBit}</div>`;
 }
 
 // 區塊3：每季財報（EPS/營收/毛利率/營益率/淨利率/稅後淨利 × 本季/上季QoQ/去年同季YoY＋近8季趨勢）
@@ -1288,7 +1311,7 @@ function trackFinHtml(c, d){
     : sgn(val, `${val > 0 ? "▲" : val < 0 ? "▼" : ""}${(val > 0 ? "+" : "") + val.toFixed(2)}${isPp ? "pp" : "%"}`);
   const badge = ` <span class="chip" style="padding:2px 8px;font-size:.7rem;color:#ef5b5b;border-color:#ef5b5b">新季別</span>`;
   let h = h0 + `<div class="mcard"><div style="font-size:.92rem;margin-bottom:6px"><b>最新季別 ${esc(last.q)}</b>${isNew ? badge : ""}</div>`;
-  h += trackDividendRow(d.dividend);
+  h += trackDividendRow(d.dividend, d.dy);
   h += `<table class="mtable"><thead><tr><th>項目</th><th>本季</th><th>上季 QoQ</th><th>去年同季 YoY</th><th>近${Math.min(arr.length, 8)}季</th></tr></thead><tbody>`;
   for (const [label, key, fmt, isPp] of rows){
     h += `<tr><td>${esc(label)}</td><td><b>${fmt(last[key])}</b></td>`

@@ -53,13 +53,29 @@ taiwan-flow-live-v2 `PROJECT_SUMMARY.md`「快速接手」。
    標「業績事件」badge 不外連。舊「不在新聞追蹤池」死路已移除；不再依賴本站 news.json 的 ~150 檔池。
 2. **月營收柱狀每根標金額**：`trackBars` 每柱加 `.trk-bar-val`（億元，`barYi` 格式化；CSS `rotate(-55deg)`
    斜排避重疊，容器高 104px）。
-3. **季財報加股利列**：`trackDividendRow(d.dividend)` 於 `trackFinHtml` 內呼叫，顯示現金/股票股利
-   ＋除息日＋配發年度季別（資料 TaiwanStockDividend）。
+3. **季財報加股利列**：`trackDividendRow(d.dividend, d.dy)` 於 `trackFinHtml` 內呼叫，顯示現金/股票股利
+   ＋除息日＋配發年度季別（資料 TaiwanStockDividend）＋**殖利率**（2026-08-30 新增，見下）。
 4. **自選股顯示名稱**：`trackName` 優先用 Worker 回的 `name`（TaiwanStockInfo），chip 與詳情標題顯示
    「代號 名稱」；新增自選股後 fundamentals 載入即解析名稱重繪。
 
-Worker 端 additive 擴充與 cache 升版（`fund:4:`）、新聞窗 5 日/保留名額等細節見 v2 `PROJECT_SUMMARY.md`。
-**未解**：殖利率欄暫未做（需股價）；冷門股媒體新聞覆蓋率仍依 FinMind（靠業績事件墊底保證有內容）。
+Worker 端 additive 擴充與 cache 升版（`fund:5:`）、新聞窗 5 日/保留名額等細節見 v2 `PROJECT_SUMMARY.md`。
+
+**殖利率欄（2026-08-30 補上，原「未解：需股價」已結案）**：不自算「現金股利÷股價」，改用 Worker
+新增的 `dy`（FinMind `TaiwanStockPER` 的 `dividend_yield`，純函式 `buildYield`），與 postmkt
+`src/build_diag.py:fetch_per_daily` 同源同欄，跨站口徑一致。
+**口徑（2026-08-30 實查，非推測）**：該 dataset 是證交所「個股日本益比、殖利率及股價淨值比」
+（BWIBBU_d）的轉發——2026-08-28 台積電 FinMind `dividend_yield` 0.91／`PER` 28.05／`PBR` 9.76，
+與證交所同日同檔逐欄同值；證交所該列另有「股利年度＝114」欄，且 0.91% × 收盤 2,420 ≒ 22.0 元
+＝民國 114 年四季現金股利合計（5+5+6+6）。故分子是**最近一個股利年度全年配發現金**，
+**不是**「最新公告一筆現金股利」（那會是 6 元／2,420＝0.25%），也不是「以除息日計的近四季」
+（2026-06-11 除息 6 元前後隱含股利恆為 22.0、未跳動，已實測）。
+上櫃同口徑亦已實查：6488 環球晶 2026-08-28 為 0.79%，×收盤 972 ≒ 7.7 元＝114 年
+公積配發 2.0＋盈餘分配 5.7——**分子含公積配發的現金**，而同列顯示的「現金股利」只取
+`CashEarningsDistribution`（盈餘分配、且只有最新一筆）。因此兩者基準不同，
+UI 以欄位說明＋tooltip 標明、不可直接相除比對。
+誠實原則：只陳述數字與口徑，不加評語、不上漲跌色。取不到 `dy` 時只少這一欄，股利列其餘照顯。
+
+**未解**：冷門股媒體新聞覆蓋率仍依 FinMind（靠業績事件墊底保證有內容）。
 
 ## 個股追蹤（第三批：技術面，2026-07-20）
 
