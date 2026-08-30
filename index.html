@@ -1276,14 +1276,18 @@ function trackDividendRow(dv, dy){
   let tail = "";
   if (hasDv && dv.exDate) tail += ` ｜ 除息日 ${esc(dv.exDate)}`;
   if (hasDv && dv.payDate) tail += ` ｜ 發放 ${esc(dv.payDate)}`;
-  // 可見欄位說明＝口徑本身（手機無 hover，不能只靠 tooltip）；tooltip 補來源與「基準不同」的提醒
-  const dyCap = `最近一個股利年度全年配發現金 ÷ 當日收盤價${dy && dy.date ? `；資料日 ${dy.date}` : ""}`;
+  // 口徑說明另起一行小字：手機沒有 hover，「基準不同、不可直接相除」這句警告必須是**可見文字**，
+  // 不能只掛在 title=。tooltip 保留更完整的來源說明（桌機補充用）。
+  const dyCap = "口徑：最近一個股利年度全年配發現金（含公積配發）÷ 當日收盤價；"
+    + "與同列現金股利（僅最新一筆盈餘分配）基準不同、不可直接相除。";
   const dyTip = "資料來源：FinMind TaiwanStockPER，即證交所／櫃買「個股日本益比、殖利率及股價淨值比」。"
     + "分子＝最近一個股利年度全年配發之現金（含盈餘分配與公積配發），與本列「現金股利」"
     + "（僅最新一筆盈餘分配）基準不同，兩者不可直接相除比對。";
   const dyBit = hasDy
     ? `<div style="margin-top:4px">殖利率 <b>${(+dy.dy).toFixed(2)}%</b>`
-      + `<span class="mut" style="font-size:.72rem" title="${esc(dyTip)}">（${esc(dyCap)}）</span></div>`
+      + (dy.date ? `<span class="mut" style="font-size:.72rem">（資料日 ${esc(dy.date)}）</span>` : "")
+      + `</div>`
+      + `<div class="mut" style="font-size:.72rem;line-height:1.5;margin-top:2px" title="${esc(dyTip)}">${esc(dyCap)}</div>`
     : "";
   const head = hasDv ? `股利（配發 ${esc(dv.year || "—")}）` : "股利";
   return `<div style="font-size:.86rem;margin-bottom:8px;padding:7px 9px;border:1px solid var(--line);border-radius:7px">`
