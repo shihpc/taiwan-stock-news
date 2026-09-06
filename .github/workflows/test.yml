@@ -2,6 +2,9 @@ name: tests
 
 # 增量抓取正確性測試：增量結果必須與全量結果完全一致。
 # 用假語料替換 FinMind，不需要 FINMIND_TOKEN、不連外網。
+# 2026-09-06 起另跑 tests/test_daily_brief.py（每日晨報產製物守門）：
+# 產製 session push daily-brief.html／daily-brief-card.json 後本 workflow 即觸發，
+# 超出產製規範（quote 字數／正文漢字／存檔期數／postMessage 契約）會亮紅。
 
 on:
   push:
@@ -10,11 +13,17 @@ on:
       - "news_curation.py"
       - "tests/**"
       - ".github/workflows/test.yml"
+      - "daily-brief.html"
+      - "daily-brief-card.json"
+      - "index.html"
   pull_request:
     paths:
       - "build_news.py"
       - "news_curation.py"
       - "tests/**"
+      - "daily-brief.html"
+      - "daily-brief-card.json"
+      - "index.html"
   workflow_dispatch: {}
 
 # 本檔原無 permissions 區塊（吃 repo 預設）。因告警 step 需要 issues: write 而顯式宣告，
@@ -36,10 +45,16 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        # pytest 只在 CI 測試用、刻意不進 requirements.txt（build-news.yml 生產班不需要）
+        run: pip install -r requirements.txt pytest
 
       - name: 增量 == 全量
         run: python tests/test_incremental.py
+
+      # test_incremental.py 是 main() 腳本、pytest 不會收集它，故上一步獨立跑；
+      # 這步收集 tests/ 下所有 pytest 風格測試（目前＝test_daily_brief.py）
+      - name: pytest（晨報產製物守門等）
+        run: python -m pytest tests/ -q
       - name: Notify failure
         # cancelled 也要告警：跑一半被取消（GitHub 端異常或誤按）同樣代表該場沒產出，
         # 而 failure() 在 cancelled 時不成立（2026-07-24 postmkt pm 場靜默消失的教訓）
