@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>新聞晨報 · 股市雷達</title>
+<!-- CSP（2026-09-06 安全工作包）：比照 postmkt/index.html:10；本頁只有一個內嵌 <script> 與 85 處 style= 屬性
+     → script-src／style-src 需 'unsafe-inline'（不為 CSP 重構）；connect-src 白名單＝實際 fetch 的 5 個 origin，
+     新增資料源要同步加；frame-src 'self' 供每日晨報 iframe（同源 daily-brief.html，該文件不受本 meta 管轄）。
+     注入面清單見 CLAUDE.md「CSP 與注入面（2026-09-06）」 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; object-src 'none'; base-uri 'none'; connect-src 'self' https://raw.githubusercontent.com https://taiwan-flow-v2.shihpc.workers.dev https://api.anthropic.com https://api.github.com">
 <style>
   :root{
     --bg:#0b1120; --bg2:#111a2e; --card:#16213a; --card-hover:#1d2b4a;

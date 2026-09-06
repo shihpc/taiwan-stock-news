@@ -88,6 +88,32 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 4. **誠實原則（專案鐵律，逐字保留，`README.md:71`）**：分頁頂部固定免責卡
    「技術指標為現況描述、非買賣訊號，僅供參考」；狀態詞用中性色、不寫該買該賣、不做預測。
 
+## CSP 與注入面（2026-09-06）
+
+`index.html:11` 的 `<meta http-equiv="Content-Security-Policy">`（比照 postmkt `index.html:10`，另加
+`frame-src 'self'` 供晨報 iframe）。**新增資料源時 `connect-src` 要同步加**，否則 fetch 被靜默擋下
+（console 出現 `Refused to connect`）。盤點（2026-09-06 grep 實查，行號為當時）：
+
+| 面向 | 現況 | CSP 對應 |
+|------|------|---------|
+| 內嵌 script | 只有 1 個 `<script>` 區塊（`index.html:222` 起，含四站同步的 `loadSiteVer`） | `script-src 'self' 'unsafe-inline'`（不為 CSP 重構、不搬外部檔） |
+| 內嵌事件屬性 | **零**（`on*=` 屬性 grep 無命中；事件全走 `addEventListener`／`el.onclick=` 指派） | — |
+| `javascript:`／`<img>`／`<link>`／`@import`／`url()`／`<object>`／`<form>` | 皆無 | `img-src 'self' data:`（預留）、`object-src 'none'`、`base-uri 'none'` |
+| `style=` 屬性 | 85 處（卡片內距等） | `style-src 'self' 'unsafe-inline'` |
+| iframe | `#dailyFrame` 載同源 `daily-brief.html`；`postMessage` 高度回報有 `e.origin === location.origin` 檢查 | `frame-src 'self'`；**該文件不受本 meta 管轄**（自身無 CSP，由產製 session 產出，外連只有新聞來源 `<a>`，`:459` 一個內嵌 script） |
+| fetch 目標 origin | 同源 `news.json`／`daily-brief.html`；`raw.githubusercontent.com`（taiwan-flow-live-v2 morning／us／daysummary、postmkt analyses）；`taiwan-flow-v2.shihpc.workers.dev`（/fundamentals /chips /technical /uswatch /usersync）；`api.anthropic.com`（callClaude）；`api.github.com`（ghSaveAnalysis 寫 postmkt、loadSiteVer） | `connect-src` 白名單恰為此 5 個 |
+| 純導覽外連 | Yahoo 技術分析（`linkifyStocks`／新聞連結）、GitHub、Hub；皆 `target="_blank" rel="noopener"` | 不受 CSP 限制（無 `navigate-to`） |
+
+**`innerHTML` 拼字串（16 處）逃逸稽核**：不可信輸入全部過 `esc()`——新聞標題／來源／連結
+（`newsItem`）、來源面板（`renderSrcPanel`）、美股表（`usHtml`／`loadUsWatch`）、晨報籌碼名單
+（`chipsHtml`）、個股追蹤各表（`trackChip`／`trackNewsHtml`／`trackHoldHtml`／`techState` 等）、雲端
+歷史 meta。LLM 輸出走三站同步的 `mdToHtml`（`esc2` 逃 `&<>`，只放進元素內容、不進屬性）＋
+`linkifyStocks`（href 只由 regex 命中的數字代號組成）。**未逃逸但可接受**：①`newsItem` 的
+`class="badge ${n.impact}"`——值來自自家 `build_news.classify_impact`，值域固定 market/heavy/stock；
+②`gapHtml`／`chipsHtml`／`flowSumHtml`／`trackFinHtml` 的數值欄（`g.gap`、`x.div`、`toFixed`）——
+來自自家 repo 的 JSON、非字串路徑；③`renderStats` 的 `TDAYS`（自家 `news.json` 的 `YYYY-MM-DD`）。
+這三類的信任邊界是「自家管線產出」，若日後改讀第三方 JSON 要補 `esc()`。
+
 ## 每日晨報產製規範（產製 session 必讀）
 
 `daily-brief.html`／`daily-brief-card.json` 由雲端排程 session 每晨產製。以下規範
