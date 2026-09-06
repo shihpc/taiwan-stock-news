@@ -199,6 +199,20 @@
 </div>
 
 <script>
+// ---- 快取策略（2026-09-06 批次二 #1）----
+// 舊寫法在每個資料 URL 後掛 ?t=Date.now() 破快取：瀏覽器與 CDN 一律 miss、每次整包重抓。
+// 改法：①同源檔（news.json）與 raw.githubusercontent 檔走 fetch(url,{cache:"no-cache"})＝
+// 每次向伺服器做「條件式驗證」（If-None-Match／If-Modified-Since），沒變就回 304 只走 header；
+// ②Worker 端點自己回 Cache-Control（/fundamentals、/chips、/technical 為 public,max-age=1800、
+// /uswatch 為 300；2026-09-06 curl 實測），直接交給瀏覽器快取、不再破；③晨報 iframe 不帶
+// query，走一般文件快取（ETag 驗證）。api.github.com 的 loadSiteVer 本來就沒破快取、不動。
+// 回退開關：CACHE_BUST=true 即恢復全部 ?t=Date.now()（no-cache 仍保留，兩者不衝突）。
+// 殘留限制：GitHub Pages CDN 回 max-age=600、raw.githubusercontent.com 回 max-age=300
+//（2026-09-06 curl 實測），條件式驗證只驗到 CDN 邊緣，剛 push 的檔最多仍晚 10／5 分鐘可見
+//（見 README「前端快取策略」節）。
+const CACHE_BUST = false;
+const bust = u => CACHE_BUST ? u + (u.includes("?") ? "&" : "?") + "t=" + Date.now() : u;
+const fetchFresh = u => fetch(bust(u), { cache: "no-cache" });
 const fmtDate = s => (s || "").slice(0, 16).replace("T", " ");
 // generated_at 顯示：解析 ISO（相容舊 UTC 尾綴 Z／+00:00 與新台北 +08:00）後一律轉台北時間到分
 const fmtGenTaipei = s => {
@@ -411,7 +425,7 @@ function renderList(){
 
 async function load(){
   try{
-    const r = await fetch("news.json?t=" + Date.now());
+    const r = await fetchFresh("news.json");
     if (!r.ok) throw new Error(r.status);
     DATA = await r.json();
     TDAYS = (DATA.trading_days || []).slice().sort();
@@ -509,9 +523,9 @@ async function loadMorning(){
   if (MORNING && US) { renderMorning(); return; }
   try{
     const [rm, ru, rd] = await Promise.all([
-      fetch(V2_BASE + "/morning.json?t=" + Date.now()),
-      fetch(V2_BASE + "/us.json?t=" + Date.now()),
-      fetch(V2_BASE + "/daysummary/latest.json?t=" + Date.now()).catch(() => null),
+      fetchFresh(V2_BASE + "/morning.json"),
+      fetchFresh(V2_BASE + "/us.json"),
+      fetchFresh(V2_BASE + "/daysummary/latest.json").catch(() => null),
     ]);
     MORNING = rm.ok ? await rm.json() : null;
     US = ru.ok ? await ru.json() : null;
@@ -972,7 +986,7 @@ let cloudOpen = null;
 function cloudLoadHist(){
   CLOUD_HIST = "loading";
   const files = twDayList(3).map(d => ({ file:`${CLOUD_KIND}-${d}.json`, day:d }));
-  Promise.all(files.map(f => fetch(CLOUD_RAW + f.file + "?t=" + Date.now())
+  Promise.all(files.map(f => fetchFresh(CLOUD_RAW + f.file)
       .then(r => r.ok ? r.json() : null).catch(() => null)))
     .then(res => {
       const items = [];
@@ -1042,7 +1056,7 @@ document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
     track: "個股追蹤（基本面／籌碼面／技術面三分頁）：自選股＋持股診斷股的每日新聞、每月營收、每季財報、法人籌碼與技術指標。資料經 taiwan-flow-live-v2 Worker 即時代理 FinMind。非投資建議。",
   };
   document.getElementById("pageSub").textContent = SUBS[tab] || SUBS.news;
-  if (tab === "daily") { const f = document.getElementById("dailyFrame"); if (!f.src) f.src = "daily-brief.html?t=" + Date.now(); }
+  if (tab === "daily") { const f = document.getElementById("dailyFrame"); if (!f.src) f.src = bust("daily-brief.html"); }
   if (tab === "morning") loadMorning();
   if (tab === "insight") renderInsight();
   if (tab === "track") loadTrack();
@@ -1071,12 +1085,14 @@ const TRK_NEW_DAYS = 14;                 // 月營收公布日在近 N 日內 �
 const TRACK = { sel: null, view: "fund", data: {}, err: {}, loading: false };
 // 第二批：籌碼面（走 v2 Worker /chips 即時代理，前端絕不碰 FinMind token）。籌碼較重（7 個
 // dataset），採「選中股 + 切到籌碼面分頁」時才逐股 lazy 取，非整批預抓；每股結果快取於本頁。
+// Worker 三端點（/fundamentals、/chips、/technical）自帶 Cache-Control: public,max-age=1800
+//（2026-09-06 curl 實測），這裡不再掛 ?t= 破快取，讓瀏覽器在 30 分內直接命中（見頂端快取策略註解）。
 const CHIPS = { data: {}, err: {}, loading: {} };
 async function loadChips(c){
   if (!c || (c in CHIPS.data) || (c in CHIPS.err) || CHIPS.loading[c]) return;
   CHIPS.loading[c] = true; renderTrack();
   try{
-    const r = await fetch(`${USW_WORKER}/chips?id=${encodeURIComponent(c)}&t=${Date.now()}`);
+    const r = await fetch(bust(`${USW_WORKER}/chips?id=${encodeURIComponent(c)}`));
     const j = await r.json();
     if (j && j.error) CHIPS.err[c] = j.error; else if (j && j.id) CHIPS.data[c] = j; else CHIPS.err[c] = "查無資料";
   }catch(e){ CHIPS.err[c] = "載入失敗（Worker 無回應）"; }
@@ -1089,7 +1105,7 @@ async function loadTech(c){
   if (!c || (c in TECH.data) || (c in TECH.err) || TECH.loading[c]) return;
   TECH.loading[c] = true; renderTrack();
   try{
-    const r = await fetch(`${USW_WORKER}/technical?id=${encodeURIComponent(c)}&t=${Date.now()}`);
+    const r = await fetch(bust(`${USW_WORKER}/technical?id=${encodeURIComponent(c)}`));
     const j = await r.json();
     if (j && j.error) TECH.err[c] = j.error; else if (j && j.id) TECH.data[c] = j; else TECH.err[c] = "查無資料";
   }catch(e){ TECH.err[c] = "載入失敗（Worker 無回應）"; }
@@ -1116,7 +1132,7 @@ async function loadTrack(){
   if (!need.length) return;
   TRACK.loading = true; renderTrack();
   try{
-    const r = await fetch(`${USW_WORKER}/fundamentals?ids=${need.join(",")}&t=${Date.now()}`);
+    const r = await fetch(bust(`${USW_WORKER}/fundamentals?ids=${need.join(",")}`));
     const j = await r.json();
     for (const s of (j.stocks || [])){ if (s && s.error) TRACK.err[s.id] = s.error; else if (s && s.id) TRACK.data[s.id] = s; }
     for (const id of need) if (!(id in TRACK.data) && !(id in TRACK.err)) TRACK.err[id] = "查無資料";

@@ -155,6 +155,26 @@ python tests/test_incremental.py                               # 增量正確性
 - **守門**：`tests/test_incremental.py` 用假語料驗證「增量輸出 == 全量輸出」，含
   台北日跨切片、新進池個股全窗補抓、快取段與新抓段不重複三個情境（CI: `tests` workflow）。
 
+## 前端快取策略（2026-09-06）
+
+`index.html` 原本在每個資料 URL 後掛 `?t=Date.now()` 破快取，瀏覽器與 CDN 一律 miss、每次整包
+重抓。現改為（開關與說明在 `index.html` script 頂端「快取策略」註解）：
+
+| 資料源 | 改法 | 依據 |
+|------|------|------|
+| 同源 `news.json` | `fetch(url,{cache:"no-cache"})`（`fetchFresh`）＝每次條件式驗證，沒變回 304 | GitHub Pages 回 `etag`＋`cache-control: max-age=600`（2026-09-06 curl 實測） |
+| raw.githubusercontent（morning／us／daysummary／postmkt analyses） | 同上 | raw 回 `etag`＋`max-age=300`（同日實測） |
+| 晨報 iframe `daily-brief.html` | 不帶 query，走一般文件快取（ETag 驗證） | 同 Pages |
+| Worker `/fundamentals`／`/chips`／`/technical` | 去掉 `&t=`，交給瀏覽器快取 | Worker 回 `Cache-Control: public, max-age=1800`（`worker/src/index.js` 三端點；同日實測） |
+| `api.github.com`（`loadSiteVer`） | 不動（本來就沒破快取） | — |
+
+- **回退開關**：`index.html` 的 `const CACHE_BUST = false;` 改 `true` 即恢復全部 `?t=` 破快取。
+- **殘留限制（刻意接受）**：條件式驗證只驗到 CDN 邊緣——GitHub Pages CDN 的 `max-age=600`、
+  raw 的 `max-age=300` 仍在，剛 push 的 `news.json`／晨報最多仍晚 10 分鐘（raw 檔 5 分鐘）
+  才看得到；舊寫法用 query 繞過 CDN 才能「秒見」，這是本次用流量換來的取捨。
+- 本機驗證（2026-09-06）：Playwright 對 `python -m http.server` 載入兩次，第二次 `news.json`
+  回 304（http.server 支援 `If-Modified-Since`）。
+
 ## 快速接手（2026-07-12）
 
 - **時區修正（2026-07-20）**：`build_news.py` 的 `news_calendar_days()`／`recent_trading_days()`

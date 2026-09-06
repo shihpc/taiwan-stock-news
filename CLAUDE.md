@@ -48,6 +48,9 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
   增量規劃（:355-386）→ 逐檔逐日抓 → `news_curation.py` 白名單過濾 → 依股分組去重 → 寫 `news.json`
 - `news_curation.py`：來源白名單／標題正規化／去重（Python 端事實來源）
 - `index.html`、`news.json`、`data/`、`tests/`
+  - `index.html` 資料抓取一律走 `fetchFresh()`（`cache:"no-cache"` 條件式驗證）或 `bust()`，
+    回退開關 `CACHE_BUST`（script 頂端「快取策略」註解；細節與 CDN `max-age` 殘留見 README
+    「前端快取策略」節，2026-09-06）
 - `.github/workflows/`：`build-news.yml` ＋ `test.yml` ＋ `canon.yml`
   （後者只守 CLAUDE.md 頂端的 CANON 區塊，不碰資料管線）
 
