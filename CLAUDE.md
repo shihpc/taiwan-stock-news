@@ -72,7 +72,7 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 3. **三站同步函式**：`index.html:641` 明寫「postmkt / taiwan-flow-live-v2 /
    taiwan-stock-news，修改請三站同步」（另見 :729-730、:846），與 postmkt CLAUDE.md
    第 2 條是同一組約定。**第五組（2026-08-27 起）**：費用估算 `insightCostText`／
-   `INSIGHT_PRICES`／`USD_TWD`（`index.html:858-877`）亦為三站逐字副本。
+   `INSIGHT_PRICES`／`USD_TWD`（`index.html:858-880`）亦為三站逐字副本。
    另有一組**四站同步但非逐字**的 `loadSiteVer()`＋footer `#siteVer`（`index.html:197`、
    `:1508`）：本站 sessionStorage key `news_site_ver`、時間走內嵌 `toLocaleString("sv-SE")`
    （postmkt 走 `fmtGenTaipei`），各站打自己 repo 的
