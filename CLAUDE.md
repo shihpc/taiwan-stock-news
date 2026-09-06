@@ -51,6 +51,10 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
   - `index.html` 資料抓取一律走 `fetchFresh()`（`cache:"no-cache"` 條件式驗證）或 `bust()`，
     回退開關 `CACHE_BUST`（script 頂端「快取策略」註解；細節與 CDN `max-age` 殘留見 README
     「前端快取策略」節，2026-09-06）
+  - 手機適配（2026-09-06）：`.mtable` 全表 `nowrap`，**新增表格一律包 `<div class="tblwrap">`**
+    （`overflow-x:auto`，同 `daily-brief.html` 的 `.poswrap`）；`.tabs` 已 `flex-wrap`，
+    `@media (max-width:640px)` 收縮外距與字級。驗收慣例：Playwright 375／390／1280 三寬度
+    5 tab（含個股追蹤三分頁）`scrollWidth <= innerWidth`
 - `.github/workflows/`：`build-news.yml` ＋ `test.yml` ＋ `canon.yml`
   （後者只守 CLAUDE.md 頂端的 CANON 區塊，不碰資料管線）
 

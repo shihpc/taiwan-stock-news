@@ -83,7 +83,7 @@
   .empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:.95rem}
   footer{margin-top:32px;color:var(--muted);font-size:.78rem;text-align:center;line-height:1.7}
   footer a{color:var(--accent);text-decoration:none}
-  .tabs{display:flex;gap:6px;margin:14px 0 4px}
+  .tabs{display:flex;gap:6px;margin:14px 0 4px;flex-wrap:wrap}
   .tab{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 16px;
     font-size:.88rem;color:var(--muted);cursor:pointer;user-select:none;transition:.15s}
   .tab:hover{border-color:#33507e}
@@ -93,6 +93,8 @@
   .mcard b{color:var(--txt)}
   .up{color:#ef5b5b}.down{color:#2fbf71}.mut{color:var(--muted)}
   .tst{color:var(--txt);font-weight:600}  /* 技術面中性狀態詞：中性色，不用紅綠避免暗示買賣 */
+  /* .mtable 全表 nowrap，窄螢幕會撐破版面 → 一律包在 .tblwrap 內橫向捲動（同 daily-brief.html 的 .poswrap，2026-09-06） */
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
   .mtable{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:4px}
   .mtable th,.mtable td{padding:5px 6px;text-align:right;border-bottom:1px solid rgba(36,53,86,.5);white-space:nowrap}
   .mtable th:first-child,.mtable td:first-child{text-align:left}
@@ -144,6 +146,20 @@
   .trk-vt{cursor:pointer;padding:6px 16px}
   .msection2{margin:16px 2px 5px;font-size:.9rem;font-weight:700;color:var(--muted)}
   .msection2::before{content:"·";margin-right:5px}
+  /* 手機適配（2026-09-06）：縮外距與字級；表格由 .tblwrap 橫向捲動、tab 列 flex-wrap 換行 */
+  @media (max-width:640px){
+    body{padding:12px 10px 48px}
+    header h1{font-size:1.25rem}
+    .sub{font-size:.8rem}
+    .tab{padding:7px 11px;font-size:.82rem}
+    .stat{padding:5px 8px;font-size:.72rem}
+    .stock{padding:11px 12px;border-radius:12px}
+    .mcard{padding:11px 12px;font-size:.88rem}
+    .insight-card{padding:12px 13px;font-size:.88rem}
+    .mtable{font-size:.78rem}
+    .mtable th,.mtable td{padding:4px 5px}
+    .item a.title{font-size:.88rem}
+  }
 </style>
 </head>
 <body>
@@ -472,14 +488,14 @@ function usHtml(u){
   const ampCell = amp => amp==null ? '<span class="mut">—</span>' : amp.toFixed(2)+"%";
   for (const g of (u.groups || [])) {
     const isAdr = (g.g||"").includes("ADR");
-    h += `<div class="msection">${esc(g.g)}</div><table class="mtable"><thead><tr>`
+    h += `<div class="msection">${esc(g.g)}</div><div class="tblwrap"><table class="mtable"><thead><tr>`
       + `<th>${esc(g.g)}</th><th>收盤</th><th>漲跌%</th><th>量比</th><th>振幅</th>${isAdr?"<th>ADR溢價</th>":""}</tr></thead><tbody>`
       + (g.rows||[]).map(r => `<tr><td>${esc(r.n)}<span class="nm">${esc((r.s||"").replace("^",""))}</span></td>`
         + `<td>${r.c!=null?r.c.toLocaleString("en-US"):"—"}</td><td>${sgn(r.chg, pct(r.chg))}</td>`
         + `<td>${vrCell(r.vr)}</td><td>${ampCell(r.amp)}</td>`
         + (isAdr ? `<td>${r.prem!=null?sgn(r.prem,(r.prem>0?"+":"")+r.prem.toFixed(2)+"%"):'<span class="mut">—</span>'}</td>` : "")
         + `</tr>`).join("")
-      + `</tbody></table>`;
+      + `</tbody></table></div>`;
   }
   return h;
 }
@@ -631,7 +647,7 @@ async function loadUsWatch(){
   const nameMap = {};
   for (const g of ((US && US.groups) || [])) for (const r of (g.rows||[])) nameMap[r.s] = r.n;
   const nameOf = s => nameMap[s] || USW_NAMES[s] || null;
-  box.innerHTML = `<table class="mtable"><thead><tr><th>自選</th><th>收盤</th><th>漲跌%</th><th>量比</th><th>振幅</th><th></th></tr></thead><tbody>`
+  box.innerHTML = `<div class="tblwrap"><table class="mtable"><thead><tr><th>自選</th><th>收盤</th><th>漲跌%</th><th>量比</th><th>振幅</th><th></th></tr></thead><tbody>`
     + rows.map(r => {
       const nm = nameOf(r.s);
       const first = r.err
@@ -645,7 +661,7 @@ async function loadUsWatch(){
       + `<td>${r.amp==null?'—':r.amp.toFixed(2)+"%"}</td>`
       + `<td><span style="cursor:pointer;color:var(--muted)" data-uswdel="${esc(r.s)}">✕</span></td></tr>`;
     }).join("")
-    + `</tbody></table>`;
+    + `</tbody></table></div>`;
 }
 document.addEventListener("click", e => {
   const d = e.target.closest("[data-uswdel]");
@@ -1336,14 +1352,14 @@ function trackFinHtml(c, d){
   const badge = ` <span class="chip" style="padding:2px 8px;font-size:.7rem;color:#ef5b5b;border-color:#ef5b5b">新季別</span>`;
   let h = h0 + `<div class="mcard"><div style="font-size:.92rem;margin-bottom:6px"><b>最新季別 ${esc(last.q)}</b>${isNew ? badge : ""}</div>`;
   h += trackDividendRow(d.dividend, d.dy);
-  h += `<table class="mtable"><thead><tr><th>項目</th><th>本季</th><th>上季 QoQ</th><th>去年同季 YoY</th><th>近${Math.min(arr.length, 8)}季</th></tr></thead><tbody>`;
+  h += `<div class="tblwrap"><table class="mtable"><thead><tr><th>項目</th><th>本季</th><th>上季 QoQ</th><th>去年同季 YoY</th><th>近${Math.min(arr.length, 8)}季</th></tr></thead><tbody>`;
   for (const [label, key, fmt, isPp] of rows){
     h += `<tr><td>${esc(label)}</td><td><b>${fmt(last[key])}</b></td>`
       + `<td>${fmt(prevQ ? prevQ[key] : null)}<br>${chgCell(last.qoq ? last.qoq[key] : null, isPp)}</td>`
       + `<td>${fmt(yoyQ ? yoyQ[key] : null)}<br>${chgCell(last.yoy ? last.yoy[key] : null, isPp)}</td>`
       + `<td>${trackSpark(arr.slice(-8).map(x => x[key]))}</td></tr>`;
   }
-  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:8px">單季值；季財報無明確公布日，「新季別」以最新季別 vs 前次瀏覽已見季別判定`
+  h += `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:8px">單季值；季財報無明確公布日，「新季別」以最新季別 vs 前次瀏覽已見季別判定`
     + `${firstSeen ? "（本檔首次瀏覽不標新）" : ""}。三率＝各項÷營收；QoQ/YoY 中三率為百分點(pp)差、其餘為相對%。以上為歷史統計，非投資建議。</div></div>`;
   return h;
 }
@@ -1374,7 +1390,7 @@ function trackInstHtml(inst){
   if (!inst) return h0 + `<div class="mcard mut">無三大法人資料。</div>`;
   const rows = [["外資", "foreign"], ["投信", "trust"], ["自營商", "dealer"]];
   const lastD = (inst.foreign && inst.foreign.length) ? inst.foreign[inst.foreign.length - 1].d : "";
-  let h = h0 + `<div class="mcard"><table class="mtable"><thead><tr><th>法人</th><th>最新日淨</th><th>連續</th><th>近5日合計</th><th>近${Math.min((inst.foreign || []).length, 20)}日</th></tr></thead><tbody>`;
+  let h = h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><thead><tr><th>法人</th><th>最新日淨</th><th>連續</th><th>近5日合計</th><th>近${Math.min((inst.foreign || []).length, 20)}日</th></tr></thead><tbody>`;
   for (const [label, key] of rows){
     const arr = inst[key] || [], last = arr.length ? arr[arr.length - 1].v : null;
     h += `<tr><td>${label}</td><td>${sgn(last, lot(last))}</td>`
@@ -1382,7 +1398,7 @@ function trackInstHtml(inst){
       + `<td>${sgn(inst.sum5 ? inst.sum5[key] : null, lot(inst.sum5 ? inst.sum5[key] : null))}</td>`
       + `<td>${trackSpark(arr.map(x => x.v))}</td></tr>`;
   }
-  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">淨買賣＝買−賣（張）；買超紅、賣超綠。資料日 ${esc(lastD || "—")}。</div></div>`;
+  h += `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">淨買賣＝買−賣（張）；買超紅、賣超綠。資料日 ${esc(lastD || "—")}。</div></div>`;
   return h;
 }
 
@@ -1390,11 +1406,11 @@ function trackInstHtml(inst){
 function trackMarginHtml(m){
   const h0 = `<div class="msection2">融資融券</div>`;
   if (!m) return h0 + `<div class="mcard mut">無融資融券資料。</div>`;
-  let h = h0 + `<div class="mcard"><table class="mtable"><tbody>`
+  let h = h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`
     + `<tr><td>融資餘額</td><td><b>${lotAbs(m.bal)}</b></td><td>${sgn(m.chg, lot(m.chg))}</td></tr>`
     + `<tr><td>融券餘額</td><td><b>${lotAbs(m.short_bal)}</b></td><td>${sgn(m.short_chg, lot(m.short_chg))}</td></tr>`
     + `<tr><td>券資比</td><td colspan="2"><b>${m.credit_ratio == null ? "—" : m.credit_ratio.toFixed(2) + "%"}</b> <span class="mut" style="font-size:.72rem">（融券÷融資，軋空參考）</span></td></tr>`
-    + `</tbody></table>`;
+    + `</tbody></table></div>`;
   if (m.series && m.series.length > 1)
     h += `<div class="mut" style="font-size:.72rem;margin-top:8px">近 ${m.series.length} 日融資餘額趨勢</div>${trackSpark(m.series.map(x => x.v))}`;
   h += `<div class="mut" style="font-size:.72rem;margin-top:6px">餘額增紅減綠。資料日 ${esc(m.date || "—")}。</div></div>`;
@@ -1404,24 +1420,24 @@ function trackMarginHtml(m){
 // 借券賣出 + 當沖比
 function trackFlowHtml(sbl, dt){
   const h0 = `<div class="msection2">借券賣出／當沖</div>`;
-  let h = h0 + `<div class="mcard"><table class="mtable"><tbody>`;
+  let h = h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`;
   if (sbl) h += `<tr><td>借券賣出餘額</td><td><b>${lotAbs(sbl.bal)}</b></td><td>${sgn(sbl.chg, lot(sbl.chg))}</td></tr>`;
   else h += `<tr><td>借券賣出餘額</td><td colspan="2" class="mut">無資料</td></tr>`;
   if (dt) h += `<tr><td>當沖比</td><td colspan="2"><b>${dt.ratio == null ? "—" : dt.ratio.toFixed(2) + "%"}</b> <span class="mut" style="font-size:.72rem">（當沖量÷成交量）</span></td></tr>`;
   else h += `<tr><td>當沖比</td><td colspan="2" class="mut">無資料</td></tr>`;
-  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">借券餘額增紅減綠。資料日 ${esc((sbl && sbl.date) || (dt && dt.date) || "—")}。</div></div>`;
+  h += `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">借券餘額增紅減綠。資料日 ${esc((sbl && sbl.date) || (dt && dt.date) || "—")}。</div></div>`;
   return h;
 }
 
 // 持股結構：外資持股率＋區間變化、千張大戶持股比＋週變化（標 T-1 週；付費層取不到降級標註）
 function trackHoldHtml(fh, big, bigNote){
   const h0 = `<div class="msection2">持股結構</div>`;
-  let h = h0 + `<div class="mcard"><table class="mtable"><tbody>`;
+  let h = h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`;
   if (fh) h += `<tr><td>外資持股率</td><td><b>${fh.ratio == null ? "—" : fh.ratio.toFixed(2) + "%"}</b></td><td>${sgn(fh.chg, pp(fh.chg))}</td></tr>`;
   else h += `<tr><td>外資持股率</td><td colspan="2" class="mut">無資料</td></tr>`;
   if (big) h += `<tr><td>千張大戶持股比</td><td><b>${big.ratio == null ? "—" : big.ratio.toFixed(2) + "%"}</b></td><td>${sgn(big.wchg, pp(big.wchg))}</td></tr>`;
   else h += `<tr><td>千張大戶持股比</td><td colspan="2" class="mut">${esc(bigNote || "無資料")}</td></tr>`;
-  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">外資持股率為區間 pp 變化，資料日 ${esc((fh && fh.date) || "—")}`;
+  h += `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">外資持股率為區間 pp 變化，資料日 ${esc((fh && fh.date) || "—")}`;
   if (big) h += `；<b>千張大戶為週資料</b>（資料週 ${esc(big.date)}，週變化為對上一週 pp 差）`;
   h += `。以上為歷史統計現況描述，非投資建議。</div></div>`;
   return h;
@@ -1449,68 +1465,68 @@ function trackMaHtml(m){
   const h0 = `<div class="msection2">均線（MA）</div>`;
   if (!m) return h0 + `<div class="mcard mut">資料不足。</div>`;
   const rows = [["MA5", m.ma5, m.dist5], ["MA10", m.ma10, m.dist10], ["MA20", m.ma20, m.dist20], ["MA60", m.ma60, m.dist60]];
-  let h = h0 + `<div class="mcard"><table class="mtable"><thead><tr><th>均線</th><th>數值</th><th>現價距離</th></tr></thead><tbody>`;
+  let h = h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><thead><tr><th>均線</th><th>數值</th><th>現價距離</th></tr></thead><tbody>`;
   for (const [label, v, dist] of rows) h += `<tr><td>${label}</td><td>${v == null ? "—（資料不足）" : "<b>" + techNum(v) + "</b>"}</td><td>${dist == null ? "—" : techPct(dist)}</td></tr>`;
-  h += `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">排列狀態：${techState(m.arrange)}（多頭＝MA5>10>20>60；現價距離正紅負綠）。</div></div>`;
+  h += `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">排列狀態：${techState(m.arrange)}（多頭＝MA5>10>20>60；現價距離正紅負綠）。</div></div>`;
   return h;
 }
 // 2. KD（9,3,3）
 function trackKdHtml(kd){
   const h0 = `<div class="msection2">KD（9,3,3）</div>`;
   if (!kd) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
-  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+  return h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`
     + `<tr><td>K 值</td><td><b>${techNum(kd.k, 1)}</b></td><td rowspan="2" style="vertical-align:middle">${techState(kd.state)}</td></tr>`
     + `<tr><td>D 值</td><td><b>${techNum(kd.d, 1)}</b></td></tr>`
-    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">K/D 介於 0–100；>80 高檔、<20 低檔為數學區間描述。</div></div>`;
+    + `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">K/D 介於 0–100；>80 高檔、<20 低檔為數學區間描述。</div></div>`;
 }
 // 3. MACD（12,26,9）
 function trackMacdHtml(m){
   const h0 = `<div class="msection2">MACD（12,26,9）</div>`;
   if (!m) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
-  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+  return h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`
     + `<tr><td>DIF（快慢線差）</td><td><b>${techNum(m.dif)}</b></td></tr>`
     + `<tr><td>MACD（訊號線）</td><td><b>${techNum(m.macd)}</b></td></tr>`
     + `<tr><td>柱狀體（DIF−MACD）</td><td>${sgn(m.hist, techNum(m.hist))}</td></tr>`
-    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(m.state)}（柱狀正紅負綠；翻正/翻負＝跨零軸的數學描述）。</div></div>`;
+    + `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(m.state)}（柱狀正紅負綠；翻正/翻負＝跨零軸的數學描述）。</div></div>`;
 }
 // 4. RSI（5,10）
 function trackRsiHtml(r){
   const h0 = `<div class="msection2">RSI（5,10）</div>`;
   if (!r) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
-  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+  return h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`
     + `<tr><td>RSI5</td><td><b>${r.rsi5 == null ? "—（資料不足）" : techNum(r.rsi5, 1)}</b></td><td rowspan="2" style="vertical-align:middle">${techState(r.state)}</td></tr>`
     + `<tr><td>RSI10</td><td><b>${r.rsi10 == null ? "—（資料不足）" : techNum(r.rsi10, 1)}</b></td></tr>`
-    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">RSI 介於 0–100；>70 超買、<30 超賣為數學區間描述；背離不自動判定。</div></div>`;
+    + `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">RSI 介於 0–100；>70 超買、<30 超賣為數學區間描述；背離不自動判定。</div></div>`;
 }
 // 5. 布林通道（20,2）
 function trackBollHtml(b){
   const h0 = `<div class="msection2">布林通道（20,2）</div>`;
   if (!b) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
-  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+  return h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`
     + `<tr><td>上軌</td><td><b>${techNum(b.upper)}</b></td></tr>`
     + `<tr><td>中軌（MA20）</td><td><b>${techNum(b.mid)}</b></td></tr>`
     + `<tr><td>下軌</td><td><b>${techNum(b.lower)}</b></td></tr>`
     + `<tr><td>%b（通道位置）</td><td><b>${techNum(b.pb)}</b></td></tr>`
-    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(b.state)}（%b=1 觸上軌、0 觸下軌、0.5 中軌，為位置描述）。</div></div>`;
+    + `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(b.state)}（%b=1 觸上軌、0 觸下軌、0.5 中軌，為位置描述）。</div></div>`;
 }
 // 6. 量能
 function trackVolHtml(v){
   const h0 = `<div class="msection2">量能</div>`;
   if (!v) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
-  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+  return h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`
     + `<tr><td>近5日均量</td><td><b>${techLot(v.avg5)}</b></td></tr>`
     + `<tr><td>20日均量</td><td><b>${techLot(v.avg20)}</b></td></tr>`
     + `<tr><td>量能比（5日÷20日）</td><td><b>${techNum(v.ratio)}</b> 倍</td></tr>`
-    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(v.state)}（爆量＝比≥2 且價漲、量縮＝比≤0.5，為量能數學描述）。</div></div>`;
+    + `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">狀態：${techState(v.state)}（爆量＝比≥2 且價漲、量縮＝比≤0.5，為量能數學描述）。</div></div>`;
 }
 // 7. 距 52 週高/低
 function trackR52Html(r){
   const h0 = `<div class="msection2">距 52 週高/低</div>`;
   if (!r) return h0 + `<div class="mcard mut">—（資料不足）</div>`;
-  return h0 + `<div class="mcard"><table class="mtable"><tbody>`
+  return h0 + `<div class="mcard"><div class="tblwrap"><table class="mtable"><tbody>`
     + `<tr><td>52 週高</td><td><b>${techNum(r.high)}</b></td><td>距高 ${techPct(r.distHigh)}</td></tr>`
     + `<tr><td>52 週低</td><td><b>${techNum(r.low)}</b></td><td>距低 ${techPct(r.distLow)}</td></tr>`
-    + `</tbody></table><div class="mut" style="font-size:.72rem;margin-top:6px">波段相對位置（距高≤0、距低≥0，正紅負綠），為現況描述。</div></div>`;
+    + `</tbody></table></div><div class="mut" style="font-size:.72rem;margin-top:6px">波段相對位置（距高≤0、距低≥0，正紅負綠），為現況描述。</div></div>`;
 }
 // ==== 個股追蹤 結束 ====
 
