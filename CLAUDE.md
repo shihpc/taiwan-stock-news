@@ -37,7 +37,10 @@
 線上 https://shihpc.github.io/taiwan-stock-news/ 。5 個 tab：新聞／每日晨報／昨日市場
 （原「晨報」tab 更名）／摘要分析／個股追蹤（`index.html` tabs 區）。「每日晨報」tab 以
 iframe 載入同 repo 的 `daily-brief.html`——該檔由雲端排程 session 每日台北 07:30 產製並
-push 到 main，勿手動編輯。純靜態前端（單檔 `index.html`）＋ Python 管線。
+push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製覆蓋）；**改版例外**——版式／
+規範本身的變更本來就得手改該檔（前例 `f09d406`／`b41e5f7`／`0bb433f`），這種手改**必須同步
+更新下方「每日晨報產製規範」節**，否則隔日產製會照舊規範寫回去、改版被沖掉。
+純靜態前端（單檔 `index.html`）＋ Python 管線。
 
 ## 佈局
 
@@ -68,7 +71,13 @@ push 到 main，勿手動編輯。純靜態前端（單檔 `index.html`）＋ Py
    Worker 端算）。token 由 Worker 持有。
 3. **三站同步函式**：`index.html:641` 明寫「postmkt / taiwan-flow-live-v2 /
    taiwan-stock-news，修改請三站同步」（另見 :729-730、:846），與 postmkt CLAUDE.md
-   第 2 條是同一組約定。
+   第 2 條是同一組約定。**第五組（2026-08-27 起）**：費用估算 `insightCostText`／
+   `INSIGHT_PRICES`／`USD_TWD`（`index.html:858-877`）亦為三站逐字副本。
+   另有一組**四站同步但非逐字**的 `loadSiteVer()`＋footer `#siteVer`（`index.html:197`、
+   `:1508`）：本站 sessionStorage key `news_site_ver`、時間走內嵌 `toLocaleString("sv-SE")`
+   （postmkt 走 `fmtGenTaipei`），各站打自己 repo 的
+   `api.github.com/repos/shihpc/<repo>/commits/main`（免金鑰、限 60 req/hr/IP，失敗靜默隱藏）。
+   改行為四站一起改，但不強求逐字。清單正本在 `postmkt/CLAUDE.md` 第 2 條。
 4. **誠實原則（專案鐵律，逐字保留，`README.md:71`）**：分頁頂部固定免責卡
    「技術指標為現況描述、非買賣訊號，僅供參考」；狀態詞用中性色、不寫該買該賣、不做預測。
 
@@ -89,7 +98,11 @@ push 到 main，勿手動編輯。純靜態前端（單檔 `index.html`）＋ Py
 3. **歷史存檔只保留最近 7 期（近一週，2026-08-30 使用者裁定，取代原 14 期）**。
 4. **`daily-brief-card.json` 的 `quote` 欄**＝今日一句話的**濃縮版**：≤120 字、
    至多 3 句、單行純文字——不是網頁版全文照抄（LINE 長圖空間有限，渲染端會依句
-   分行，過長會被截斷）。
+   分行，過長會被截斷）。**本 repo 沒有任何自動守門在檢查這個字數**（`tests/` 只有
+   `test_incremental.py`，三支 workflow 也沒查）——只有這行規範文字在守，產製 session
+   自己要數。下游 taiwan-flow-live-v2 Worker 另有防禦層 `export function fxSplitQuote`
+   ＋`export const FX_QUOTE_MAX`（360 字）：超標會截到最近句尾並補「（全文見網頁版晨報）」，
+   **那是保險絲不是額度**，寫到 360 字仍然違規。
 
 ## 跨 repo 依賴
 
