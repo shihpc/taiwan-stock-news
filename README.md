@@ -155,6 +155,22 @@ python tests/test_incremental.py                               # 增量正確性
 - **守門**：`tests/test_incremental.py` 用假語料驗證「增量輸出 == 全量輸出」，含
   台北日跨切片、新進池個股全窗補抓、快取段與新抓段不重複三個情境（CI: `tests` workflow）。
 
+### 管線韌性（2026-09-06）
+
+- **共用 `requests.Session`**：所有 FinMind 請求走模組級 `_session()`（連線重用）。
+- **交易日 memoize**：`_fetch_trading_dates(start,end)` 掛 `lru_cache`、視窗固定 45 天，
+  `build_pool_from_finmind`（n=3）與 `main`（n=lookback）一班只打一次；例外不快取。
+- **`fetch_news_one` 重試一次**：非 200／連線例外／JSON 壞掉 → 退避 `RETRY_SLEEP`（2 秒）再試一次
+  （重試計入 Throttle）；兩次都失敗才回 `(records=[], ok=False)`，失敗路徑同樣 `sleep(FETCH_PAUSE)`。
+- **股票池／市值權重／交易日同日快取** `data/cache/pool_<YYYYMMDD>.json`（台北日粒度、
+  `.gitignore` 排除）：同日第二班起直接讀，省 6 個請求；`--full` 重建並覆寫、`--no-cache` 不讀不寫、
+  `--pool-csv` 不快取；池或權重為空不寫；舊日檔自動清。CI 靠 `build-news.yml` 的
+  `actions/cache/restore`＋`save`（key `news-pool-<台北日>-<run_id>`、restore-keys 取同日最近一次）跨 run 帶。
+  **取捨**：FinMind 當日法人約 17:00 後入庫，池在 21:37 `--full` 班前維持早班版本；新進池的檔
+  在該班全窗補抓，不會漏。
+- 守門：`tests/test_pipeline_resilience.py`（memoize 只打一次、重試一次後成功、兩次失敗回報失敗、
+  快取 roundtrip／清舊檔／`--no-cache`／`--full`），`python -m pytest tests/ -q`。
+
 ## 前端快取策略（2026-09-06）
 
 `index.html` 原本在每個資料 URL 後掛 `?t=Date.now()` 破快取，瀏覽器與 CDN 一律 miss、每次整包

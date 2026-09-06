@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 .env
+# 股票池／市值權重／交易日的同日快取（build_news.py），CI 走 actions/cache、不進 git
+data/cache/

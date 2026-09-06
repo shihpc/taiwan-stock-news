@@ -16,16 +16,25 @@
 #
 #  用法：
 #    FINMIND_TOKEN=xxx python build_news.py [--lookback 3] [--max-pool 150]
-#        [--hourly-budget 550] [--pool-csv <path or url>]
+#        [--hourly-budget 550] [--pool-csv <path or url>] [--full] [--no-cache]
+#
+#  韌性（2026-09-06 批次二 #4）：
+#   - 所有 FinMind 請求共用模組級 requests.Session（連線重用）
+#   - 交易日查詢 memoize（_fetch_trading_dates），一班只打一次
+#   - fetch_news_one 非 200／例外退避 RETRY_SLEEP 秒重試一次，失敗路徑也 sleep
+#   - 股票池／市值權重／交易日以「台北日」為粒度落盤快取 data/cache/pool_<YYYYMMDD>.json，
+#     同日第二班起直接讀（--full 重建並覆寫、--no-cache 不讀不寫）；舊日檔自動清
 # ============================================================
 
 import argparse
+import glob
 import io
 import json
 import logging
 import os
 import time
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 
 import requests
 import pandas as pd
@@ -37,6 +46,28 @@ logger = logging.getLogger("build_news")
 
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 FINMIND_URL = "https://api.finmindtrade.com/api/v4/data"
+
+# ── HTTP：模組級 Session（連線重用）＋重試參數（測試可改 0）──────────────
+_SESSION: requests.Session | None = None
+RETRY_SLEEP = 2.0     # fetch_news_one 失敗後退避秒數（只重試一次）
+FETCH_PAUSE = 0.05    # 每個請求之後的小停頓（成功／失敗路徑皆 sleep）
+
+
+def _session() -> requests.Session:
+    global _SESSION
+    if _SESSION is None:
+        _SESSION = requests.Session()
+    return _SESSION
+
+
+# ── 股票池／市值權重／交易日：台北日粒度落盤快取 ─────────────────────────
+# 每小時一班（一天 16 班）但這三樣一天內幾乎不變；快取後同日第二班起省掉
+# TaiwanStockInfo（全市場）＋3 個交易日法人＋市值權重＋交易日共 6 個請求。
+# 取捨（刻意）：FinMind 當日法人資料約 17:00 後才入庫，快取讓池在 21:37 的 --full
+# 備援班（會重建並覆寫快取）之前維持早班版本；新進池的檔會在該班全窗補抓，不會漏。
+# None＝停用（tests/test_incremental.py 用），CI 走 actions/cache 跨 run 帶（build-news.yml）。
+POOL_CACHE_DIR: str | None = "data/cache"
+POOL_CACHE_VERSION = 1
 
 # 台北時區（台灣無夏令時間，固定 UTC+8）
 TAIPEI_TZ = timezone(timedelta(hours=8))
@@ -115,7 +146,7 @@ def load_pool(pool_csv: str, max_pool: int) -> pd.DataFrame:
     """讀 scan_app.csv → 回傳 (code, name, industry) 池。"""
     if pool_csv.startswith("http"):
         logger.info(f"讀取股票池：{pool_csv}")
-        r = requests.get(pool_csv, timeout=30)
+        r = _session().get(pool_csv, timeout=30)
         r.raise_for_status()
         df = pd.read_csv(io.StringIO(r.text), dtype={"code": str})
     else:
@@ -140,7 +171,7 @@ def build_pool_from_finmind(max_pool: int) -> pd.DataFrame:
     邏輯與原 scan_app.csv 一致：TaiwanStockInfo 取名稱/產業分類，近3個交易日
     TaiwanStockInstitutionalInvestorsBuySell 算投信/外資連買天數，篩選
     (trust_days>=2 or foreign_days>=2) 且非ETF，依熱度(兩者天數合計)排序取前N。"""
-    r = requests.get(FINMIND_URL, params={"dataset": "TaiwanStockInfo", "token": FINMIND_TOKEN}, timeout=30)
+    r = _session().get(FINMIND_URL, params={"dataset": "TaiwanStockInfo", "token": FINMIND_TOKEN}, timeout=30)
     r.raise_for_status()
     name_map, ind_map, type_map = {}, {}, {}
     for row in r.json().get("data", []):
@@ -156,7 +187,7 @@ def build_pool_from_finmind(max_pool: int) -> pd.DataFrame:
     trust_days: dict[str, int] = {}
     foreign_days: dict[str, int] = {}
     for ds in recent_trading_days(3):
-        r = requests.get(FINMIND_URL, params={
+        r = _session().get(FINMIND_URL, params={
             "dataset": "TaiwanStockInstitutionalInvestorsBuySell",
             "start_date": ds, "end_date": ds, "token": FINMIND_TOKEN,
         }, timeout=30)
@@ -190,7 +221,7 @@ def fetch_market_value_weights() -> dict[str, float]:
     失敗時回傳空 dict，呼叫端 fallback 為排序時 weight_per 皆視為 0。"""
     start = (datetime.now(timezone.utc) - timedelta(days=10)).strftime("%Y-%m-%d")
     try:
-        r = requests.get(FINMIND_URL, params={
+        r = _session().get(FINMIND_URL, params={
             "dataset": "TaiwanStockMarketValueWeight",
             "start_date": start,
             "token": FINMIND_TOKEN,
@@ -220,21 +251,32 @@ def fetch_market_value_weights() -> dict[str, float]:
         return {}
 
 
+TRADING_DATE_WINDOW_DAYS = 45   # 交易日查詢的固定回看窗（n ≤ 12 都夠），固定才能讓 memoize 命中
+
+
+@lru_cache(maxsize=None)
+def _fetch_trading_dates(start: str, end: str) -> tuple[str, ...]:
+    """TaiwanStockTradingDate [start, end] 的交易日（升序）。lru_cache：同一班內
+    build_pool_from_finmind（n=3）與 main（n=lookback）都會查交易日，原本各打一次 API，
+    現在共用固定視窗、只打一次。例外不會被快取（下次呼叫會再試）。"""
+    r = _session().get(FINMIND_URL, params={
+        "dataset": "TaiwanStockTradingDate",
+        "start_date": start,
+        "end_date": end,
+        "token": FINMIND_TOKEN,
+    }, timeout=30)
+    data = r.json().get("data", [])
+    return tuple(sorted({str(d["date"])[:10] for d in data}))
+
+
 def recent_trading_days(n: int) -> list[str]:
     """近 n 個交易日（以 FinMind TaiwanStockTradingDate 為準，退回平日近似）。"""
     end = datetime.now(TAIPEI_TZ)
-    start = end - timedelta(days=n * 2 + 20)
+    start = end - timedelta(days=max(TRADING_DATE_WINDOW_DAYS, n * 2 + 20))
     try:
-        r = requests.get(FINMIND_URL, params={
-            "dataset": "TaiwanStockTradingDate",
-            "start_date": start.strftime("%Y-%m-%d"),
-            "end_date": end.strftime("%Y-%m-%d"),
-            "token": FINMIND_TOKEN,
-        }, timeout=30)
-        data = r.json().get("data", [])
-        dates = sorted({str(d["date"])[:10] for d in data})
+        dates = _fetch_trading_dates(start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"))
         if dates:
-            return dates[-n:]
+            return list(dates[-n:])
     except Exception as e:
         logger.warning(f"交易日 API 失敗，改用平日近似：{e}")
     out: list[str] = []
@@ -314,24 +356,88 @@ def fetch_news_one(stock_id: str, date: str, throttle: Throttle) -> tuple[list[d
     改成全量重抓之前，失敗只影響當班、下一班會重抓，是自癒的；增量把它變成
     沾黏的，所以這裡一定要回報失敗。
     """
-    throttle.wait()
+    params = {
+        "dataset": "TaiwanStockNews",
+        "data_id": stock_id,
+        "start_date": date,
+        "end_date": date,
+        "token": FINMIND_TOKEN,
+    }
+    last = ""
+    # 非 200／連線例外／JSON 解析失敗 → 退避 RETRY_SLEEP 秒重試一次（重試也計入 Throttle）；
+    # 兩次都失敗才回報失敗。失敗路徑同樣 sleep FETCH_PAUSE，避免連續失敗時緊接著猛打。
+    for attempt in range(2):
+        throttle.wait()
+        try:
+            r = _session().get(FINMIND_URL, params=params, timeout=30)
+            if r.status_code == 200:
+                data = r.json().get("data", [])
+                time.sleep(FETCH_PAUSE)
+                return data, True
+            last = f"HTTP {r.status_code}"
+        except Exception as e:
+            last = f"{type(e).__name__}: {e}"
+        if attempt == 0:
+            logger.warning(f"[{stock_id} {date}] {last}，{RETRY_SLEEP:g}s 後重試一次")
+            time.sleep(RETRY_SLEEP)
+    logger.warning(f"[{stock_id} {date}] 重試後仍失敗（{last}），視為抓取失敗")
+    time.sleep(FETCH_PAUSE)
+    return [], False
+
+
+def pool_cache_path(day8: str) -> str:
+    return os.path.join(POOL_CACHE_DIR or "", f"pool_{day8}.json")
+
+
+def load_pool_cache(day8: str, max_pool: int, lookback: int) -> dict | None:
+    """讀當日股票池快取。回 None 表示不可用（無檔／版本或參數不合／損壞）。
+    回 {"pool": DataFrame, "weights": dict, "tdays": list}。"""
+    if not POOL_CACHE_DIR:
+        return None
+    path = pool_cache_path(day8)
     try:
-        r = requests.get(FINMIND_URL, params={
-            "dataset": "TaiwanStockNews",
-            "data_id": stock_id,
-            "start_date": date,
-            "end_date": date,
-            "token": FINMIND_TOKEN,
-        }, timeout=30)
-        if r.status_code != 200:
-            logger.warning(f"[{stock_id} {date}] HTTP {r.status_code}，視為抓取失敗")
-            return [], False
-        data = r.json().get("data", [])
-        time.sleep(0.05)
-        return data, True
-    except Exception as e:
-        logger.warning(f"[{stock_id} {date}] 抓取失敗：{e}")
-        return [], False
+        with open(path, encoding="utf-8") as f:
+            c = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+    if (c.get("version") != POOL_CACHE_VERSION or c.get("day") != day8
+            or c.get("max_pool") != max_pool or not c.get("pool")):
+        logger.info(f"股票池快取 {path} 版本／參數不合，忽略")
+        return None
+    tdays = c.get("tdays") or []
+    if c.get("lookback") != lookback or len(tdays) != lookback:
+        tdays = recent_trading_days(lookback)      # 只有交易日要補查（1 個請求）
+    pool = pd.DataFrame(c["pool"], columns=["code", "name", "industry"])
+    pool["code"] = pool["code"].astype(str)
+    return {"pool": pool, "weights": {str(k): float(v) for k, v in (c.get("weights") or {}).items()},
+            "tdays": list(tdays)}
+
+
+def save_pool_cache(day8: str, max_pool: int, lookback: int,
+                    pool: pd.DataFrame, weights: dict[str, float], tdays: list[str]) -> None:
+    """寫當日快取並清掉其他日期的舊檔。池或權重為空（FinMind 未 settle／API 失敗）時
+    不寫——否則整天都會鎖在壞結果上。"""
+    if not POOL_CACHE_DIR:
+        return
+    if pool.empty or not weights:
+        logger.info("股票池或市值權重為空，不寫快取（下一班重建）")
+        return
+    os.makedirs(POOL_CACHE_DIR, exist_ok=True)
+    for old in glob.glob(os.path.join(POOL_CACHE_DIR, "pool_*.json")):
+        if os.path.basename(old) != f"pool_{day8}.json":
+            try:
+                os.remove(old)
+            except OSError:
+                pass
+    payload = {
+        "version": POOL_CACHE_VERSION, "day": day8, "max_pool": max_pool, "lookback": lookback,
+        "generated_at": datetime.now(TAIPEI_TZ).isoformat(timespec="seconds"),
+        "pool": pool[["code", "name", "industry"]].astype(str).to_dict(orient="records"),
+        "weights": weights, "tdays": list(tdays),
+    }
+    with open(pool_cache_path(day8), "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False)
+    logger.info(f"股票池快取已寫 {pool_cache_path(day8)}（{len(pool)} 檔、權重 {len(weights)} 檔）")
 
 
 def main() -> None:
@@ -349,16 +455,29 @@ def main() -> None:
                     help="增量模式下要重抓的「台北日」數（預設 1＝只重抓今天；"
                          "更早的日子沿用既有 news.json）")
     ap.add_argument("--full", action="store_true",
-                    help="忽略快取、全窗重抓（換過濾規則/池邏輯後跑一次）")
+                    help="忽略快取、全窗重抓（換過濾規則/池邏輯後跑一次）；股票池快取也重建並覆寫")
+    ap.add_argument("--no-cache", action="store_true",
+                    help="股票池／市值權重／交易日不讀不寫當日快取（data/cache/pool_<YYYYMMDD>.json）")
     args = ap.parse_args()
 
     if not FINMIND_TOKEN:
         logger.error("未設定 FINMIND_TOKEN 環境變數")
         raise SystemExit(1)
 
-    pool = load_pool(args.pool_csv, args.max_pool) if args.pool_csv else build_pool_from_finmind(args.max_pool)
-    weight_map = fetch_market_value_weights()
-    tdays = recent_trading_days(args.lookback)          # 交易日（trading_days 欄位、前端 TDAYS 依賴）
+    # ── 股票池／市值權重／交易日：同日快取（--full 重建並覆寫、--no-cache 不讀不寫、--pool-csv 不快取）──
+    day8 = taipei_today().strftime("%Y%m%d")
+    cached = None
+    if not args.full and not args.no_cache and not args.pool_csv:
+        cached = load_pool_cache(day8, args.max_pool, args.lookback)
+    if cached:
+        pool, weight_map, tdays = cached["pool"], cached["weights"], cached["tdays"]
+        logger.info(f"股票池／市值權重／交易日：讀同日快取 {pool_cache_path(day8)}（{len(pool)} 檔）")
+    else:
+        pool = load_pool(args.pool_csv, args.max_pool) if args.pool_csv else build_pool_from_finmind(args.max_pool)
+        weight_map = fetch_market_value_weights()
+        tdays = recent_trading_days(args.lookback)      # 交易日（trading_days 欄位、前端 TDAYS 依賴）
+        if not args.no_cache and not args.pool_csv:
+            save_pool_cache(day8, args.max_pool, args.lookback, pool, weight_map, tdays)
     dates = news_calendar_days(tdays)                   # 抓新聞用日曆日（含週末/假日）
     logger.info(f"時間範圍：{dates[0]} ~ {dates[-1]}（{len(tdays)} 個交易日、共 {len(dates)} 個日曆日）")
     throttle = Throttle(args.hourly_budget)

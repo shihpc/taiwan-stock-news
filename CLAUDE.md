@@ -46,6 +46,10 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 
 - `build_news.py`：主管線，流程註解在 :6-15 —— 自建股票池 → 市值權重 → 算窗 →
   增量規劃（:355-386）→ 逐檔逐日抓 → `news_curation.py` 白名單過濾 → 依股分組去重 → 寫 `news.json`
+  - 韌性（2026-09-06）：模組級 `_session()`、交易日 `_fetch_trading_dates` memoize、
+    `fetch_news_one` 退避重試一次、股票池／市值權重／交易日同日快取 `data/cache/pool_<YYYYMMDD>.json`
+    （`--full` 重建覆寫、`--no-cache` 繞過；不進 git，CI 走 `build-news.yml` actions/cache）。
+    細節見 README「管線韌性」節
 - `news_curation.py`：來源白名單／標題正規化／去重（Python 端事實來源）
 - `index.html`、`news.json`、`data/`、`tests/`
   - `index.html` 資料抓取一律走 `fetchFresh()`（`cache:"no-cache"` 條件式驗證）或 `bust()`，
@@ -168,6 +172,6 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 ```bash
 python tests/test_incremental.py   # 免 token 免網路，驗「增量輸出 == 全量輸出」六情境
                                    # （含抓取失敗不毒化 coverage、失敗後下一班自動補回）
-python -m pytest tests/ -q         # 晨報產製物守門 tests/test_daily_brief.py（免 token 免網路）
+python -m pytest tests/ -q         # 晨報產製物守門 test_daily_brief.py＋管線韌性 test_pipeline_resilience.py（免 token 免網路）
 python -m http.server 8000         # 前端本機驗證，5 個 tab 逐一點擊 console 零 error
 ```

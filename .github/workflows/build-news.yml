@@ -55,6 +55,23 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Taipei date (pool cache key)
+        id: tpe
+        run: echo "day=$(TZ=Asia/Taipei date +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
+      # 股票池／市值權重／交易日的同日快取（2026-09-06）：build_news.py 寫 data/cache/pool_<YYYYMMDD>.json
+      # （.gitignore 排除、不進 git），同日第二班起省掉 TaiwanStockInfo＋3 日法人＋市值權重＋交易日
+      # 共 6 個請求。跨 run 靠 actions/cache：key 帶 run_id 讓每班都存得了新版（同 key 不覆寫），
+      # restore-keys 前綴＝同一台北日最近一次；跨日自然 miss、當天首班重建。21:37 的 --full 備援班
+      # 會重建並覆寫（程式端 --full 不讀只寫）。快取被淘汰只是多打 6 個請求，無其他影響。
+      - name: Restore pool cache
+        uses: actions/cache/restore@v6
+        with:
+          path: data/cache
+          key: news-pool-${{ steps.tpe.outputs.day }}-${{ github.run_id }}
+          restore-keys: |
+            news-pool-${{ steps.tpe.outputs.day }}-
+
       - name: Build news.json
         env:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
@@ -73,6 +90,13 @@ jobs:
           fi
           python build_news.py --lookback "${{ github.event.inputs.lookback || '5' }}" \
             --hourly-budget 1400 $mode
+
+      - name: Save pool cache
+        if: always() && hashFiles('data/cache/pool_*.json') != ''
+        uses: actions/cache/save@v6
+        with:
+          path: data/cache
+          key: news-pool-${{ steps.tpe.outputs.day }}-${{ github.run_id }}
 
       - name: Commit news.json
         run: |

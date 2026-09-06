@@ -67,6 +67,7 @@ def taipei_to_utc_slice(tpe: str) -> str:
 
 def install_stubs(pool_codes: list[str]) -> None:
     bn.FINMIND_TOKEN = "stub"
+    bn.POOL_CACHE_DIR = None      # 股票池同日快取停用：本測試每個情境都換池（stub），快取命中會蓋掉 stub
     bn.recent_trading_days = lambda n: TDAYS[-n:]
     bn.fetch_market_value_weights = lambda: {c: 1.0 for c in pool_codes}
     bn.build_pool_from_finmind = lambda mx: pd.DataFrame(
