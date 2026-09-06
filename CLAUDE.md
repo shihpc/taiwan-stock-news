@@ -98,9 +98,11 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 3. **歷史存檔只保留最近 7 期（近一週，2026-08-30 使用者裁定，取代原 14 期）**。
 4. **`daily-brief-card.json` 的 `quote` 欄**＝今日一句話的**濃縮版**：≤120 字、
    至多 3 句、單行純文字——不是網頁版全文照抄（LINE 長圖空間有限，渲染端會依句
-   分行，過長會被截斷）。**本 repo 沒有任何自動守門在檢查這個字數**（`tests/` 只有
-   `test_incremental.py`，三支 workflow 也沒查）——只有這行規範文字在守，產製 session
-   自己要數。下游 taiwan-flow-live-v2 Worker 另有防禦層 `export function fxSplitQuote`
+   分行，過長會被截斷）。**自動守門（2026-09-06 起）**：`tests/test_daily_brief.py` 驗
+   quote 字數／句數／單行純文字／必要欄位，並連帶驗第 1 條正文 ≤5,000 漢字、第 3 條存檔
+   恰 7 期、postMessage script 契約；`test.yml` 的 paths 已納入 `daily-brief.html`／
+   `daily-brief-card.json`，**產製 session push 後 CI 就會跑這支測試，紅了要回頭改產製物**
+   （本機可先 `python -m pytest tests/ -q`）。下游 taiwan-flow-live-v2 Worker 另有防禦層 `export function fxSplitQuote`
    ＋`export const FX_QUOTE_MAX`（360 字）：超標會截到最近句尾並補「（全文見網頁版晨報）」，
    **那是保險絲不是額度**，寫到 360 字仍然違規。
 
@@ -133,5 +135,6 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 ```bash
 python tests/test_incremental.py   # 免 token 免網路，驗「增量輸出 == 全量輸出」六情境
                                    # （含抓取失敗不毒化 coverage、失敗後下一班自動補回）
-python -m http.server 8000         # 前端本機驗證，4 個 tab 逐一點擊 console 零 error
+python -m pytest tests/ -q         # 晨報產製物守門 tests/test_daily_brief.py（免 token 免網路）
+python -m http.server 8000         # 前端本機驗證，5 個 tab 逐一點擊 console 零 error
 ```

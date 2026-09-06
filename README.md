@@ -167,8 +167,9 @@ python tests/test_incremental.py                               # 增量正確性
   `data/daysummary/latest.json`（`flowSumHtml()`，插在籌碼卡與美股段之間；讀不到/解析失敗
   整段隱藏不擋晨報，卡片標「資料日 YYYY-MM-DD」）。上游為該 repo `daysummary.yml`（平日
   14:05 台北產出，口徑同其收盤總結卡）。
-- `index.html` 現有 3 個 tab：新聞、晨報（跨 repo 讀 taiwan-flow-live-v2 `data/morning.json`）、
-  **摘要分析**（2026-07-12 新增）。摘要分析為前端直呼 Claude，框架與 postmkt 逐字同源
+- `index.html` 現有 5 個 tab：新聞、每日晨報（iframe 載入 `daily-brief.html`）、昨日市場
+  （原「晨報」tab，跨 repo 讀 taiwan-flow-live-v2 `data/morning.json`）、**摘要分析**
+  （2026-07-12 新增）、個股追蹤（見上方三批）。摘要分析為前端直呼 Claude，框架與 postmkt 逐字同源
   （callClaude/mdToHtml/Opus 4.8-Sonnet 5 模型切換）；localStorage key
   `anthropic_key`/`insight_model` 與 postmkt、taiwan-flow-live-v2 同 origin 共用（設一次三站通用）。
 - insightGatherContext 彙整：大盤財金焦點新聞（impact=market 去重前12）、個股新聞熱度前15、
