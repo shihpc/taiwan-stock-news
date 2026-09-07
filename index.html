@@ -248,6 +248,7 @@ const LS_DAYS = "tsn_days", LS_DISABLED = "tsn_disabled";
 let DATA = null, TDAYS = [];
 const INSIGHT_MODELS = [["claude-opus-4-8","Opus 4.8（最佳判讀，約NT$3/次）"],["claude-sonnet-5","Sonnet 5（近Opus、約半價更快）"]];
 const state = {
+  tab: "news",          // 目前分頁（hash 路由的事實來源，見 showTab／currentHash）
   impact: "all",
   q: "",
   days: parseInt(localStorage.getItem(LS_DAYS) || "3", 10),
@@ -330,7 +331,7 @@ function renderDayChips(){
   document.getElementById("dayChips").innerHTML = uniq.map(n =>
     `<span class="chip day ${state.days===n?"active":""}" data-d="${n}">近${n}日</span>`).join("");
   document.querySelectorAll("#dayChips .chip").forEach(el =>
-    el.onclick = () => { state.days = parseInt(el.dataset.d,10); save(); renderImpactChips(); renderDayChips(); renderList(); });
+    el.onclick = () => { state.days = parseInt(el.dataset.d,10); save(); renderImpactChips(); renderDayChips(); renderList(); syncHash(); });
 }
 
 function setSrcPanel(open){
@@ -355,13 +356,13 @@ function renderSrcPanel(){
     cb.onchange = () => {
       const s = cb.dataset.s;
       if (cb.checked) state.disabled.delete(s); else state.disabled.add(s);
-      save(); renderImpactChips(); renderSrcPanel(); renderList();
+      save(); renderImpactChips(); renderSrcPanel(); renderList(); syncHash();
     });
   document.getElementById("selAll").onclick = () => {
-    state.disabled.clear(); save(); renderImpactChips(); renderSrcPanel(); renderList();
+    state.disabled.clear(); save(); renderImpactChips(); renderSrcPanel(); renderList(); syncHash();
   };
   document.getElementById("selNone").onclick = () => {
-    state.disabled = new Set(list.map(([s]) => s)); save(); renderImpactChips(); renderSrcPanel(); renderList();
+    state.disabled = new Set(list.map(([s]) => s)); save(); renderImpactChips(); renderSrcPanel(); renderList(); syncHash();
   };
   document.getElementById("srcClose").onclick = () => setSrcPanel(false);
 }
@@ -484,6 +485,7 @@ async function load(){
     DATA = await r.json();
     TDAYS = (DATA.trading_days || []).slice().sort();
     if (state.days > TDAYS.length) state.days = TDAYS.length;
+    applyHashSrc();     // hash 的 src 需要全體來源才能換算成 state.disabled，故在此才套用
     renderStats(DATA);
     renderImpactChips();
     renderDayChips();
@@ -495,7 +497,7 @@ async function load(){
   }
 }
 
-document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; renderList(); });
+document.getElementById("q").addEventListener("input", e => { state.q = e.target.value; renderList(); syncHash(); });
 document.getElementById("srcToggle").addEventListener("click", () =>
   setSrcPanel(!document.getElementById("srcPanel").classList.contains("open")));
 
@@ -1094,27 +1096,123 @@ document.addEventListener("keydown", e => {
   if (e.key==="Enter" && e.target.id==="ghTok"){ const b=document.querySelector("[data-gh-save]"); if(b) b.click(); }
 });
 
-document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
-  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
-  const tab = t.dataset.tab;
+// ---------- URL 狀態（hash 路由，2026-09-07 批次三 事 2）----------
+// 格式：#tab=<HASH_TABS 之一>&q=<搜尋字>&src=<啟用來源，逗號分隔>&days=<近 N 日>&code=<個股追蹤代號>
+// 只放非預設值（預設＝tab news／q 空／全來源啟用／days 3／未選代號 → hash 為空）。
+// 讀入一律白名單／型別檢查：tab 必在 HASH_TABS、days 為 1..HASH_DAYS_MAX 正整數（載入後另由
+// TDAYS 夾住）、code 為 4–6 位大寫英數、q／src 有長度與筆數上限；非法值靜默退回預設、不炸。
+// 值只進 state 與 input.value，之後由既有渲染路徑過 esc() 才進 DOM（src 名稱更只做比對、
+// 畫面上的來源字串一律來自 news.json 的 allSources()）。
+// 寫出走 history.replaceState（不塞歷史堆疊、不觸發 hashchange）；hashchange 只在外部改網址
+//（貼連結／手動編輯／返回到不同 hash）時進入。
+// 兩個刻意的限制：①src 是「啟用來源白名單」，要有 news.json 才知道全體來源，故 applyHash 只暫存
+// 在 hashSrc、由 load() 完成後套用，且**不寫回 localStorage**（不覆蓋使用者自己的來源偏好）；
+// ②晨報 iframe 的 src 只在首次切到該 tab 時設定一次，hash 變動不會重設它。
+const HASH_TABS = ["news", "daily", "morning", "insight", "track"];
+const HASH_CODE_RE = /^[0-9A-Z]{4,6}$/;
+const HASH_DEF_DAYS = 3, HASH_DAYS_MAX = 30, HASH_Q_MAX = 40, HASH_SRC_MAX = 200, HASH_SRC_N = 40;
+let hashSrc = null;   // 由 hash 帶入的啟用來源白名單；null＝未指定（用 localStorage 偏好）
+
+function parseHash(){
+  let p;
+  try{ p = new URLSearchParams(String(location.hash || "").replace(/^#/, "")); }catch(e){ return {}; }
+  const out = {};
+  const tab = p.get("tab");
+  if (tab && HASH_TABS.includes(tab)) out.tab = tab;
+  const q = String(p.get("q") || "").trim();
+  if (q) out.q = q.slice(0, HASH_Q_MAX);
+  const d = String(p.get("days") || "").trim();
+  if (/^[0-9]{1,3}$/.test(d)){ const n = parseInt(d, 10); if (n >= 1 && n <= HASH_DAYS_MAX) out.days = n; }
+  const src = String(p.get("src") || "").trim();
+  if (src && src.length <= HASH_SRC_MAX){
+    const a = [...new Set(src.split(",").map(s => s.trim()).filter(Boolean))].slice(0, HASH_SRC_N);
+    if (a.length) out.src = a;
+  }
+  const code = String(p.get("code") || "").trim().toUpperCase();
+  if (HASH_CODE_RE.test(code)) out.code = code;
+  return out;
+}
+
+// hashSrc → state.disabled（需要 DATA 才知道全體來源；load() 完成後會再呼叫一次）
+function applyHashSrc(){
+  if (!DATA) return;
+  if (hashSrc){
+    state.disabled = new Set(allSources().map(([s]) => s).filter(s => !hashSrc.includes(s)));
+  } else {
+    try{ state.disabled = new Set(JSON.parse(localStorage.getItem(LS_DISABLED) || "[]")); }
+    catch(e){ state.disabled = new Set(); }
+  }
+}
+
+// 把 hash 套進 state（載入時與 hashchange 時呼叫）
+function applyHash(){
+  const h = parseHash();
+  state.q = h.q || "";
+  const qEl = document.getElementById("q");
+  if (qEl) qEl.value = state.q;
+  state.days = h.days || parseInt(localStorage.getItem(LS_DAYS) || String(HASH_DEF_DAYS), 10) || HASH_DEF_DAYS;
+  hashSrc = h.src || null;
+  applyHashSrc();
+  // code：在追蹤清單內＝直接選取；不在清單＝只預填新增欄（絕不由網址改動使用者的自選股）
+  TRACK.prefill = null;
+  if (h.code){
+    if (trackWatch().includes(h.code) || trackHoldings().includes(h.code)) TRACK.sel = h.code;
+    else { TRACK.sel = null; TRACK.prefill = h.code; }
+  }
+  showTab(h.tab || "news");
+  if (DATA){ renderImpactChips(); renderDayChips(); renderSrcPanel(); renderList(); }
+}
+
+// 由 state 反推 hash（只放非預設值）
+function currentHash(){
+  const p = [];
+  if (state.tab !== "news") p.push("tab=" + state.tab);
+  const q = state.q.trim();
+  if (q) p.push("q=" + encodeURIComponent(q.slice(0, HASH_Q_MAX)));
+  if (state.days !== HASH_DEF_DAYS) p.push("days=" + state.days);
+  if (DATA && state.disabled.size){
+    const on = allSources().map(([s]) => s).filter(srcOn);
+    const joined = on.join(",");
+    // 全關（on 為空）或名單過長時不寫進網址，避免產出無意義／過長的 hash
+    if (on.length && joined.length <= HASH_SRC_MAX && on.length <= HASH_SRC_N) p.push("src=" + encodeURIComponent(joined));
+  }
+  if (state.tab === "track"){
+    const c = TRACK.sel || TRACK.prefill;
+    if (c && HASH_CODE_RE.test(c)) p.push("code=" + c);
+  }
+  return p.length ? "#" + p.join("&") : "";
+}
+function syncHash(){
+  const h = currentHash();
+  if (h === location.hash) return;
+  try{ history.replaceState(null, "", h || location.pathname + location.search); }
+  catch(e){ /* 靜默：file:// 等環境不支援 replaceState */ }
+}
+window.addEventListener("hashchange", applyHash);
+
+const TAB_SUBS = {
+  news: "投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。",
+  daily: "每日晨報：今日三件事、開盤前定位、本週關鍵事件與生活情報，每日台北時間 07:30 更新。AI 研判非保證、非投資顧問服務。",
+  morning: "昨日市場與開盤參考：期指開盤參考、隔夜美股、法人籌碼與除權息（資料源：taiwan-flow-live-v2）。",
+  insight: "AI 摘要分析：彙整新聞焦點與晨報籌碼，由 Claude 生成洞見。token 自備、只存本機。非投資建議。",
+  track: "個股追蹤（基本面／籌碼面／技術面三分頁）：自選股＋持股診斷股的每日新聞、每月營收、每季財報、法人籌碼與技術指標。資料經 taiwan-flow-live-v2 Worker 即時代理 FinMind。非投資建議。",
+};
+function showTab(tab){
+  if (!HASH_TABS.includes(tab)) tab = "news";
+  state.tab = tab;
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x.dataset.tab === tab));
   document.getElementById("newsView").style.display = tab === "news" ? "" : "none";
   document.getElementById("dailyView").style.display = tab === "daily" ? "" : "none";
   document.getElementById("morningView").style.display = tab === "morning" ? "" : "none";
   document.getElementById("insightView").style.display = tab === "insight" ? "" : "none";
   document.getElementById("trackView").style.display = tab === "track" ? "" : "none";
-  const SUBS = {
-    news: "投信／外資連買股的近日新聞，經來源白名單過濾後，依產業別與對大盤影響度分層。",
-    daily: "每日晨報：今日三件事、開盤前定位、本週關鍵事件與生活情報，每日台北時間 07:30 更新。AI 研判非保證、非投資顧問服務。",
-    morning: "昨日市場與開盤參考：期指開盤參考、隔夜美股、法人籌碼與除權息（資料源：taiwan-flow-live-v2）。",
-    insight: "AI 摘要分析：彙整新聞焦點與晨報籌碼，由 Claude 生成洞見。token 自備、只存本機。非投資建議。",
-    track: "個股追蹤（基本面／籌碼面／技術面三分頁）：自選股＋持股診斷股的每日新聞、每月營收、每季財報、法人籌碼與技術指標。資料經 taiwan-flow-live-v2 Worker 即時代理 FinMind。非投資建議。",
-  };
-  document.getElementById("pageSub").textContent = SUBS[tab] || SUBS.news;
+  document.getElementById("pageSub").textContent = TAB_SUBS[tab] || TAB_SUBS.news;
   if (tab === "daily") { const f = document.getElementById("dailyFrame"); if (!f.src) f.src = bust("daily-brief.html"); }
   if (tab === "morning") loadMorning();
   if (tab === "insight") renderInsight();
   if (tab === "track") loadTrack();
-});
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => { showTab(t.dataset.tab); syncHash(); });
 
 // 晨報 iframe 自動高度（2026-08-30）：daily-brief.html 內嵌 script 會 postMessage 回報
 // scrollHeight，這裡接手把 iframe 撐到內容高，消除「外層＋iframe」雙層捲動。
@@ -1136,7 +1234,8 @@ window.addEventListener("message", e => {
 const WATCH_KEY = "news_watchlist";
 const SEENQ_KEY = "news_track_seenq";   // {代號:最新季別} 記錄前次已見，判定季財報「新季別」
 const TRK_NEW_DAYS = 14;                 // 月營收公布日在近 N 日內 → 標「新公布」
-const TRACK = { sel: null, view: "fund", data: {}, err: {}, loading: false };
+// prefill＝網址 #code 帶進來、但不在追蹤清單內的代號：只預填「加入」欄位提示，不自動改自選股
+const TRACK = { sel: null, prefill: null, view: "fund", data: {}, err: {}, loading: false };
 // 第二批：籌碼面（走 v2 Worker /chips 即時代理，前端絕不碰 FinMind token）。籌碼較重（7 個
 // dataset），採「選中股 + 切到籌碼面分頁」時才逐股 lazy 取，非整批預抓；每股結果快取於本頁。
 // Worker 三端點（/fundamentals、/chips、/technical）自帶 Cache-Control: public,max-age=1800
@@ -1235,7 +1334,13 @@ function renderTrack(){
   const add = document.getElementById("trkAdd"), inp = document.getElementById("trkInput");
   if (add) add.onclick = trackAdd;
   if (inp) inp.onkeydown = e => { if (e.key === "Enter") trackAdd(); };
-  el.querySelectorAll("[data-trk-sel]").forEach(x => x.onclick = () => { TRACK.sel = x.dataset.trkSel; renderTrack(); loadTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); if (TRACK.view === "tech") loadTech(TRACK.sel); });
+  // 網址帶入但不在清單的代號：填進輸入框（value 非 innerHTML）＋中性提示，由使用者決定要不要加入
+  if (TRACK.prefill && inp && !inp.value){
+    inp.value = TRACK.prefill;
+    const msg = document.getElementById("trkAddMsg");
+    if (msg) msg.textContent = `網址帶入的 ${TRACK.prefill} 不在追蹤清單，按「加入」即可開始追蹤。`;
+  }
+  el.querySelectorAll("[data-trk-sel]").forEach(x => x.onclick = () => { TRACK.sel = x.dataset.trkSel; TRACK.prefill = null; renderTrack(); syncHash(); loadTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); if (TRACK.view === "tech") loadTech(TRACK.sel); });
   el.querySelectorAll("[data-trk-view]").forEach(x => x.onclick = () => { TRACK.view = x.dataset.trkView; renderTrack(); if (TRACK.view === "chips") loadChips(TRACK.sel); if (TRACK.view === "tech") loadTech(TRACK.sel); });
   el.querySelectorAll("[data-trk-del]").forEach(x => x.onclick = e => { e.stopPropagation(); trackDel(x.dataset.trkDel); });
 }
@@ -1246,15 +1351,16 @@ function trackAdd(){
   if (!raw) return;
   if (!/^[0-9]{4,6}[A-Z]?$/.test(raw)){ msg.innerHTML = `<span class="up">格式不符：請輸入 4~6 位數字代號（如 2330、00878）。</span>`; return; }
   const watch = trackWatch();
-  if (watch.includes(raw)){ msg.textContent = `${raw} 已在自選股中。`; inp.value = ""; TRACK.sel = raw; renderTrack(); return; }
+  if (watch.includes(raw)){ msg.textContent = `${raw} 已在自選股中。`; inp.value = ""; TRACK.sel = raw; TRACK.prefill = null; renderTrack(); syncHash(); return; }
   watch.push(raw); trackSaveWatch(watch); inp.value = "";
-  TRACK.sel = raw;
-  renderTrack(); loadTrack();   // 存在性驗證：Worker 回 error 時，下方詳情區會顯示「查無資料」提示，不炸
+  TRACK.sel = raw; TRACK.prefill = null;
+  renderTrack(); syncHash(); loadTrack();   // 存在性驗證：Worker 回 error 時，下方詳情區會顯示「查無資料」提示，不炸
 }
 function trackDel(c){
   trackSaveWatch(trackWatch().filter(x => x !== c));
   if (TRACK.sel === c) TRACK.sel = null;
-  renderTrack();
+  if (TRACK.prefill === c) TRACK.prefill = null;
+  renderTrack(); syncHash();
 }
 
 function trackDetailHtml(c){
@@ -1568,6 +1674,7 @@ function trackR52Html(r){
 }
 // ==== 個股追蹤 結束 ====
 
+applyHash();   // 先依網址 hash 決定分頁與篩選，再載資料（load() 內會補套 src 白名單）
 load();
 
 // ---------- 站台版本（footer）----------
