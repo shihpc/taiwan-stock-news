@@ -51,10 +51,25 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
     （`--full` 重建覆寫、`--no-cache` 繞過；不進 git，CI 走 `build-news.yml` actions/cache）。
     細節見 README「管線韌性」節
 - `news_curation.py`：來源白名單／標題正規化／去重（Python 端事實來源）
+  - **連結正規化與文章鍵（2026-09-07）**：`canonical_url()` 去掉追蹤參數（`utm_*`／`fbclid`／
+    `gclid`／`from`／`ref`／`spm`／`mc_cid`）、保留識別參數（`id=`／`articleId=`／MoneyDJ 的 `a=`），
+    `article_id()` 取其 sha1 前 12 碼寫進每則的 `aid`。**同 `aid` ＝同一篇文章**——同一檔股票下
+    多筆合併為一（保留最早 `date` 與最長 `title`），跨股票的同篇**不刪**、改互附 `related`
+    （對稱寫入雙方）。跨股關聯刻意不去重的理由：一篇同時影響多檔時，各檔的可見文章集合不能縮小。
 - `index.html`、`news.json`、`data/`、`tests/`
   - `index.html` 資料抓取一律走 `fetchFresh()`（`cache:"no-cache"` 條件式驗證）或 `bust()`，
     回退開關 `CACHE_BUST`（script 頂端「快取策略」註解；細節與 CDN `max-age` 殘留見 README
     「前端快取策略」節，2026-09-06）
+  - **hash 路由（2026-09-07）**：`#tab=&q=&src=&days=&code=`，只放非預設值；`applyHash()` 於
+    載入時套用、切 tab／改篩選走 `history.replaceState`（不塞歷史）、外部改網址由 `hashchange`
+    進入。**讀入一律白名單＋型別檢查**（tab 必在 5 個之一、days 1..30 正整數再由 `TDAYS` 夾住、
+    code 為 4-6 位大寫英數、q／src 有長度與筆數上限），非法值靜默退回預設；值只進 state 與
+    `input.value`，畫面字串仍走既有 `esc()` 路徑。`src` 需 `news.json` 才知道全體來源，故由
+    `load()` 補套且**不寫回 localStorage**（不覆蓋使用者偏好）；`#code` 若不在追蹤清單只預填
+    「加入」欄位，**絕不由網址改動自選股**
+  - **前端去重顯示（2026-09-07）**：`newsKey()` 取 `aid`，舊版 `news.json` 無 `aid` 時退回 `link`、
+    再退回標題鍵——**線上現行 news.json 尚未帶 `aid`**（要等下一班 `build_news.py` 產出），
+    現階段走 link 回退路徑。統計列顯示「原始 N 則／去重後 M 篇」
   - 手機適配（2026-09-06）：`.mtable` 全表 `nowrap`，**新增表格一律包 `<div class="tblwrap">`**
     （`overflow-x:auto`，同 `daily-brief.html` 的 `.poswrap`）；`.tabs` 已 `flex-wrap`，
     `@media (max-width:640px)` 收縮外距與字級。驗收慣例：Playwright 375／390／1280 三寬度
