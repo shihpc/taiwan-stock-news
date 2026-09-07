@@ -39,7 +39,7 @@ from functools import lru_cache
 import requests
 import pandas as pd
 
-from news_curation import curate_news, normalize_source, strip_title_tail, _loose
+from news_curation import article_id, curate_news, normalize_source, strip_title_tail, _loose
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("build_news")
@@ -440,6 +440,68 @@ def save_pool_cache(day8: str, max_pool: int, lookback: int,
     logger.info(f"股票池快取已寫 {pool_cache_path(day8)}（{len(pool)} 檔、權重 {len(weights)} 檔）")
 
 
+def dedup_records(kept: list[dict]) -> tuple[dict[str, list[dict]], dict[str, set[str]]]:
+    """依股票分組＋兩層去重（2026-09-07 批次三改為兩層，順序不可反）。
+
+    輸入：curate_news 過濾後的紀錄（date／stock_id／source／title／link）。
+    回傳：(by_stock, aid_codes)——by_stock[code] 為該檔去重後的紀錄（每則已附 `aid`、新到舊）；
+          aid_codes[aid] 為該文章出現的股票代號集合（供 related 欄）。
+
+    第一層 aid：同一檔股票內同 article_id（連結正規化後的識別碼，見 news_curation.article_id）
+       合併成一則——date 取最早、title 取最長（同長取字典序小者）、其餘欄位隨最長標題那筆。
+       同一篇文章常帶不同追蹤參數／在相鄰 UTC 切片重複回傳，這層先把「同連結」收攏。
+       合併是 min／argmax 的可交換結合運算，快取段（已合併）與新抓段再合併結果不變，
+       增量輸出==全量輸出（tests/test_incremental.py 守著）。無 link 的則（aid 空）不併。
+    第二層標題：key 用「去尾巴(- 媒體名)+寬鬆正規化」的標題（沿用 news_curation 既有的
+       strip_title_tail/_loose）：同一篇文章常見同來源集團旗下不同站台轉載（自由財經 vs
+       自由時報、UDN vs udn 大小寫），標題尾巴的媒體名不同、連結也不同，aid 攔不住。
+       依日期新到舊排序再去重 → 同篇保留最新一筆。
+    **跨股票不刪**：同一 aid 出現在多檔是合法關聯（一篇提到多家公司），各檔都保留，
+    另由呼叫端依 aid_codes 在每則附 `related`（同 aid 的其他股票代號）供前端全站列表折疊。
+    """
+    merged: dict[tuple[str, str], dict] = {}
+    no_aid: list[dict] = []
+    for rec in kept:
+        aid = article_id(rec.get("link", ""))
+        rec = dict(rec, aid=aid)
+        if not aid:
+            no_aid.append(rec)
+            continue
+        k = (rec["stock_id"], aid)
+        cur = merged.get(k)
+        if cur is None:
+            merged[k] = rec
+            continue
+        # 標題取最長（同長取字典序小者）；date 取最早
+        if (-len(rec["title"]), rec["title"]) < (-len(cur["title"]), cur["title"]):
+            rec, cur = cur, rec           # cur ← 最長標題那筆
+            merged[k] = cur
+        cur["date"] = min(cur["date"], rec["date"])
+    kept = list(merged.values()) + no_aid
+
+    # 新到舊；同時刻以 aid／link／title 作次鍵，讓第二層去重的取捨不依賴輸入順序
+    #（全量與增量的 kept 拼接順序不同，沒有次鍵時同日同標題鍵的取捨會漂）
+    kept.sort(key=lambda r: (r["date"], r["aid"], r["link"], r["title"]), reverse=True)
+    by_stock: dict[str, list[dict]] = {}
+    seen_per_stock: dict[str, set[str]] = {}
+    for rec in kept:
+        sid = rec["stock_id"]
+        seen = seen_per_stock.setdefault(sid, set())
+        key = _loose(strip_title_tail(rec["title"]))
+        if key and key in seen:
+            continue
+        seen.add(key)
+        by_stock.setdefault(sid, []).append(rec)
+
+    # 跨股關聯：aid → 出現的股票代號集合
+    aid_codes: dict[str, set[str]] = {}
+    for sid, items in by_stock.items():
+        for r in items:
+            if r["aid"]:
+                aid_codes.setdefault(r["aid"], set()).add(sid)
+    return by_stock, aid_codes
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--lookback", type=int, default=3, help="近 N 個交易日（預設 3）")
@@ -561,33 +623,27 @@ def main() -> None:
         logger.info(f"沿用快取 {len(reused)} 則（台北日 {tdays[0]} ~ {cache_cutoff} 之前）")
         kept = kept + reused
 
-    # 依股票分組＋去重。key 用「去尾巴(- 媒體名)+寬鬆正規化」的標題（沿用
-    # news_curation 既有的 strip_title_tail/_loose）：同一篇文章常見同來源
-    # 集團旗下不同站台轉載（自由財經 vs 自由時報、UDN vs udn 大小寫），
-    # 標題尾巴的媒體名不同、連結也不同，純標題或標題+連結比對都攔不住。
-    # 先依日期新到舊排序再去重 → 同篇保留最新一筆。
-    kept.sort(key=lambda r: r["date"], reverse=True)
-    by_stock: dict[str, list[dict]] = {}
-    seen_per_stock: dict[str, set[str]] = {}
-    for rec in kept:
-        sid = rec["stock_id"]
-        seen = seen_per_stock.setdefault(sid, set())
-        key = _loose(strip_title_tail(rec["title"]))
-        if key and key in seen:
-            continue
-        seen.add(key)
-        by_stock.setdefault(sid, []).append(rec)
+    # 依股票分組＋兩層去重（aid 合併 → 標題鍵）＋跨股關聯；邏輯抽在 dedup_records()
+    # 讓離線統計／測試能對既有 news.json 重跑同一套規則（不需 token）。
+    by_stock, aid_codes = dedup_records(kept)
 
     stocks = []
     for code, items in by_stock.items():
-        items.sort(key=lambda r: r["date"], reverse=True)
-        news = [{
-            "date": r["date"],
-            "source": normalize_source(r["source"]),
-            "title": r["title"],
-            "link": r["link"],
-            "impact": classify_impact(code, r["title"]),
-        } for r in items]
+        items.sort(key=lambda r: (r["date"], r["aid"], r["title"]), reverse=True)
+        news = []
+        for r in items:
+            n = {
+                "date": r["date"],
+                "source": normalize_source(r["source"]),
+                "title": r["title"],
+                "link": r["link"],
+                "impact": classify_impact(code, r["title"]),
+                "aid": r["aid"],
+            }
+            related = sorted(aid_codes.get(r["aid"], set()) - {code}) if r["aid"] else []
+            if related:
+                n["related"] = related
+            news.append(n)
         stocks.append({
             "stock_id": code,
             "name": name_map.get(code, ""),
@@ -607,6 +663,10 @@ def main() -> None:
     #   - 增量（2 切片 + 快取）：kept ~491 → 實際輸出 ~475（快取那段早已去重過）
     # 兩者實際輸出一致，但 len(kept) 會讓前端的「則數」看起來掉了三成。
     delivered = sum(len(s["news"]) for s in stocks)
+    # 去重後「篇」數：distinct aid ＋ 無 link 的則各算一篇。與 delivered 一樣只看實際輸出，
+    # 不受抓取模式（全量／增量）影響。
+    n_unique_articles = len({n["aid"] for s in stocks for n in s["news"] if n["aid"]}) \
+        + sum(1 for s in stocks for n in s["news"] if not n["aid"])
     covered_codes = [c for c in pool_codes if c not in failed_codes]
     if failed_codes:
         logger.warning(f"⚠ {len(failed_codes)} 檔本班有抓取失敗，已排出 coverage："
@@ -619,6 +679,9 @@ def main() -> None:
         "pool_size": int(len(pool)),
         "stocks_with_news": len(stocks),
         "total_news": delivered,
+        # n_raw＝各股 news 條目總數（同 total_news；同一篇跨股計多次）、
+        # n_unique_articles＝distinct 文章數（aid 去重）。前端說明列「原始 N 則／去重後 M 篇」。
+        "stats": {"n_raw": delivered, "n_unique_articles": n_unique_articles},
         # 下一班的增量依據：本檔已涵蓋這些 (日曆日切片 × 股票代號) 的組合。
         # 「有涵蓋但 stocks 裡沒出現」＝該檔該日確實沒新聞（而非沒抓過）——少了這個
         # 區塊就無法區分兩者，只能全量重抓。~1.5KB，且內容穩定、幾乎不增加 git churn。

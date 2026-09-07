@@ -23,7 +23,9 @@
 #  未知來源（不在任何清單）預設排除：白名單前提是「未列名 = 不信任」。
 # ============================================================
 
+import hashlib
 import re
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 # ── 1. source 正規化對照（raw source → canonical）─────────────
 #  只列出有多種寫法的媒體；未列出者 canonical == 原字串。
@@ -123,6 +125,52 @@ def _is_cmoney_forum(canonical: str, title: str) -> bool:
 
 def _day(rec: dict) -> str:
     return str(rec.get("date", ""))[:10]
+
+
+# ── 文章識別（2026-09-07 批次三）─────────────────────────────
+#  同一篇文章常帶不同追蹤參數（udn `?from=udn-ch1_breaknews`、`utm_*`）或大小寫／尾斜線
+#  差異，純 link 比對會把同篇算成多篇。canonical_url 只做「確定是追蹤用途」的參數移除
+#  （移除清單制，不在清單者一律保留——MoneyDJ `?a=`、cnyes `?id=` 都是文章識別參數，
+#  刪了會把不同文章併成一篇）。article_id 取 canonical_url 的 sha1 前 12 碼，穩定可攜。
+_TRACKING_PARAMS: frozenset[str] = frozenset({
+    "fbclid", "gclid", "dclid", "msclkid", "yclid", "igshid", "twclid", "ttclid",
+    "mc_cid", "mc_eid", "_ga", "_gl", "spm", "from", "ref", "refer", "referer", "referrer",
+})
+_TRACKING_PREFIXES: tuple[str, ...] = ("utm_",)
+
+
+def _is_tracking_param(key: str) -> bool:
+    k = (key or "").lower()
+    return k in _TRACKING_PARAMS or k.startswith(_TRACKING_PREFIXES)
+
+
+def canonical_url(url: str) -> str:
+    """URL 正規化：scheme／host 轉小寫、去 fragment、去尾斜線、移除追蹤參數（移除清單制）、
+    其餘 query 依 key 排序。空字串／無 host 的字串原樣 strip 回傳。"""
+    u = (url or "").strip()
+    if not u:
+        return ""
+    parts = urlsplit(u)
+    if not parts.netloc:
+        return u
+    host = parts.netloc.lower()
+    path = parts.path or ""
+    while len(path) > 1 and path.endswith("/"):
+        path = path[:-1]
+    if path == "/":
+        path = ""
+    kept = sorted((k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
+                  if not _is_tracking_param(k))
+    query = urlencode(kept, doseq=False)
+    return urlunsplit((parts.scheme.lower(), host, path, query, ""))
+
+
+def article_id(url: str) -> str:
+    """文章識別碼＝canonical_url 的 sha1 前 12 碼；無 link 時回空字串（呼叫端不做 aid 去重）。"""
+    c = canonical_url(url)
+    if not c:
+        return ""
+    return hashlib.sha1(c.encode("utf-8")).hexdigest()[:12]
 
 
 # ── 主邏輯（單一 stock_id + 單一交易日）──────────────────────

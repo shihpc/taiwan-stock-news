@@ -83,6 +83,7 @@
   .badge.market{background:rgba(245,158,11,.16);color:#f0b45a}
   .badge.heavy{background:rgba(79,156,255,.14);color:#8fc0ff}
   .badge.stock{background:var(--chip);color:#8aa0c0}
+  .rel{color:#8fc0ff;font-size:.66rem;white-space:nowrap}
   .item a.title{color:var(--txt);text-decoration:none;font-size:.92rem;line-height:1.45}
   .item a.title:hover{color:var(--accent);text-decoration:underline}
   .empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:.95rem}
@@ -284,12 +285,22 @@ function passNews(n){
   return srcOn(n.source) && day10(n.date) >= dayThreshold();
 }
 
+// 文章鍵：管線給的 aid（連結正規化 sha1 前 12 碼，見 news_curation.article_id）；舊版 news.json
+// 沒有 aid 時退回 link、再退回標題鍵。同鍵＝同一篇文章（可能掛在多檔股票下，屬合法關聯）。
+const newsKey = n => n.aid || n.link || looseTitleKey(n.title);
+function uniqueArticleCount(d){
+  if (d.stats && Number.isFinite(d.stats.n_unique_articles)) return d.stats.n_unique_articles;
+  const keys = new Set();
+  (d.stocks || []).forEach(s => s.news.forEach(n => keys.add(newsKey(n))));
+  return keys.size;
+}
+
 function renderStats(d){
   const gen = fmtGenTaipei(d.generated_at);
   const days = TDAYS.length ? TDAYS[0] + " ~ " + TDAYS[TDAYS.length-1] : "";
   document.getElementById("stats").innerHTML =
     `<div class="stat"><b>${d.stocks_with_news ?? 0}</b>檔</div>` +
-    `<div class="stat"><b>${d.total_news ?? 0}</b>則</div>` +
+    `<div class="stat">原始 <b>${d.total_news ?? 0}</b>則／去重後 <b>${uniqueArticleCount(d)}</b>篇</div>` +
     `<div class="stat"><b>${TDAYS.length}</b>交易日</div>` +
     (days ? `<div class="stat">${days}</div>` : "") +
     `<div class="stat">更新 ${gen}（台灣）</div>`;
@@ -297,7 +308,12 @@ function renderStats(d){
 
 function renderImpactChips(){
   const c = { all:0, market:0, heavy:0, stock:0 };
-  DATA.stocks.forEach(s => s.news.forEach(n => { if(passNews(n)){ c.all++; c[n.impact]++; } }));
+  const seen = new Set();   // 同篇跨股只計一次，與列表折疊口徑一致
+  DATA.stocks.forEach(s => s.news.forEach(n => {
+    if (!passNews(n)) return;
+    const k = newsKey(n); if (seen.has(k)) return; seen.add(k);
+    c.all++; c[n.impact]++;
+  }));
   const defs = [["all","全部"],["market","盤面"],["heavy","權值股"],["stock","個股"]];
   document.getElementById("impactChips").innerHTML = defs.map(([k,label]) =>
     `<span class="chip ${state.impact===k?"active":""} ${k==="market"?"mkt":""}" data-k="${k}">`
@@ -354,11 +370,14 @@ function newsItem(n){
   const t = n.link
     ? `<a class="title" href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a>`
     : `<span class="title">${esc(n.title)}</span>`;
-  return `<div class="item">
+  // related＝同一篇文章也掛在哪些股票（管線 build_news.py 給；代號來自自家股票池，仍過 esc）
+  const rel = Array.isArray(n.related) && n.related.length
+    ? `<span class="rel">相關：${n.related.map(c => esc(String(c))).join("、")}</span>` : "";
+  return `<div class="item" data-aid="${esc(n.aid || "")}">
     <div class="meta">
       <span class="badge ${n.impact}">${IMPACT_LABEL[n.impact]||"個股"}</span>
       <span class="src">${esc(n.source)}</span>
-      <span>${esc(fmtDate(n.date))}</span>
+      <span>${esc(fmtDate(n.date))}</span>${rel}
     </div>${t}</div>`;
 }
 
@@ -374,26 +393,31 @@ function looseTitleKey(title){
   return body.replace(LOOSE_RE, "").toLowerCase();
 }
 
-// 大盤與財金焦點：彙整所有 impact==="market" 的新聞（不分股票），去重＋依日期新到舊
-function marketNewsList(){
-  const seen = new Set();
+// 大盤與財金焦點：彙整所有 impact==="market" 的新聞（不分股票），去重＋依日期新到舊。
+// shown＝本次渲染已顯示過的文章鍵（跟個股卡共用），同一篇全站只出現一次。
+function marketNewsList(shown){
+  const seenTitle = new Set();
   const out = [];
   DATA.stocks.forEach(s => s.news.forEach(n => {
     if (n.impact !== "market" || !passNews(n)) return;
+    const k = newsKey(n);
+    if (shown.has(k)) return;
     // 去尾巴(- 媒體名)+寬鬆正規化後比對，跟build_news.py的strip_title_tail/_loose同邏輯：
-    // 同篇文章常見同集團旗下站台轉載，標題尾巴媒體名不同（自由財經/自由時報、UDN/udn）
+    // 同篇文章常見同集團旗下站台轉載，標題尾巴媒體名不同（自由財經/自由時報、UDN/udn），
+    // 連結不同、aid 也不同，這裡再用標題鍵補一層
     const key = looseTitleKey(n.title);
-    if (!key || seen.has(key)) return;
-    seen.add(key);
+    if (!key || seenTitle.has(key)) return;
+    seenTitle.add(key);
+    shown.add(k);
     out.push(n);
   }));
   out.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   return out;
 }
 
-function marketSection(){
+function marketSection(shown){
   if (state.impact !== "all" && state.impact !== "market") return "";
-  const list = marketNewsList();
+  const list = marketNewsList(shown);
   if (!list.length) return "";
   return `<div class="indhead"><span class="indname">📊 大盤與財金焦點</span>`
     + `<span class="indcount">${list.length} 則</span></div>`
@@ -414,18 +438,27 @@ function renderList(){
   const listEl = document.getElementById("list");
   if (!DATA || !DATA.stocks){ listEl.innerHTML = `<div class="empty">無資料</div>`; return; }
   const q = state.q.trim().toLowerCase();
+  // 全站折疊：同一篇文章（newsKey）在本次渲染只出現一次——先讓大盤焦點認領，再依股票池
+  // 順序（市值權重高者先）由第一檔認領，其後各檔略過並靠 related 標籤指回。只在「渲染集合」
+  // 內折疊：搜尋單一代號時該檔每一則都在（其他檔被 q 濾掉、不會搶先認領）。
+  const shown = new Set();
+  const marketHtml = marketSection(shown);
   const groups = {}, order = [];
   DATA.stocks.forEach(s => {
     if (q && !(s.stock_id + " " + (s.name||"")).toLowerCase().includes(q)) return;
-    const news = s.news.filter(n =>
-      passNews(n) && n.impact !== "market" &&
-      (state.impact === "all" || n.impact === state.impact));
+    const news = s.news.filter(n => {
+      if (!(passNews(n) && n.impact !== "market" &&
+            (state.impact === "all" || n.impact === state.impact))) return false;
+      const k = newsKey(n);
+      if (shown.has(k)) return false;
+      shown.add(k);
+      return true;
+    });
     if (!news.length) return;
     const ind = s.industry || "其他";
     if (!groups[ind]){ groups[ind] = []; order.push(ind); }
     groups[ind].push({ s, news });
   });
-  const marketHtml = marketSection();
   let industryHtml;
   if (!order.length){
     industryHtml = marketHtml

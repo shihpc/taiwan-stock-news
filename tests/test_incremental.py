@@ -54,6 +54,18 @@ CORPUS = {
     (NEW_CODE, "2026-07-21"): [("2026-07-21 08:30:00", "經濟日報", "新進池個股舊新聞")],
     (NEW_CODE, "2026-07-24"): [("2026-07-24 10:00:00", "工商時報", "新進池個股今日新聞")],
 }
+# 第 4 元素＝明確 link（省略時 stub 用 https://x/<title>）。以下三則同一篇文章（連結只差追蹤參數／
+# 大小寫／尾斜線 → 同 aid）：2330 出現兩次（不同標題與日期）→ 同股內須合併成一則（date 取最早、
+# 標題取最長）；2454 也有 → 跨股保留、雙方互附 related。
+#   2330 的兩份分別落在切片 07-22（<cache_cutoff，增量走快取）與 07-23（增量重抓）——正是
+#   「快取段已合併 + 新抓段再合併」要與全量一致的那條路。
+DUP_LINKS = ("https://udn.com/news/story/1/999?from=udn-ch1_breaknews",
+             "https://UDN.com/news/story/1/999/",
+             "https://udn.com/news/story/1/999")
+DUP_TITLE_SHORT, DUP_TITLE_LONG = "同篇短題", "同篇短題 加長版標題"
+CORPUS[("2330", "2026-07-22")].append(("2026-07-22 09:10:00", "經濟日報", DUP_TITLE_SHORT, DUP_LINKS[0]))
+CORPUS[("2330", "2026-07-23")].append(("2026-07-23 10:00:00", "經濟日報", DUP_TITLE_LONG, DUP_LINKS[1]))
+CORPUS[("2454", "2026-07-23")] = [("2026-07-23 10:00:00", "經濟日報", DUP_TITLE_LONG, DUP_LINKS[2])]
 
 req_log: list[tuple[str, str]] = []
 FAIL_PAIRS: set[tuple[str, str]] = set()   # 要模擬抓取失敗的 (代號, 切片)
@@ -80,9 +92,9 @@ def install_stubs(pool_codes: list[str]) -> None:
         req_log.append((stock_id, date))
         if (stock_id, date) in FAIL_PAIRS:      # 模擬 HTTP 非 200 / 連線例外
             return [], False
-        return ([{"date": taipei_to_utc_slice(t), "stock_id": stock_id, "source": s,
-                  "title": ti, "link": f"https://x/{ti}"}
-                 for (t, s, ti) in CORPUS.get((stock_id, date), [])], True)
+        return ([{"date": taipei_to_utc_slice(rec[0]), "stock_id": stock_id, "source": rec[1],
+                  "title": rec[2], "link": rec[3] if len(rec) > 3 else f"https://x/{rec[2]}"}
+                 for rec in CORPUS.get((stock_id, date), [])], True)
     bn.fetch_news_one = fake_fetch
 
 
@@ -187,6 +199,37 @@ def main() -> None:
         check(("2330", "2026-07-24 13:00:00", "尾盤拉抬") in idx_h,
               "下一班增量即自動補回失敗那天的新聞（不必等 --full）")
         check("2330" in healed["coverage"]["codes"], "補回後重新計入 coverage")
+
+        # 同一篇文章（同 aid）在同一檔股票內只留一則，但跨股票是合法關聯、不得刪；
+        # 跨股折疊交給前端（related 欄）。增量與全量都要得到同樣的合併結果。
+        print("[7] 同股重複去、跨股保留（aid 去重＋related）")
+        install_stubs(POOL_BASE)
+        full3, _ = run(["--lookback", "5", "--full"])
+        incr3, _ = run(["--lookback", "5"])
+        check(comparable(incr3) == comparable(full3), "aid 合併後增量輸出仍與全量一致")
+        for label, out in (("全量", full3), ("增量", incr3)):
+            by = {s["stock_id"]: s for s in out["stocks"]}
+            aid = bn.article_id(DUP_LINKS[0])
+            check(all(bn.article_id(u) == aid for u in DUP_LINKS), f"[{label}] 三種寫法的連結同一 aid")
+            hits_2330 = [n for n in by["2330"]["news"] if n["aid"] == aid]
+            hits_2454 = [n for n in by["2454"]["news"] if n["aid"] == aid]
+            check(len(hits_2330) == 1, f"[{label}] 2330 同 aid 只留一則（{len(hits_2330)}）")
+            check(hits_2330 and hits_2330[0]["date"] == "2026-07-22 09:10:00"
+                  and hits_2330[0]["title"] == DUP_TITLE_LONG,
+                  f"[{label}] 合併後 date 取最早、標題取最長")
+            check(len(hits_2454) == 1, f"[{label}] 2454 的同篇文章未被跨股刪除")
+            check(hits_2330 and hits_2330[0].get("related") == ["2454"]
+                  and hits_2454 and hits_2454[0].get("related") == ["2330"],
+                  f"[{label}] 雙方互附 related")
+            check(all("related" not in n for s in out["stocks"] for n in s["news"] if n["aid"] != aid),
+                  f"[{label}] 非跨股的則不帶 related 鍵")
+            check(all(n.get("aid") for s in out["stocks"] for n in s["news"]), f"[{label}] 每則都有 aid")
+            st = out.get("stats", {})
+            check(st.get("n_raw") == out["total_news"] and st.get("n_unique_articles") == out["total_news"] - 1,
+                  f"[{label}] stats n_raw={st.get('n_raw')}／n_unique_articles={st.get('n_unique_articles')}"
+                  f"（唯一跨股連結使兩者差 1）")
+            check(out["coverage"]["codes"] == POOL_BASE and out["coverage"]["dates"],
+                  f"[{label}] coverage 不變式未被動到")
 
     print()
     if failures:
