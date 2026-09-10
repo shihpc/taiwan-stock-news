@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-10T16:09:20+08:00",
+ "generated_at": "2026-09-10T17:09:17+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-09-04",
@@ -9,11 +9,11 @@
   "2026-09-10"
  ],
  "pool_size": 150,
- "stocks_with_news": 77,
- "total_news": 402,
+ "stocks_with_news": 82,
+ "total_news": 417,
  "stats": {
-  "n_raw": 402,
-  "n_unique_articles": 385
+  "n_raw": 417,
+  "n_unique_articles": 399
  },
  "coverage": {
   "dates": [
@@ -610,9 +610,25 @@
    "industry": "電子工業",
    "heavyweight": true,
    "weight_per": 1.0889,
-   "count": 33,
-   "market_count": 2,
+   "count": 35,
+   "market_count": 3,
    "news": [
+    {
+     "date": "2026-09-10 16:25:00",
+     "source": "FTNN新聞",
+     "title": "PCB族群漲跌互見！「這軟板廠」重挫9%、台虹跌半根 欣興收連4紅、柏承直逼漲停 - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/577905",
+     "impact": "market",
+     "aid": "192b5027dcee"
+    },
+    {
+     "date": "2026-09-10 15:10:00",
+     "source": "工商時報",
+     "title": "PCB今年漲多還能追？不只欣興、南電、景碩PCB女王再點名5檔潛力股- 證券 - 工商時報",
+     "link": "https://www.ctee.com.tw/news/20260910701565-430201",
+     "impact": "heavy",
+     "aid": "9d77a4078918"
+    },
     {
      "date": "2026-09-10 10:29:44",
      "source": "自由時報系",
@@ -1538,9 +1554,20 @@
    "industry": "通信網路業",
    "heavyweight": false,
    "weight_per": 0.7887,
-   "count": 4,
+   "count": 5,
    "market_count": 1,
    "news": [
+    {
+     "date": "2026-09-10 15:25:00",
+     "source": "FTNN新聞",
+     "title": "光通訊綠紅交錯！「這檔」8月營收年增152%噴逾半根 前鼎、汎銓漲3%、致茂、華星光摔6% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/577881",
+     "impact": "stock",
+     "aid": "be57cfc0b26d",
+     "related": [
+      "2360"
+     ]
+    },
     {
      "date": "2026-09-07 03:00:00",
      "source": "工商時報",
@@ -1722,14 +1749,44 @@
    ]
   },
   {
+   "stock_id": "3653",
+   "name": "健策",
+   "industry": "電子工業",
+   "heavyweight": false,
+   "weight_per": 0.5845,
+   "count": 1,
+   "market_count": 1,
+   "news": [
+    {
+     "date": "2026-09-10 10:25:00",
+     "source": "ETtoday",
+     "title": "台股殺逾600點散熱股抗跌　奇鋐、健策營收看俏 - ETtoday財經雲",
+     "link": "https://finance.ettoday.net/news/3234805",
+     "impact": "market",
+     "aid": "47f9eafced08"
+    }
+   ]
+  },
+  {
    "stock_id": "2360",
    "name": "致茂",
    "industry": "其他電子業",
    "heavyweight": false,
    "weight_per": 0.5543,
-   "count": 8,
+   "count": 9,
    "market_count": 2,
    "news": [
+    {
+     "date": "2026-09-10 15:25:00",
+     "source": "FTNN新聞",
+     "title": "光通訊綠紅交錯！「這檔」8月營收年增152%噴逾半根 前鼎、汎銓漲3%、致茂、華星光摔6% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/577881",
+     "impact": "stock",
+     "aid": "be57cfc0b26d",
+     "related": [
+      "4979"
+     ]
+    },
     {
      "date": "2026-09-10 03:00:00",
      "source": "工商時報",
@@ -2333,9 +2390,17 @@
    "industry": "通信網路業",
    "heavyweight": true,
    "weight_per": 0.2872,
-   "count": 9,
+   "count": 10,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-09-10 15:46:54",
+     "source": "鉅亨(cnyes)",
+     "title": "台灣大商務長林東閔：iPhone Duo CP值高 預告iPhone 18 Pro貨量將較去年多 - news.cnyes.com",
+     "link": "https://news.cnyes.com/news/id/6602887",
+     "impact": "heavy",
+     "aid": "476973d55640"
+    },
     {
      "date": "2026-09-09 05:30:00",
      "source": "自由時報系",
@@ -2586,9 +2651,17 @@
    "industry": "通信網路業",
    "heavyweight": true,
    "weight_per": 0.2361,
-   "count": 2,
+   "count": 3,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-09-10 16:42:34",
+     "source": "TechNews 科技新報",
+     "title": "遠傳8月營收95.47 億元 - TechNews 科技新報",
+     "link": "https://finance.technews.tw/2026/09/10/far-eastone-4904-202608-financial-report/",
+     "impact": "heavy",
+     "aid": "065f98267a42"
+    },
     {
      "date": "2026-09-07 11:08:37",
      "source": "中央社",
@@ -2664,9 +2737,25 @@
    "industry": "鋼鐵工業",
    "heavyweight": true,
    "weight_per": 0.1983,
-   "count": 10,
+   "count": 12,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-09-10 16:35:19",
+     "source": "鉅亨(cnyes)",
+     "title": "中鋼8月營收年增近13% 國際鋼價回升帶動下游補庫契機 - news.cnyes.com",
+     "link": "https://news.cnyes.com/news/id/6602999",
+     "impact": "heavy",
+     "aid": "98374d77dcaa"
+    },
+    {
+     "date": "2026-09-10 15:42:46",
+     "source": "UDN",
+     "title": "中鋼營收／8月279億元、年增12.9% 「月來月旺」的格局確立| 個股情報| 股市 - UDN",
+     "link": "https://udn.com/news/story/7252/9746555",
+     "impact": "heavy",
+     "aid": "45e09584d0e7"
+    },
     {
      "date": "2026-09-08 11:02:14",
      "source": "經濟日報",
@@ -3142,9 +3231,25 @@
    "industry": "水泥工業",
    "heavyweight": true,
    "weight_per": 0.1221,
-   "count": 2,
+   "count": 4,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-09-10 14:47:01",
+     "source": "UDN",
+     "title": "台泥營收／8月135億元、年增10.6% 歐洲布局持續挹注成長 - UDN",
+     "link": "https://udn.com/news/story/7252/9746403",
+     "impact": "heavy",
+     "aid": "6063cafcbccc"
+    },
+    {
+     "date": "2026-09-10 01:44:00",
+     "source": "自由時報系",
+     "title": "水泥雙雄8月營收出爐！台泥營收135.16億 亞泥55.9億 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/hz4uuf3dgmpu",
+     "impact": "heavy",
+     "aid": "6e846f8569f5"
+    },
     {
      "date": "2026-09-04 16:27:06",
      "source": "經濟日報",
@@ -3435,6 +3540,25 @@
      "link": "https://finance.technews.tw/2026/09/08/mhc-3706-202608-financial-report/",
      "impact": "stock",
      "aid": "da64544c519f"
+    }
+   ]
+  },
+  {
+   "stock_id": "1102",
+   "name": "亞泥",
+   "industry": "水泥工業",
+   "heavyweight": false,
+   "weight_per": 0.0815,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-09-10 14:40:50",
+     "source": "UDN",
+     "title": "亞泥營收／8月55.9億元、月增3.55% 兩岸水泥市場回溫| 個股情報| 股市 - UDN",
+     "link": "https://udn.com/news/story/7252/9746390",
+     "impact": "stock",
+     "aid": "a3fbadbd7e68"
     }
    ]
   },
@@ -3837,6 +3961,25 @@
    ]
   },
   {
+   "stock_id": "8454",
+   "name": "富邦媒",
+   "industry": "貿易百貨",
+   "heavyweight": false,
+   "weight_per": 0.0435,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-09-10 16:04:19",
+     "source": "UDN",
+     "title": "富邦媒營收／8月91.5億元、月增7%延續漲勢 前八月創同期新高 - UDN",
+     "link": "https://udn.com/news/amp/story/7252/9746618",
+     "impact": "stock",
+     "aid": "428eb04a173a"
+    }
+   ]
+  },
+  {
    "stock_id": "2606",
    "name": "裕民",
    "industry": "航運業",
@@ -3852,6 +3995,25 @@
      "link": "https://news.cnyes.com/news/id/6598191",
      "impact": "stock",
      "aid": "23126ff6af0f"
+    }
+   ]
+  },
+  {
+   "stock_id": "2371",
+   "name": "大同",
+   "industry": "電機機械",
+   "heavyweight": false,
+   "weight_per": 0.0401,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-09-10 15:52:28",
+     "source": "自由時報系",
+     "title": "大同8月營收月增年減 強化澳洲電力市場耕耘 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/cl06wekn9ssm",
+     "impact": "stock",
+     "aid": "8398863451c4"
     }
    ]
   },
@@ -4190,6 +4352,25 @@
      "link": "https://udn.com/news/story/7252/9743601",
      "impact": "stock",
      "aid": "812bcb15f6b4"
+    }
+   ]
+  },
+  {
+   "stock_id": "6248",
+   "name": "沛波",
+   "industry": "鋼鐵工業",
+   "heavyweight": false,
+   "weight_per": 0.0155,
+   "count": 1,
+   "market_count": 1,
+   "news": [
+    {
+     "date": "2026-09-10 16:22:00",
+     "source": "MoneyDJ",
+     "title": "天候因素影響，沛波8月營收轉雙減 - 台股 - 新聞 - MoneyDJ",
+     "link": "https://m.moneydj.com/f1a.aspx?a=190e7943-6e3b-4929-8f98-171dbf6a96bf&c=MB06",
+     "impact": "market",
+     "aid": "5a99f45727b4"
     }
    ]
   },
