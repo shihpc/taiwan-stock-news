@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-11T12:09:12+08:00",
+ "generated_at": "2026-09-11T13:08:57+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-09-07",
@@ -9,11 +9,11 @@
   "2026-09-11"
  ],
  "pool_size": 150,
- "stocks_with_news": 70,
- "total_news": 329,
+ "stocks_with_news": 73,
+ "total_news": 334,
  "stats": {
-  "n_raw": 329,
-  "n_unique_articles": 314
+  "n_raw": 334,
+  "n_unique_articles": 318
  },
  "coverage": {
   "dates": [
@@ -1927,9 +1927,20 @@
    "industry": "金融保險",
    "heavyweight": true,
    "weight_per": 0.3865,
-   "count": 3,
+   "count": 4,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-09-11 10:53:00",
+     "source": "今周刊",
+     "title": "華南金今年漲44％、第一金只有29％...賺得差不多，股價為何差一截？便宜的VS漲得快的，存股該選誰？ - 今周刊",
+     "link": "https://www.businesstoday.com.tw/article/category/183008/post/202609110007/",
+     "impact": "heavy",
+     "aid": "ce581e6495a0",
+     "related": [
+      "2892"
+     ]
+    },
     {
      "date": "2026-09-10 20:15:09",
      "source": "鉅亨(cnyes)",
@@ -2023,6 +2034,28 @@
      "link": "https://money.udn.com/money/story/5739/9738006",
      "impact": "heavy",
      "aid": "76fe1951a73f"
+    }
+   ]
+  },
+  {
+   "stock_id": "2892",
+   "name": "第一金",
+   "industry": "金融保險",
+   "heavyweight": true,
+   "weight_per": 0.3376,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-09-11 10:53:00",
+     "source": "今周刊",
+     "title": "華南金今年漲44％、第一金只有29％...賺得差不多，股價為何差一截？便宜的VS漲得快的，存股該選誰？ - 今周刊",
+     "link": "https://www.businesstoday.com.tw/article/category/183008/post/202609110007/",
+     "impact": "heavy",
+     "aid": "ce581e6495a0",
+     "related": [
+      "2880"
+     ]
     }
    ]
   },
@@ -2958,9 +2991,17 @@
    "industry": "電機機械",
    "heavyweight": false,
    "weight_per": 0.0676,
-   "count": 1,
+   "count": 2,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-09-11 10:48:47",
+     "source": "自由時報系",
+     "title": "焦點股》中砂：跳空飆漲逾8％ 創下新天價 - 自由財經",
+     "link": "https://ec.ltn.com.tw/article/breakingnews/5570295",
+     "impact": "stock",
+     "aid": "12d222d3d797"
+    },
     {
      "date": "2026-09-10 03:57:42",
      "source": "UDN",
@@ -3311,6 +3352,25 @@
    ]
   },
   {
+   "stock_id": "2851",
+   "name": "中再保",
+   "industry": "金融保險",
+   "heavyweight": false,
+   "weight_per": 0.0246,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-09-11 10:57:00",
+     "source": "MoneyDJ",
+     "title": "本業保底、投資加乘，中再保隱含高現金殖利率可期- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=d3c5d77f-f320-4ff2-aa8e-b90b4a3cf459",
+     "impact": "stock",
+     "aid": "f62be6a072c3"
+    }
+   ]
+  },
+  {
    "stock_id": "9933",
    "name": "中鼎",
    "industry": "其他",
@@ -3648,6 +3708,25 @@
      "link": "https://finance.technews.tw/2026/09/10/mvi-2342-202608-financial-report/",
      "impact": "stock",
      "aid": "0aacfe057723"
+    }
+   ]
+  },
+  {
+   "stock_id": "2427",
+   "name": "三商電",
+   "industry": "資訊服務業",
+   "heavyweight": false,
+   "weight_per": 0.0029,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-09-11 12:29:56",
+     "source": "鉅亨(cnyes)",
+     "title": "三商電 8 月營收 4.13 億元：年增 74.78%，靠的是這個月交了多少台 ATM - 鉅亨號",
+     "link": "https://hao.cnyes.com/post/267077",
+     "impact": "stock",
+     "aid": "a44656f1b3fd"
     }
    ]
   },
