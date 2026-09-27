@@ -25,6 +25,10 @@
 #
 #  用法：
 #    python build_social.py [--date YYYY-MM-DD] [--from-fixture DIR] [--no-llm] [--stock-info PATH]
+#  exit code：0＝完成（含預期跳過：--no-llm／no-key／robots disallow／unreachable／no-articles）；
+#             2＝聲量產物已落地但情緒分類失效（classify() 例外 → llm.skipped="error"，或有目標篇卻
+#               全數失敗 failed_n == 目標篇數）。workflow 走「延後紅燈」：build 步驟不失敗、commit 照跑、
+#               末段依 exit code 讓 job 紅並 notify-failure。
 #
 #  ⚠ PTT DOM 結構（r-ent／nrec／article-metaline／push）依記憶實作、沙箱連不到 ptt.cc，
 #    線上首跑要對照實際頁面；解析器一律寬鬆——找不到元素回 None／空值、不拋例外。
@@ -909,6 +913,21 @@ def build(target: date, fetcher: PttFetcher, info: dict[str, str | None] | None,
     return out
 
 
+EXIT_LLM_ERROR = 2
+
+
+def llm_exit_code(out: dict) -> int:
+    """情緒分類失效 → EXIT_LLM_ERROR，否則 0。失效＝classify() 例外（skipped="error"）或有目標篇
+    （有代號的文章 >0）卻全數 failed；預期跳過（no-llm／no-key／robots／no-articles／pending）不算失效。"""
+    llm = out.get("llm") or {}
+    if llm.get("skipped") == "error":
+        return EXIT_LLM_ERROR
+    target_n = sum(1 for a in out.get("articles", []) if a.get("codes"))
+    if llm.get("skipped") is None and target_n > 0 and llm.get("failed_n", 0) >= target_n:
+        return EXIT_LLM_ERROR
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="社群聲量量測班（階段一）：PTT Stock 板 → data/social/")
     ap.add_argument("--date", help="目標台北日 YYYY-MM-DD（預設今天）")
@@ -933,7 +952,11 @@ def main(argv=None) -> int:
           f"fetched={out['articles_fetched_n']} failed={out['failed_n']} requests={out['requests_n']} "
           f"stocks={len(out['stocks'])} llm.via={out['llm']['via']} skipped={out['llm']['skipped']} "
           f"usage={out['llm']['usage']}", flush=True)
-    return 0
+    rc = llm_exit_code(out)
+    if rc:
+        print(f"::error::情緒分類失效（skipped={out['llm']['skipped']} failed_n={out['llm']['failed_n']}），"
+              f"聲量產物已寫出、exit {rc}（延後紅燈由 workflow 末段發）", flush=True)
+    return rc
 
 
 if __name__ == "__main__":

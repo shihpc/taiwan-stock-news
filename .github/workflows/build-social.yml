@@ -64,14 +64,24 @@ jobs:
           restore-keys: |
             social-info-${{ steps.tpe.outputs.day8 }}-
 
+      # 延後紅燈（同 taiwan-flow-live-v2/intraday.yml）：build_social.py exit 2＝聲量產物已落地但情緒
+      # 分類失效（classify() 例外或全數失敗）。本步驟**不失敗**、只記 ok=0，讓 Commit 照跑把當日聲量
+      # 資料推上去；紅燈延到 commit 之後由「Fail on LLM error」步驟發。**禁止 continue-on-error**
+      #（那會把失敗靜默吞成綠燈，notify-failure 永遠不會響）。其他非 0 exit（抓取炸掉等）同樣記 ok=0。
       - name: Build data/social
+        id: build
         env:
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           extra=""
           if [ "${{ github.event.inputs.no_llm }}" = "true" ]; then extra="--no-llm"; fi
-          python build_social.py --date "${{ steps.tpe.outputs.day }}" $extra
+          if python build_social.py --date "${{ steps.tpe.outputs.day }}" $extra; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::build_social.py exit $?（產物若已落地仍會 commit，紅燈延後發）"
+            echo "ok=0" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Save stock-info cache
         if: always() && hashFiles('data/cache/social_info_*.json') != ''
@@ -108,6 +118,13 @@ jobs:
             sleep 4
           done
           if [ "$pushed" != "1" ]; then echo "::error::push failed after 5 retries"; exit 1; fi
+
+      # 排在 commit 之後才紅燈：情緒分類失效要看得見（開 issue），但不能讓當日聲量資料陪葬
+      - name: Fail on LLM error
+        if: steps.build.outputs.ok == '0'
+        run: |
+          echo "::error::build_social.py 回報失效（情緒分類例外／全數失敗或抓取異常），聲量產物已 commit；見上方 log"
+          exit 1
 
       - name: Notify failure
         # cancelled 也要告警（failure() 在 cancelled 時不成立）

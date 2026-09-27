@@ -214,6 +214,11 @@ python tests/test_incremental.py                               # 增量正確性
   同步回退總預算 `SOCIAL_SYNC_BUDGET_SEC`（15 分，與 batch 40 分合計仍留餘裕給 70 分 job）超過即停、
   剩餘篇計 `llm.failed_n`、代號記 `unk`；`classify()` 拋例外記 `skipped="error"`、exit 0。
   磁碟上看到 `pending` 就代表那班 LLM 沒走完。
+- **exit code 與延後紅燈**：`build_social.py` exit 0＝完成（含預期跳過：`--no-llm`／no-key／robots
+  disallow／unreachable／無文章）；**exit 2**＝聲量產物已落地但情緒分類失效（`classify()` 例外 →
+  `skipped="error"`，或有目標篇卻全數 `failed_n`）。workflow 的 Build 步驟不失敗、只記 `ok=0`，Commit 照跑
+  把聲量資料推上去，之後「Fail on LLM error」步驟才讓 job 紅並開 issue（同 taiwan-flow-live-v2
+  `intraday.yml` 的模式，不用 `continue-on-error`）。
 - **金鑰**：`ANTHROPIC_API_KEY`／`FINMIND_TOKEN` 只由環境變數讀；例外訊息過 `mask_secret()` 才印。
   缺 `ANTHROPIC_API_KEY` → 情緒整批 null、`llm.skipped="no-key"`，聲量資料照寫。缺 `FINMIND_TOKEN`
   且無當日快取（`data/cache/social_info_<YYYYMMDD>.json`，不進 git）→ 只認代號、`name` 為 null。

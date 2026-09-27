@@ -485,6 +485,49 @@ def test_main_from_fixture_writes_files(tmp_path):
     assert j["llm"]["skipped"] == "no-llm" and j["fixture"] is True and j["stocks"]["2330"]["n"] == 2
 
 
+def test_main_exit_2_on_classify_exception_but_product_written(tmp_path, monkeypatch):
+    """延後紅燈：classify() 例外 → 產物仍落地（skipped=error）、main() 回 2。"""
+    def boom(*a, **k):
+        raise RuntimeError("api exploded")
+
+    monkeypatch.setattr(bs, "classify", boom)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", FAKE_KEY)
+    rc = bs.main(["--from-fixture", FIX, "--stock-info", os.path.join(FIX, "stock_info.json"),
+                  "--date", "2026-09-26", "--out-dir", str(tmp_path)])
+    assert rc == 2
+    j = json.load(open(tmp_path / "2026-09-26.json", encoding="utf-8"))
+    assert j["llm"]["skipped"] == "error" and j["articles_n"] == 5 and len(j["articles"]) == 3
+    assert all(v["unk"] == v["n"] for v in j["stocks"].values())
+
+
+def test_main_exit_2_when_all_articles_fail_classification(tmp_path, monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", FAKE_KEY)
+    monkeypatch.setattr(bs.requests, "Session", lambda: FakeAnthropic(submit_fail=True, sync_fail=True))
+    monkeypatch.setattr(bs, "LLM_RETRY_SLEEP", 0)
+    rc = bs.main(["--from-fixture", FIX, "--stock-info", os.path.join(FIX, "stock_info.json"),
+                  "--date", "2026-09-26", "--out-dir", str(tmp_path)])
+    assert rc == 2
+    j = json.load(open(tmp_path / "2026-09-26.json", encoding="utf-8"))
+    assert j["llm"]["skipped"] is None and j["llm"]["failed_n"] == 3 and j["llm"]["classified_n"] == 0
+
+
+def test_main_exit_0_on_expected_skips(tmp_path, monkeypatch):
+    base = ["--from-fixture", FIX, "--stock-info", os.path.join(FIX, "stock_info.json"), "--date", "2026-09-26"]
+    assert bs.main(base + ["--no-llm", "--out-dir", str(tmp_path / "a")]) == 0
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    assert bs.main(base + ["--out-dir", str(tmp_path / "b")]) == 0          # no-key
+    d = tmp_path / "fix"
+    d.mkdir()
+    for n in os.listdir(FIX):
+        (d / n).write_bytes(open(os.path.join(FIX, n), "rb").read())
+    (d / "robots.txt").write_text(_read("robots_disallow.txt"), encoding="utf-8")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", FAKE_KEY)
+    assert bs.main(["--from-fixture", str(d), "--stock-info", os.path.join(FIX, "stock_info.json"),
+                    "--date", "2026-09-26", "--out-dir", str(tmp_path / "c")]) == 0   # robots disallow
+    assert bs.llm_exit_code({"llm": {"skipped": None, "failed_n": 1}, "articles": [{"codes": ["2330"]}, {"codes": ["2317"]}]}) == 0  # 部分失敗不算
+    assert bs.llm_exit_code({"llm": {"skipped": "no-articles", "failed_n": 0}, "articles": []}) == 0
+
+
 @pytest.mark.parametrize("title,cat", [("[標的] 台積電 多", "標的"), ("Re: [新聞] x", "新聞"), ("無分類", None)])
 def test_title_cat(title, cat):
     assert bs.title_cat(title) == cat

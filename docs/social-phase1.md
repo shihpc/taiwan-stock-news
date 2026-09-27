@@ -169,3 +169,17 @@
   `Crawl-delay: 1`，否則本機實跑會真的睡 10 秒）；線上路徑仍是 `time.sleep`。
 - §2 schema 同批回寫：`llm.skipped` 補 `no-llm`／`pending`／`error`、`sent` 值可為 `unk`、頂層 `fixture` 鍵、
   新欄 `robots_crawl_delay`。`tests/test_social.py` 由 25 案例增為 30。
+
+### 6.2 classify() 例外不得靜默成綠燈（2026-09-28 第二次退回修正）
+
+- `build_social.py` 新增 `EXIT_LLM_ERROR = 2` 與 `llm_exit_code(out)`：`llm.skipped == "error"`（classify()
+  例外）或「有目標篇（有代號的文章 >0）卻 `failed_n` ≥ 目標篇數」（全數失敗）→ `main()` **exit 2**，
+  產物照樣落地並印 `::error::`；預期跳過（`--no-llm`／no-key／robots disallow／unreachable／no-articles）
+  與部分失敗仍 exit 0。
+- `build-social.yml` 走家族「延後紅燈」模式（同 taiwan-flow-live-v2 `intraday.yml`）：Build 步驟
+  `id: build`、以 `if python …; then ok=1; else ok=0; fi` 寫 `$GITHUB_OUTPUT`（步驟本身不失敗、任何非 0 exit
+  都記 ok=0）→ Commit 照跑 → 「Fail on LLM error」`if: steps.build.outputs.ok == '0'` → `exit 1` →
+  notify-failure（末步 `if: failure() || cancelled()`）。**未用 `continue-on-error`**。
+- 守門測試：`test_main_exit_2_on_classify_exception_but_product_written`、
+  `test_main_exit_2_when_all_articles_fail_classification`、`test_main_exit_0_on_expected_skips`。
+  `tests/test_social.py` 30 → 33 案例。
