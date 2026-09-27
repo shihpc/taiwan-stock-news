@@ -191,6 +191,46 @@ python tests/test_incremental.py                               # 增量正確性
 - 本機驗證（2026-09-06）：Playwright 對 `python -m http.server` 載入兩次，第二次 `news.json`
   回 304（http.server 支援 `If-Modified-Since`）。
 
+## 社群聲量量測班（階段一，2026-09-27）
+
+**定位：只收資料、不顯示、不下判準。** 規格、硬約束 H1–H9 與驗收清單正本在 `docs/social-phase1.md`；
+背景是「聲量／情緒能不能當訊號」尚未回測（家族鐵律 8），故先收 30+ 個交易日樣本，
+第二階段在 taiwan-backtest 驗資訊係數，有結果才談呈現。**前端 `index.html` 完全不讀這批資料。**
+
+- **管線**：`build_social.py`（只用 `requests`＋標準庫，HTML 解析走 `html.parser`）。
+  流程：`robots.txt` 守門 → PTT Stock 板首頁向前翻頁（≤15 頁）挑目標日列 → 依推文數高者優先抓
+  ≤300 篇文章頁（台北日歸屬以文章頁發文時間為準）→ 代號 regex＋股票清單全名整詞抽取（只認全名、
+  不建暱稱字典）→ Anthropic Message Batches 情緒分類（逾時 40 分或失敗逐篇同步回退，`llm.via`
+  記實際路徑）→ 聚合 `stocks{}` → 寫 `data/social/YYYY-MM-DD.json`＋`index.json`。
+- **產物 schema**：見 `docs/social-phase1.md` §2；每檔必帶 `llm.model`／`llm.prompt_ver`
+  （改 prompt 就 `SOCIAL_PROMPT_VER` +1，舊檔不可比）與 `llm.usage`（估成本用）。
+  `stocks[code]` 的 `pos+neg+neu+unk == n` 恆成立；LLM 跳過時 `sent` 為 null、`unk == n`。
+  **不存正文**、沒有任何偏多／偏空／建議欄位。
+- **節流與守門**：對 ptt.cc 每次請求間隔 ≥1 秒、單班 ≤400 請求、UA 帶專案識別字串、cookie
+  `over18=1`；robots 判 `disallow` 或 `unreachable` 都不抓文章，仍寫產物（`articles_n: 0`）並
+  印 `::warning::`、exit 0。
+- **金鑰**：`ANTHROPIC_API_KEY`／`FINMIND_TOKEN` 只由環境變數讀；例外訊息過 `mask_secret()` 才印。
+  缺 `ANTHROPIC_API_KEY` → 情緒整批 null、`llm.skipped="no-key"`，聲量資料照寫。缺 `FINMIND_TOKEN`
+  且無當日快取（`data/cache/social_info_<YYYYMMDD>.json`，不進 git）→ 只認代號、`name` 為 null。
+- **排程**：`.github/workflows/build-social.yml` cron `20 15 * * *`（台北 23:20，每日含週末）＋
+  `workflow_dispatch`（可指定 `date`／`no_llm`）。**只靠 GH cron、不進 Worker dispatch 清單**。
+  目標日＝起跑時刻減 6 小時的台北日，GitHub cron 延遲 ≤6 小時不會把目標日滾成隔天；白天手動
+  dispatch 不帶 `date` 會算到**前一天**（刻意）。push 走 `build-news.yml` 同款 rebase 重試，
+  失敗開 issue（`pipeline: news-social`）。
+- **拆除提醒**：`SOCIAL_SAMPLE_SINCE="2026-09-27"`、滿 45 個日曆日起每班印
+  `::warning::社群量測班已滿 N 日…`，不開 issue、不 dispatch；到期只代表「該回頭看樣本」。
+- **本機驗證（免 token 免網路）**：
+  ```bash
+  python -m pytest tests/test_social.py -q
+  python build_social.py --from-fixture tests/fixtures/social \
+      --stock-info tests/fixtures/social/stock_info.json --no-llm --date 2026-09-26
+  ```
+  `data/social/2026-09-26.json` 就是這條指令產的 **schema 樣本**（檔內與 `index.json` 皆標
+  `"fixture": true`），不是線上資料。
+- **已知不確定點**：PTT 板首頁／文章頁的 DOM（`div.r-ent`／`div.nrec > span.hl`／
+  `div.article-metaline`／`div.push > span.push-tag`）依記憶實作，本沙箱連不到 ptt.cc；解析器
+  一律寬鬆（找不到元素回 None／空值），**線上首跑要對照實際頁面**。截至本節寫成時**尚未在線上跑過**。
+
 ## 快速接手（2026-07-12）
 
 - **時區修正（2026-07-20）**：`build_news.py` 的 `news_calendar_days()`／`recent_trading_days()`

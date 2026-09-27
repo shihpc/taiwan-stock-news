@@ -1,0 +1,119 @@
+{
+ "schema": 1,
+ "date": "2026-09-26",
+ "generated_at": "2026-09-28T03:32:15+08:00",
+ "source": "ptt-stock",
+ "robots": "allow",
+ "pages_fetched": 3,
+ "articles_n": 5,
+ "articles_fetched_n": 4,
+ "failed_n": 1,
+ "requests_n": 10,
+ "elapsed_s": 2.0,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": null,
+  "skipped": "no-llm",
+  "classified_n": 0,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 0,
+   "output_tokens": 0
+  }
+ },
+ "stocks": {
+  "2330": {
+   "name": "台積電",
+   "n": 2,
+   "push": 4,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 2
+  },
+  "2317": {
+   "name": "鴻海",
+   "n": 1,
+   "push": 0,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "2412": {
+   "name": "中華電",
+   "n": 1,
+   "push": 1,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "2454": {
+   "name": "聯發科",
+   "n": 1,
+   "push": 0,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1758900004.A.004",
+   "title": "[新聞] 中華電 5G 用戶數創高",
+   "author": "user_d (小d)",
+   "ts": "2026-09-26 08:30",
+   "push": 1,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1758900004.A.004.html",
+   "codes": [
+    "2412",
+    "2330"
+   ],
+   "sent": null
+  },
+  {
+   "aid": "M.1758900002.A.002",
+   "title": "[心得] 鴻海與聯發科 財報比較",
+   "author": "user_b (小b)",
+   "ts": "2026-09-26 10:00",
+   "push": 0,
+   "boo": 2,
+   "cat": "心得",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1758900002.A.002.html",
+   "codes": [
+    "2317",
+    "2454"
+   ],
+   "sent": null
+  },
+  {
+   "aid": "M.1758900001.A.001",
+   "title": "[標的] 台積電 2330 多",
+   "author": "user_a (小a)",
+   "ts": "2026-09-26 21:03",
+   "push": 3,
+   "boo": 1,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1758900001.A.001.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": null
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": -1,
+  "due": false
+ },
+ "fixture": true
+}

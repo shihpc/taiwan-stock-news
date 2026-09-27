@@ -1,0 +1,117 @@
+name: 社群聲量量測班（階段一）
+
+# 只收資料、不顯示、不下判準（規格：docs/social-phase1.md）。
+# 本班只靠 GitHub cron（不進 Worker dispatch 清單，H8）；GitHub cron 常態延遲 1~2 小時，
+# 產物以 --date 不指定＝台北「今天」為準：23:20 延遲到隔日 00:xx 會把目標日滾成隔天而抓不到
+# 當日文章——所以 step 內用 TZ=Asia/Taipei 的「起跑時刻減 6 小時」算目標日，延遲 ≤6 小時都仍指向同一天。
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '目標台北日 YYYY-MM-DD（留空＝依起跑時刻推算）'
+        required: false
+        default: ''
+      no_llm:
+        description: '跳過情緒分類（true/false）'
+        required: false
+        default: 'false'
+  schedule:
+    # 台北 23:20，每日含週末：PTT 討論到晚間才齊，且避開 21:37 的 news 備援班
+    - cron: '20 15 * * *'
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: build-social
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # 抓取上限 400 請求 × ≥1 秒節流 ≈ 7 分 ＋ Batches 期限 40 分 ＋ 同步回退，70 分留餘裕
+    timeout-minutes: 70
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Target date (Taipei, start time minus 6h)
+        id: tpe
+        run: |
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            echo "day=${{ github.event.inputs.date }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "day=$(TZ=Asia/Taipei date -d '6 hours ago' +%F)" >> "$GITHUB_OUTPUT"
+          fi
+          echo "day8=$(TZ=Asia/Taipei date -d '6 hours ago' +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
+      # 股票清單同日快取 data/cache/social_info_<YYYYMMDD>.json（.gitignore 排除、不進 git）
+      - name: Restore stock-info cache
+        uses: actions/cache/restore@v6
+        with:
+          path: data/cache
+          key: social-info-${{ steps.tpe.outputs.day8 }}-${{ github.run_id }}
+          restore-keys: |
+            social-info-${{ steps.tpe.outputs.day8 }}-
+
+      - name: Build data/social
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          extra=""
+          if [ "${{ github.event.inputs.no_llm }}" = "true" ]; then extra="--no-llm"; fi
+          python build_social.py --date "${{ steps.tpe.outputs.day }}" $extra
+
+      - name: Save stock-info cache
+        if: always() && hashFiles('data/cache/social_info_*.json') != ''
+        uses: actions/cache/save@v6
+        with:
+          path: data/cache
+          key: social-info-${{ steps.tpe.outputs.day8 }}-${{ github.run_id }}
+
+      - name: Commit data/social
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/social
+          if git diff --cached --quiet; then
+            echo "data/social 無變化，跳過 commit"
+            exit 0
+          fi
+          git commit -m "social update ${{ steps.tpe.outputs.day }} ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          # push 走 build-news.yml 同款 pull --rebase 重試（最多 5 次、間隔 4 秒）；
+          # 本班只動 data/social/**，衝突必在該目錄，以本班版本為準（rebase 期間 --theirs＝本班）
+          pushed=0
+          for i in 1 2 3 4 5; do
+            if git pull --rebase origin "${GITHUB_REF_NAME}"; then
+              if git push origin HEAD:"${GITHUB_REF_NAME}"; then pushed=1; break; fi
+            else
+              if git checkout --theirs -- data/social && git add data/social; then
+                GIT_EDITOR=true git rebase --continue \
+                  || git rebase --skip \
+                  || git rebase --abort || true
+              else
+                git rebase --abort || true
+              fi
+            fi
+            sleep 4
+          done
+          if [ "$pushed" != "1" ]; then echo "::error::push failed after 5 retries"; exit 1; fi
+
+      - name: Notify failure
+        # cancelled 也要告警（failure() 在 cancelled 時不成立）
+        if: failure() || cancelled()
+        uses: ./.github/actions/notify-failure
+        with:
+          pipeline: news-social
