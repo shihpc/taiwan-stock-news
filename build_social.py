@@ -58,6 +58,10 @@ SOCIAL_MAX_CODES_PER_ARTICLE = 8   # 每篇最多記幾個代號（依出現順�
 SOCIAL_BODY_CHARS = 600            # 送 LLM 的正文前 N 字
 SOCIAL_BATCH_DEADLINE_SEC = 40 * 60
 SOCIAL_BATCH_POLL_SEC = 20
+# 同步回退的總時間預算：與 batch 40 分合計 55 分，仍留餘裕給 build-social.yml 的 70 分 job
+#（抓取上限 400 請求×≥1 秒≈7 分＋commit）。超過預算就停止回退：剩餘篇數計入 llm.failed_n、
+# 代號記 unk——API 異常時寧可情緒缺、不可讓 job 被砍掉連聲量資料一起丟（H7 精神）。
+SOCIAL_SYNC_BUDGET_SEC = 15 * 60
 SOCIAL_MODEL = "claude-opus-5"     # 要換模型改這裡即可，產物 llm.model 會如實記錄
 SOCIAL_PROMPT_VER = 1              # 改 SOCIAL_SYS 就 +1，舊檔不可比
 SOCIAL_SAMPLE_SINCE = "2026-09-27"
@@ -118,13 +122,29 @@ def warn(msg: str) -> None:
 
 
 # ── robots.txt（H5）─────────────────────────────────────────────────────
-def robots_verdict(text: str | None, path: str = f"/bbs/{PTT_BOARD}/") -> str:
-    """回 allow / disallow / unreachable。只看 User-agent: * 那組（含多個 UA 共用一組的寫法）；
-    任何 Disallow 前綴命中 path（如 `/` 或 `/bbs/`）即 disallow；Allow 不解、寧可多擋。"""
+ROBOTS_CHECK_PATHS = ("/", "/bbs/", f"/bbs/{PTT_BOARD}/", f"/bbs/{PTT_BOARD}/index.html")
+
+
+def _robots_rule_re(pattern: str) -> re.Pattern:
+    """Disallow 路徑 → regex：`*` 任意串、結尾 `$` 精確結尾、其餘為前綴比對。"""
+    anchored = pattern.endswith("$")
+    core = pattern[:-1] if anchored else pattern
+    rx = "^" + ".*".join(re.escape(part) for part in core.split("*"))
+    rx += "$" if anchored else ".*"
+    return re.compile(rx)
+
+
+def parse_robots(text: str | None) -> dict:
+    """回 {verdict: allow|disallow|unreachable, crawl_delay: float|None}。只看 User-agent: * 那組
+    （含多個 UA 共用一組的寫法）；**任一** Disallow 規則命中 ROBOTS_CHECK_PATHS 任一路徑
+    （`/`、`/bbs/`、`/bbs/Stock/`、板首頁）即 disallow——含 `*`／`$` 萬用字元；Allow 不解、寧可多擋。
+    Crawl-delay 只取 * 那組、解析失敗視同未宣告。"""
     if text is None:
-        return "unreachable"
+        return {"verdict": "unreachable", "crawl_delay": None}
     applies = False
     seen_ua = False
+    verdict = "allow"
+    crawl_delay = None
     for raw in text.splitlines():
         line = raw.split("#", 1)[0].strip()
         if not line or ":" not in line:
@@ -137,12 +157,24 @@ def robots_verdict(text: str | None, path: str = f"/bbs/{PTT_BOARD}/") -> str:
                 applies = False
             applies = applies or (v == "*")
             seen_ua = True
-        elif k in ("disallow", "allow", "sitemap", "crawl-delay"):
-            seen_ua = False
-            if k == "disallow" and applies and v:
-                if path.startswith(v) or v == "/":
-                    return "disallow"
-    return "allow"
+            continue
+        seen_ua = False
+        if not applies:
+            continue
+        if k == "disallow" and v:
+            rx = _robots_rule_re(v)
+            if any(rx.match(p) for p in ROBOTS_CHECK_PATHS):
+                verdict = "disallow"
+        elif k == "crawl-delay":
+            try:
+                crawl_delay = max(crawl_delay or 0.0, float(v))
+            except ValueError:
+                pass
+    return {"verdict": verdict, "crawl_delay": crawl_delay}
+
+
+def robots_verdict(text: str | None) -> str:
+    return parse_robots(text)["verdict"]
 
 
 # ── 抓取（H4：節流＋上限＋UA）────────────────────────────────────────────
@@ -643,8 +675,10 @@ def call_sync(user_msg: str, key: str, session, model: str = SOCIAL_MODEL, sleep
 
 def classify(articles: list[dict], bodies: dict[str, str], key: str, session, model: str = SOCIAL_MODEL,
              deadline_sec: int = SOCIAL_BATCH_DEADLINE_SEC, sleep=time.sleep, clock=time.monotonic,
-             poll_sec: float = SOCIAL_BATCH_POLL_SEC) -> dict:
-    """就地把 sent 寫進每篇（有代號者）；回 llm 區塊。via：全 batch＝batch、全 sync＝sync、混＝mixed。"""
+             poll_sec: float = SOCIAL_BATCH_POLL_SEC, sync_budget_sec: float = SOCIAL_SYNC_BUDGET_SEC) -> dict:
+    """就地把 sent 寫進每篇（有代號者）；回 llm 區塊。via：全 batch＝batch、全 sync＝sync、混＝mixed。
+    同步回退累計超過 sync_budget_sec（從第一次同步呼叫起算）即停止：沒拿到任何結果的篇數計入 failed_n、
+    代號記 unk，並印 ::warning::。"""
     todo = [a for a in articles if a["codes"]]
     llm = {"model": model, "prompt_ver": SOCIAL_PROMPT_VER, "via": None, "skipped": None,
            "classified_n": 0, "failed_n": 0, "usage": {"input_tokens": 0, "output_tokens": 0}}
@@ -654,11 +688,24 @@ def classify(articles: list[dict], bodies: dict[str, str], key: str, session, mo
     reqs = {a["aid"]: user_prompt(a["title"], bodies.get(a["aid"], ""), a["codes"]) for a in todo}
     got = call_batch(reqs, key, session, deadline_sec, model=model, sleep=sleep, clock=clock, poll_sec=poll_sec)
     n_batch = n_sync = 0
+    sync_t0: float | None = None
+    budget_hit = 0
+
+    def sync_allowed() -> bool:
+        nonlocal sync_t0
+        if sync_t0 is None:
+            sync_t0 = clock()
+            return True
+        return clock() - sync_t0 <= sync_budget_sec
+
     for a in todo:
         res = got.get(a["aid"])
         path = "batch"
         if res is None:
-            res = call_sync(reqs[a["aid"]], key, session, model=model, sleep=sleep)
+            if sync_allowed():
+                res = call_sync(reqs[a["aid"]], key, session, model=model, sleep=sleep)
+            else:
+                budget_hit += 1
             path = "sync"
         if res is None:
             llm["failed_n"] += 1
@@ -669,8 +716,8 @@ def classify(articles: list[dict], bodies: dict[str, str], key: str, session, mo
         llm["usage"]["output_tokens"] += usage["output_tokens"]
         parsed = parse_sent(text, a["codes"])
         if parsed is None:
-            # 回應不是合法 JSON：再試一次（同步），仍不合法 → 該篇全 unk
-            res2 = call_sync(reqs[a["aid"]], key, session, model=model, sleep=sleep)
+            # 回應不是合法 JSON：再試一次（同步，仍受預算約束），仍不合法 → 該篇全 unk
+            res2 = call_sync(reqs[a["aid"]], key, session, model=model, sleep=sleep) if sync_allowed() else None
             path = "sync" if path == "sync" else "mixed"
             if res2 is not None:
                 text2, usage2 = res2
@@ -687,6 +734,8 @@ def classify(articles: list[dict], bodies: dict[str, str], key: str, session, mo
         else:
             n_batch += 1
             n_sync += 1
+    if budget_hit:
+        warn(f"同步回退超過預算 {int(sync_budget_sec)} 秒，{budget_hit} 篇未分類（計入 llm.failed_n、代號記 unk）")
     if n_batch and n_sync:
         llm["via"] = "mixed"
     elif n_batch:
@@ -800,12 +849,26 @@ def collect_day(fetcher: PttFetcher, target: date, info: dict[str, str | None] |
             "articles_fetched_n": len(picked) - failed, "failed_n": failed}
 
 
+def _finalize(out: dict, fetcher: PttFetcher, info, t0: float) -> dict:
+    out["stocks"] = aggregate(out["articles"], info)
+    out["requests_n"] = fetcher.requests_n
+    out["elapsed_s"] = round(time.monotonic() - t0, 1)
+    out["generated_at"] = taipei_now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    return out
+
+
 def build(target: date, fetcher: PttFetcher, info: dict[str, str | None] | None, key: str,
-          llm_session=None, no_llm: bool = False, fixture: bool = False, **llm_kw) -> dict:
+          llm_session=None, no_llm: bool = False, fixture: bool = False, out_dir: str | None = None,
+          **llm_kw) -> dict:
+    """out_dir 非 None 時：進 LLM 之前先落一版 sent 全 null／llm.skipped="pending" 的產物，分類完成
+    再由呼叫端覆寫——LLM 路徑掛住或 job 被砍時，該日聲量資料已在磁碟上（H7 精神）。"""
     t0 = time.monotonic()
-    robots = robots_verdict(fetcher.get(PTT_ROBOTS_PATH))
+    rb = parse_robots(fetcher.get(PTT_ROBOTS_PATH))
+    robots = rb["verdict"]
+    if rb["crawl_delay"]:
+        fetcher.min_interval = max(fetcher.min_interval, rb["crawl_delay"])
     out = {"schema": 1, "date": target.isoformat(), "generated_at": None, "source": "ptt-stock",
-           "robots": robots, "pages_fetched": 0, "articles_n": 0, "articles_fetched_n": 0, "failed_n": 0,
+           "robots": robots, "robots_crawl_delay": rb["crawl_delay"], "pages_fetched": 0, "articles_n": 0, "articles_fetched_n": 0, "failed_n": 0,
            "requests_n": 0, "elapsed_s": 0.0,
            "llm": {"model": SOCIAL_MODEL, "prompt_ver": SOCIAL_PROMPT_VER, "via": None, "skipped": None,
                    "classified_n": 0, "failed_n": 0, "usage": {"input_tokens": 0, "output_tokens": 0}},
@@ -827,12 +890,20 @@ def build(target: date, fetcher: PttFetcher, info: dict[str, str | None] | None,
             warn("ANTHROPIC_API_KEY 缺：情緒欄整批 null、llm.skipped=no-key（聲量資料照寫）")
             out["llm"]["skipped"] = "no-key"
         else:
-            out["llm"] = classify(out["articles"], bodies, key, llm_session or requests.Session(), **llm_kw)
+            if out_dir:
+                out["llm"]["skipped"] = "pending"
+                write_outputs(_finalize(out, fetcher, info, t0), out_dir)
+                out["llm"]["skipped"] = None
+            try:
+                out["llm"] = classify(out["articles"], bodies, key, llm_session or requests.Session(), **llm_kw)
+            except Exception as e:
+                # 分類整段炸掉也不讓聲量資料陪葬：記 skipped="error"、全部 unk，exit 仍為 0
+                warn(f"情緒分類例外（{mask_secret(e, key)}）：llm.skipped=error、代號全記 unk")
+                for a in out["articles"]:
+                    a["sent"] = {c: "unk" for c in a["codes"]} if a["codes"] else None
+                out["llm"].update({"skipped": "error", "failed_n": sum(1 for a in out["articles"] if a["codes"])})
         bodies.clear()  # H3：正文用完即丟
-    out["stocks"] = aggregate(out["articles"], info)
-    out["requests_n"] = fetcher.requests_n
-    out["elapsed_s"] = round(time.monotonic() - t0, 1)
-    out["generated_at"] = taipei_now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    _finalize(out, fetcher, info, t0)
     if out["teardown"]["due"]:
         warn(f"社群量測班已滿 {out['teardown']['age_days']} 日，該回頭看樣本決定收窄／移除")
     return out
@@ -853,9 +924,10 @@ def main(argv=None) -> int:
     http = requests.Session()
     info = load_stock_info(args.stock_info, target.strftime("%Y%m%d"), http, fm_token)
     fetcher = PttFetcher(session=http, fixture_dir=args.from_fixture,
-                         min_interval=0 if args.from_fixture else SOCIAL_MIN_INTERVAL)
+                         min_interval=0 if args.from_fixture else SOCIAL_MIN_INTERVAL,
+                         sleep=(lambda s: None) if args.from_fixture else time.sleep)
     out = build(target, fetcher, info, key, llm_session=http, no_llm=args.no_llm,
-                fixture=bool(args.from_fixture))
+                fixture=bool(args.from_fixture), out_dir=args.out_dir)
     path = write_outputs(out, args.out_dir)
     print(f"寫出 {path}：robots={out['robots']} pages={out['pages_fetched']} articles={out['articles_n']} "
           f"fetched={out['articles_fetched_n']} failed={out['failed_n']} requests={out['requests_n']} "

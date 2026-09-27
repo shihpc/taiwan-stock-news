@@ -206,9 +206,14 @@ python tests/test_incremental.py                               # 增量正確性
   （改 prompt 就 `SOCIAL_PROMPT_VER` +1，舊檔不可比）與 `llm.usage`（估成本用）。
   `stocks[code]` 的 `pos+neg+neu+unk == n` 恆成立；LLM 跳過時 `sent` 為 null、`unk == n`。
   **不存正文**、沒有任何偏多／偏空／建議欄位。
-- **節流與守門**：對 ptt.cc 每次請求間隔 ≥1 秒、單班 ≤400 請求、UA 帶專案識別字串、cookie
-  `over18=1`；robots 判 `disallow` 或 `unreachable` 都不抓文章，仍寫產物（`articles_n: 0`）並
-  印 `::warning::`、exit 0。
+- **節流與守門**：對 ptt.cc 每次請求間隔 ≥1 秒（robots 有 `Crawl-delay` 則取較大者，寫進產物
+  `robots_crawl_delay`）、單班 ≤400 請求、UA 帶專案識別字串、cookie `over18=1`；robots `Disallow`
+  支援 `*`／`$`，任一規則命中 `/`、`/bbs/`、`/bbs/Stock/` 即 `disallow`；判 `disallow` 或 `unreachable`
+  都不抓文章，仍寫產物（`articles_n: 0`）並印 `::warning::`、exit 0。
+- **LLM 路徑掛住不拖垮聲量資料**：進 LLM 前先落一版 `llm.skipped="pending"` 的完整產物，分類完再覆寫；
+  同步回退總預算 `SOCIAL_SYNC_BUDGET_SEC`（15 分，與 batch 40 分合計仍留餘裕給 70 分 job）超過即停、
+  剩餘篇計 `llm.failed_n`、代號記 `unk`；`classify()` 拋例外記 `skipped="error"`、exit 0。
+  磁碟上看到 `pending` 就代表那班 LLM 沒走完。
 - **金鑰**：`ANTHROPIC_API_KEY`／`FINMIND_TOKEN` 只由環境變數讀；例外訊息過 `mask_secret()` 才印。
   缺 `ANTHROPIC_API_KEY` → 情緒整批 null、`llm.skipped="no-key"`，聲量資料照寫。缺 `FINMIND_TOKEN`
   且無當日快取（`data/cache/social_info_<YYYYMMDD>.json`，不進 git）→ 只認代號、`name` 為 null。

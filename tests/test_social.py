@@ -228,6 +228,79 @@ def test_invalid_json_reply_retries_once_then_unk():
     assert llm["classified_n"] == 3
 
 
+def test_sync_budget_exhausted_stops_fallback_keeps_invariant(tmp_path, capsys):
+    """必修 1b：同步回退超過 SOCIAL_SYNC_BUDGET_SEC 即停止，剩餘篇計 failed_n、代號 unk，產物照寫。"""
+    t = {"now": 0.0}
+
+    def clock():
+        return t["now"]
+
+    def sleep(s):
+        t["now"] += s
+
+    calls = {"n": 0}
+
+    def slow_reply(j):
+        calls["n"] += 1
+        t["now"] += 400.0                              # 每次同步呼叫耗 400 秒
+        return json.dumps({c: "neu" for c in json.loads(
+            j["messages"][0]["content"].split("代號清單：")[1].split("\n")[0])})
+
+    class Sess(FakeAnthropic):
+        def post(self, url, headers=None, json=None, timeout=None):
+            if url == bs.URL_MESSAGES:
+                self.calls.append(("POST", url))
+                return FakeResp(200, {"content": [{"type": "text", "text": slow_reply(json)}],
+                                      "usage": {"input_tokens": 1, "output_tokens": 1}})
+            return super().post(url, headers=headers, json=json, timeout=timeout)
+
+    fake = Sess(submit_fail=True)
+    f = _fetcher()
+    out = bs.build(TARGET, f, _info(), key=FAKE_KEY, llm_session=fake, out_dir=str(tmp_path),
+                   sleep=sleep, clock=clock, poll_sec=0, sync_budget_sec=500)
+    # 第 1 篇：t=0 起算 → 呼叫（t=400）；第 2 篇：400 ≤ 500 → 呼叫（t=800）；第 3 篇：800 > 500 → 停
+    assert calls["n"] == 2
+    assert out["llm"]["classified_n"] == 2 and out["llm"]["failed_n"] == 1 and out["llm"]["via"] == "sync"
+    unk_arts = [a for a in out["articles"] if set(a["sent"].values()) == {"unk"}]
+    assert len(unk_arts) == 1
+    for v in out["stocks"].values():
+        assert v["pos"] + v["neg"] + v["neu"] + v["unk"] == v["n"]
+    assert "同步回退超過預算" in capsys.readouterr().out
+    assert (tmp_path / "2026-09-26.json").exists()   # pending 版已先落地
+    assert bs.SOCIAL_SYNC_BUDGET_SEC + bs.SOCIAL_BATCH_DEADLINE_SEC < 70 * 60
+
+
+def test_pending_product_written_before_classify_and_survives_exception(tmp_path, monkeypatch):
+    """必修 1a：classify() 之前磁碟上已有 sent 全 null／skipped=pending 的產物；classify 拋例外時
+    該版仍在、最終版記 skipped=error、聲量資料不丟。"""
+    snapshots = []
+
+    def boom(*a, **k):
+        p = tmp_path / "2026-09-26.json"
+        assert p.exists()
+        snapshots.append(json.load(open(p, encoding="utf-8")))
+        raise RuntimeError("api exploded " + FAKE_KEY)
+
+    monkeypatch.setattr(bs, "classify", boom)
+    out = bs.build(TARGET, _fetcher(), _info(), key=FAKE_KEY, llm_session=object(), out_dir=str(tmp_path))
+    pend = snapshots[0]
+    assert pend["llm"]["skipped"] == "pending" and all(a["sent"] is None for a in pend["articles"])
+    assert pend["articles_n"] == 5 and len(pend["articles"]) == 3 and pend["stocks"]["2330"]["unk"] == 2
+    assert all(v["pos"] + v["neg"] + v["neu"] + v["unk"] == v["n"] for v in pend["stocks"].values())
+    idx = json.load(open(tmp_path / "index.json", encoding="utf-8"))
+    assert idx["days"][0]["date"] == "2026-09-26"
+    assert out["llm"]["skipped"] == "error" and out["llm"]["failed_n"] == 3
+    assert all(set(a["sent"].values()) == {"unk"} for a in out["articles"])
+    final = bs.write_outputs(out, str(tmp_path))
+    assert json.load(open(final, encoding="utf-8"))["llm"]["skipped"] == "error"
+
+
+def test_build_without_out_dir_writes_nothing(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    bs.build(TARGET, _fetcher(), _info(), key="")
+    assert not os.path.exists("data")
+
+
 def test_sync_total_failure_counts_failed_and_unk():
     arts, bodies = _articles_with_bodies()
     fake = FakeAnthropic(submit_fail=True, sync_fail=True)
@@ -253,6 +326,36 @@ def test_robots_verdict_parsing():
     assert bs.robots_verdict("User-agent: foo\nUser-agent: *\nDisallow: /bbs\n") == "disallow"
     assert bs.robots_verdict("") == "allow"
     assert bs.robots_verdict(None) == "unreachable"
+
+
+def test_robots_wildcard_and_dollar_rules():
+    assert bs.robots_verdict("User-agent: *\nDisallow: /bbs/*/\n") == "disallow"       # 萬用字元
+    assert bs.robots_verdict("User-agent: *\nDisallow: /*/Stock/\n") == "disallow"
+    assert bs.robots_verdict("User-agent: *\nDisallow: /bbs/Stock/index*\n") == "disallow"
+    assert bs.robots_verdict("User-agent: *\nDisallow: /bbs/$\n") == "disallow"        # 精確結尾命中 /bbs/
+    assert bs.robots_verdict("User-agent: *\nDisallow: /bbs/Other/*\n") == "allow"
+    assert bs.robots_verdict("User-agent: *\nDisallow: /*.png$\n") == "allow"
+    assert bs.robots_verdict("User-agent: Bad\nDisallow: /bbs/*/\nUser-agent: *\nDisallow: /ask/\n") == "allow"
+
+
+def test_robots_crawl_delay_parsed_and_applied_to_fetcher(tmp_path):
+    rb = bs.parse_robots("User-agent: *\nCrawl-delay: 3\nDisallow: /ask/\nUser-agent: X\nCrawl-delay: 99\n")
+    assert rb == {"verdict": "allow", "crawl_delay": 3.0}
+    assert bs.parse_robots("User-agent: *\nCrawl-delay: abc\n")["crawl_delay"] is None
+    assert bs.parse_robots("User-agent: *\nDisallow: /ask/\n")["crawl_delay"] is None
+    d = tmp_path / "fix"
+    d.mkdir()
+    for n in os.listdir(FIX):
+        (d / n).write_bytes(open(os.path.join(FIX, n), "rb").read())
+    (d / "robots.txt").write_text("User-agent: *\nCrawl-delay: 3\n", encoding="utf-8")
+    f = bs.PttFetcher(session=None, fixture_dir=str(d), min_interval=1.0, sleep=lambda s: None)
+    out = bs.build(TARGET, f, _info(), key="")
+    assert f.min_interval == 3.0 and out["robots_crawl_delay"] == 3.0 and out["robots"] == "allow"
+    f2 = bs.PttFetcher(session=None, fixture_dir=str(d), min_interval=5.0, sleep=lambda s: None)
+    bs.build(TARGET, f2, _info(), key="")
+    assert f2.min_interval == 5.0                    # 取 max(Crawl-delay, 既有間隔)
+    out0 = bs.build(TARGET, _fetcher(), _info(), key="")
+    assert out0["robots_crawl_delay"] == 1.0         # robots_allow.txt
 
 
 def test_robots_disallow_fetches_nothing(tmp_path, capsys):
@@ -331,7 +434,8 @@ def test_output_schema_no_body_no_judgement_and_index(tmp_path):
         assert k not in raw
     assert set(j) == {"schema", "date", "generated_at", "source", "robots", "pages_fetched", "articles_n",
                       "articles_fetched_n", "failed_n", "requests_n", "elapsed_s", "llm", "stocks",
-                      "articles", "teardown", "fixture"}
+                      "articles", "teardown", "fixture", "robots_crawl_delay"}
+    assert j["robots_crawl_delay"] == 1.0            # robots_allow.txt 宣告 Crawl-delay: 1
     assert set(j["llm"]) == {"model", "prompt_ver", "via", "skipped", "classified_n", "failed_n", "usage"}
     assert j["fixture"] is True and j["teardown"]["since"] == bs.SOCIAL_SAMPLE_SINCE
     idx = json.load(open(tmp_path / "index.json", encoding="utf-8"))

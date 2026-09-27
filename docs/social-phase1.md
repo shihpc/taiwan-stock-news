@@ -36,10 +36,13 @@
   "generated_at": "2026-09-27T23:2x:xx+08:00",
   "source": "ptt-stock",
   "robots": "allow" | "disallow" | "unreachable",
+  "robots_crawl_delay": null | 1.0,   // robots.txt 對 User-agent: * 宣告的 Crawl-delay（秒），null＝未宣告；
+                                      // 生效值＝max(它, SOCIAL_MIN_INTERVAL)（2026-09-28 驗收後補）
   "pages_fetched": 3, "articles_n": 187, "articles_fetched_n": 180, "failed_n": 7,
   "requests_n": 184, "elapsed_s": 212.3,
   "llm": { "model": "claude-opus-5", "prompt_ver": 1, "via": "batch"|"sync"|"mixed"|null,
-           "skipped": null | "no-key" | "robots" | "no-articles", "classified_n": 180, "failed_n": 0,
+           "skipped": null | "no-key" | "robots" | "no-articles" | "no-llm" | "pending" | "error",
+           "classified_n": 180, "failed_n": 0,
            "usage": {"input_tokens": 0, "output_tokens": 0} },
   "stocks": { "2330": { "name": "台積電", "n": 41, "push": 913, "boo": 120,
                         "pos": 18, "neg": 9, "neu": 12, "unk": 2 } },
@@ -47,12 +50,19 @@
                   "ts": "2026-09-27 21:03", "push": 35, "boo": 2, "cat": "標的",
                   "url": "https://www.ptt.cc/bbs/Stock/M.1758980000.A.1B2.html",
                   "codes": ["2330"], "sent": {"2330": "pos"} } ],
-  "teardown": { "since": "2026-09-27", "age_days": 0, "due": false }
+  "teardown": { "since": "2026-09-27", "age_days": 0, "due": false },
+  "fixture": true                     // 只有 --from-fixture 產的樣本才有這個頂層鍵（線上產物沒有）
 }
 ```
 
+- `llm.skipped`（2026-09-28 驗收後補）：`no-llm`＝`--no-llm`；`pending`＝進 LLM 之前先落地的那一版
+  （分類完成會被覆寫，磁碟上還看得到它＝那班 LLM 路徑沒走完）；`error`＝`classify()` 整段拋例外，
+  代號全記 `unk`、exit 仍 0。
+- `sent` 的值除 `pos|neg|neu` 外**可為 `"unk"`**（LLM 未回／回了不在三類／同步回退預算耗盡）；
+  LLM 整批跳過時 `sent` 才是 `null`。
+
 - `n`＝提及該代號的篇數；`push`／`boo`＝那些篇的推／噓數加總；`pos+neg+neu+unk == n`（`unk`＝LLM 未回或回了不在三類）。
-- `sent` 每篇每代號一個標籤 ∈ `pos|neg|neu`；LLM 跳過時 `sent` 為 `null`、`unk == n`。
+- `sent` 每篇每代號一個標籤 ∈ `pos|neg|neu|unk`；LLM 跳過時 `sent` 為 `null`、`unk == n`。
 - **`prompt_ver` 與 `model` 每檔必帶**——改 prompt 就把 `SOCIAL_PROMPT_VER` +1，舊檔不可比。
 
 ## 3. 功能規格
@@ -62,6 +72,8 @@
 - 每篇：解析 `.r-ent`（標題、作者、日期、推文數；「爆」→100、「X{n}」→ −n×10、「XX」→ −100，寫在註解）、去掉「(本文已被刪除)」與公告；標題以 `[分類]` 開頭者記 `cat`。
 - 文章頁只抓當日 `SOCIAL_MAX_ARTICLES`（300）篇，依推文數高者優先；解析發文時間（`.article-meta-value` 第 4 個，`%a %b %d %H:%M:%S %Y`）、正文（`#main-content` 去 meta 與推文區）、推噓（`.push-tag` 計數）。
 - 台北日歸屬用文章頁的發文時間；板首頁只有「月/日」，用來決定要不要抓文章頁。
+- robots `Disallow` 含 `*`／結尾 `$` 依萬用字元比對，任一規則命中 `/`、`/bbs/`、`/bbs/Stock/` 或板首頁即
+  disallow；`Crawl-delay` 取 `max(它, SOCIAL_MIN_INTERVAL)` 生效並寫進 `robots_crawl_delay`（2026-09-28 補）。
 - 節流：H4；失敗（非 200／逾時／例外）退避一次再失敗即計入 `failed_n`，**不寫 `err` 到產物以外的地方**。
 - `--from-fixture DIR`：用目錄裡的 HTML 取代網路（測試與沙箱用；本沙箱連不到 ptt.cc）。
 
@@ -76,6 +88,9 @@
 - System prompt 存常數 `SOCIAL_SYS`，明寫：只判**作者對該檔的態度**，不判市場、不預測、不加解釋；無法判斷回 `neu`。
 - 走 Anthropic Message Batches（`POST /v1/messages/batches`，raw `requests`，比照 `postmkt/build_summary.py` 的 `call_claude_batch`／`batch_deadline` 移植但**不共用**）：期限 `SOCIAL_BATCH_DEADLINE_SEC`（40 分）；逾時或整包失敗 → 逐篇同步回退，`via` 記實際路徑（全 batch＝`batch`、全 sync＝`sync`、混＝`mixed`）。
 - `max_tokens` 256、無 thinking 參數（分類任務）。回應非合法 JSON 或缺代號 → 該代號 `unk`，不重試超過一次。
+- **同步回退總預算 `SOCIAL_SYNC_BUDGET_SEC`（15 分，2026-09-28 驗收後補）**：從第一次同步呼叫起算，
+  超過即停止回退、剩餘篇計入 `llm.failed_n`、代號記 `unk`、印 `::warning::`。與 batch 40 分合計 55 分，
+  留餘裕給 70 分 job。**進 LLM 之前先寫一版 `llm.skipped="pending"` 的產物**，分類完成再覆寫。
 - 模型常數 `SOCIAL_MODEL = "claude-opus-5"`（依本 session 載入的 claude-api skill 預設；要換成 `claude-haiku-4-5` 省成本屬使用者裁決，改常數即可，`model` 欄會如實記錄）。
 - **usage 必記**：從每筆回應的 `usage` 加總 `input_tokens`／`output_tokens` 寫入 `llm.usage`，供估成本。
 
@@ -131,3 +146,26 @@
 - **移植來源**：Batches 提交／輪詢／cancel／結果依 `custom_id` 對回的流程移植自 postmkt
   `build_summary.py` 的 `call_claude_batch`，刻意不共用模組；差異＝無 thinking 參數、`max_tokens` 256、
   期限固定 40 分（無牌鐘）、回應解析改為 JSON 物件而非長文。
+
+### 6.1 驗收退回修正（2026-09-28，於 `e3c7f1e` 之後同分支補）
+
+- **必修 1（LLM 路徑掛住不得拖垮聲量資料）**：
+  a. `build(out_dir=…)` 在 `classify()` 之前先 `write_outputs()` 一版 `sent` 全 null／`llm.skipped="pending"`
+     的完整產物（`stocks` 已聚合、`index.json` 已更新），分類完成後由 `main()` 覆寫；`classify()` 拋例外
+     則記 `llm.skipped="error"`、代號全 `unk`、exit 0（`::warning::` 帶遮罩後的例外訊息）。
+     守門測試：`test_pending_product_written_before_classify_and_survives_exception`（monkeypatch `classify`
+     拋例外，斷言拋出當下磁碟已有 pending 版且不變式成立、最終版 `skipped="error"`）、
+     `test_build_without_out_dir_writes_nothing`。
+  b. `SOCIAL_SYNC_BUDGET_SEC = 15*60`：`classify()` 從第一次同步呼叫起算，超過即不再呼叫 `/v1/messages`
+     （含「非法 JSON 再試一次」那次），沒拿到結果的篇計 `failed_n`、代號 `unk`，印 `::warning::`。
+     守門測試：`test_sync_budget_exhausted_stops_fallback_keeps_invariant`（假鐘每次呼叫耗 400 秒、預算 500
+     → 恰呼叫 2 次、第 3 篇 unk、`pos+neg+neu+unk==n`、pending 檔存在、並斷言 15+40 分 < 70 分）。
+- **必修 2（robots 解析）**：`parse_robots()` 取代 `robots_verdict()` 內部實作（後者保留為包裝）。
+  `Disallow` 值含 `*` 轉 `.*`、結尾 `$` 精確結尾、其餘前綴比對；任一規則命中 `ROBOTS_CHECK_PATHS`
+  （`/`、`/bbs/`、`/bbs/Stock/`、`/bbs/Stock/index.html`）即 disallow。`Crawl-delay`（只取 `*` 那組）
+  → `fetcher.min_interval = max(既有, Crawl-delay)`，產物新增 `robots_crawl_delay`（null＝未宣告）。
+  守門測試：`test_robots_wildcard_and_dollar_rules`、`test_robots_crawl_delay_parsed_and_applied_to_fetcher`。
+- fixture 模式的 `PttFetcher` 改注入 `sleep=lambda s: None`（fixture 的 `robots_allow.txt` 宣告
+  `Crawl-delay: 1`，否則本機實跑會真的睡 10 秒）；線上路徑仍是 `time.sleep`。
+- §2 schema 同批回寫：`llm.skipped` 補 `no-llm`／`pending`／`error`、`sent` 值可為 `unk`、頂層 `fixture` 鍵、
+  新欄 `robots_crawl_delay`。`tests/test_social.py` 由 25 案例增為 30。

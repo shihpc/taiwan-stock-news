@@ -90,9 +90,10 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
   ＋`index.json`，**只收資料、不顯示、不下判準**——規格與 H1–H9 硬約束正本＝`docs/social-phase1.md`，
   改動前先讀。來源只有 PTT Stock 板（板首頁翻頁→當日文章頁，`html.parser`、不加 bs4）；產物不存
   正文（H3）；每班先看 robots.txt，`disallow`／`unreachable` 都不抓、仍寫產物（H5，後者是保守
-  選擇）；對 ptt.cc 節流 `SOCIAL_MIN_INTERVAL`／`SOCIAL_MAX_REQUESTS`（H4）。情緒分類走 Anthropic
-  Message Batches→逐篇同步回退（`call_batch`／`call_sync`／`classify`，移植自 postmkt
-  `build_summary.py`、**刻意不共用**），缺 `ANTHROPIC_API_KEY` 情緒整批 null（H7）。排程只靠
+  選擇，`Disallow` 支援 `*`／`$`、`Crawl-delay` 取較大者生效）；對 ptt.cc 節流 `SOCIAL_MIN_INTERVAL`／
+  `SOCIAL_MAX_REQUESTS`（H4）。情緒分類走 Message Batches→逐篇同步回退（`call_batch`／`call_sync`／
+  `classify`，移植自 postmkt `build_summary.py`、**刻意不共用**；進 LLM 前先落一版 `skipped="pending"`
+  產物、同步回退總預算 `SOCIAL_SYNC_BUDGET_SEC` 15 分），缺 `ANTHROPIC_API_KEY` 情緒整批 null（H7）。排程只靠
   `build-social.yml` 的 GH cron 台北 23:20（不進 Worker dispatch 清單，H8）；目標日＝起跑時刻減
   6 小時的台北日（cron 延遲不滾日）。`data/social/2026-09-26.json` 是 fixture 產的 **schema 樣本**
   （檔內 `"fixture": true`），不是線上資料。⚠ PTT DOM 依記憶實作，**線上首跑要對照實際頁面**。
