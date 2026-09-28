@@ -89,7 +89,7 @@ Worker 端 additive 擴充與 cache 升版（`fund:5:`）、新聞窗 5 日/保�
 **前端絕不碰 FinMind token**，7 項指標全在 Worker 算好回傳，前端只渲染。渲染函式：`trackTechHtml`＋
 `trackMaHtml/trackKdHtml/trackMacdHtml/trackRsiHtml/trackBollHtml/trackVolHtml/trackR52Html`。
 
-**誠實原則（專案鐵律）**（**唯一例外：社群聲量 tab**，使用者 2026-09-28 裁決改紅綠並給規則式買賣建議，見 `docs/social-display.md` §1b）：分頁頂部固定免責卡「技術指標為現況描述、非買賣訊號，僅供參考」；狀態詞
+**誠實原則（專案鐵律）**：分頁頂部固定免責卡「技術指標為現況描述、非買賣訊號，僅供參考」；狀態詞
 （超買/超賣/黃金交叉/死亡交叉/黏合/多空排列…）＝描述指標數學狀態的中性詞（`.tst` 中性色，不用紅綠），
 **不寫該買該賣、不做預測**。紅漲綠跌（`sgn`）僅用於「現價距離%」正負與距 52 週高低%。7 項＝均線
 MA5/10/20/60＋距離%＋排列、KD(9,3,3)、MACD(12,26,9)、RSI(5,10)、布林(20,2 %b)、量能(5/20日均量比)、
@@ -193,11 +193,13 @@ python tests/test_incremental.py                               # 增量正確性
 
 ## 社群聲量量測班（階段一，2026-09-27）
 
-> **2026-09-28 起上畫面**：第 6 個 tab「社群聲量」，含紅綠標籤、偏多／偏空排行、情緒＋千張大戶雙確認的規則式買賣建議與參考價位（使用者裁決，**未經回測**，畫面標「AI 研判，未經回測，非保證」）。規格見 `docs/social-display.md`。
+**定位：只收資料、不顯示、不下判準。** 規格、硬約束 H1–H9 與驗收清單正本在 `docs/social-phase1.md`；
+背景是「聲量／情緒能不能當訊號」尚未回測（家族鐵律 8），故先收 30+ 個交易日樣本，
+第二階段在 taiwan-backtest 驗資訊係數，有結果才談呈現。**前端 `index.html` 完全不讀這批資料。**
 
-**定位（原始設計，2026-09-28 已部分改變）**：原本只收資料、不顯示、不下判準，規格、硬約束 H1–H9 與驗收清單正本在 `docs/social-phase1.md`；
-背景是「聲量／情緒能不能當訊號」尚未回測（家族鐵律 8），故先收 30+ 個交易日樣本，第二階段在 taiwan-backtest 驗資訊係數。
-**2026-09-28 使用者裁決提前上畫面**（見上方引言），回測仍未做，所以畫面上的標籤與建議都是**未經回測**的規則。
+> **2026-09-28**：「社群聲量」畫面（紅綠標籤、偏多／偏空排行、情緒＋千張大戶雙確認的規則式建議，使用者裁決、未經回測）
+> 在本站上線後同日**搬到 postmkt**（tab id `social`），本站 tab 已移除；postmkt 以同源相對路徑 `../taiwan-stock-news/data/social/`
+> 讀本管線產物，**產物 schema 或路徑改動＝跨站變更**。畫面規格正本仍是本 repo `docs/social-display.md`。
 
 - **管線**：`build_social.py`（只用 `requests`＋標準庫，HTML 解析走 `html.parser`）。
   流程：`robots.txt` 守門 → PTT Stock 板首頁向前翻頁（≤15 頁）挑目標日列 → 依推文數高者優先抓
@@ -262,7 +264,7 @@ python tests/test_incremental.py                               # 增量正確性
   `data/daysummary/latest.json`（`flowSumHtml()`，插在籌碼卡與美股段之間；讀不到/解析失敗
   整段隱藏不擋晨報，卡片標「資料日 YYYY-MM-DD」）。上游為該 repo `daysummary.yml`（平日
   14:05 台北產出，口徑同其收盤總結卡）。
-- `index.html` 現有 6 個 tab（第 6 個「社群聲量」見上方社群聲量節）：新聞、每日晨報（iframe 載入 `daily-brief.html`）、昨日市場
+- `index.html` 現有 5 個 tab：新聞、每日晨報（iframe 載入 `daily-brief.html`）、昨日市場
   （原「晨報」tab，跨 repo 讀 taiwan-flow-live-v2 `data/morning.json`）、**摘要分析**
   （2026-07-12 新增）、個股追蹤（見上方三批）。摘要分析為前端直呼 Claude，框架與 postmkt 逐字同源
   （callClaude/mdToHtml/Opus 4.8-Sonnet 5 模型切換）；localStorage key

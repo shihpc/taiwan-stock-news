@@ -1,5 +1,7 @@
 # 社群聲量 tab — 驗收條件
 
+> **2026-09-28 搬到 postmkt**（tab id `social`，驗收條件 `postmkt/docs/move-radar-social.md`）；本站 `social` tab 已移除。本文件仍是該 tab 的畫面規格正本，下文的「本 repo」「`index.html`」路徑指的是搬家前的原站實作。
+
 **寫於** 2026-09-28，動手前定稿。**目標專案**：`/home/user/taiwan-stock-news`，分支 `claude/investment-site-optimization-nac77h`。
 **設計示意**：https://claude.ai/artifact/ETr466nR5q9ox7eVY1Jsft （第二分頁）。
 **使用者裁決（2026-09-28，兩次，均由使用者本人在主對話直接選定）**：
