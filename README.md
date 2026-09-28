@@ -242,6 +242,8 @@ python tests/test_incremental.py                               # 增量正確性
   ```
   `data/social/2026-09-26.json` 就是這條指令產的 **schema 樣本**（檔內與 `index.json` 皆標
   `"fixture": true`），不是線上資料。
+- **線上實測（2026-09-28）**：GitHub runner 對 `/bbs/Stock/index.html` 拿到 **403**（robots.txt 為 404、
+  無規則），三班序列與待裁決的兩條路見 `docs/social-phase1.md` §6.5；**不以偽裝 UA 試探**。
 - **已知不確定點**：PTT 板首頁／文章頁的 DOM（`div.r-ent`／`div.nrec > span.hl`／
   `div.article-metaline`／`div.push > span.push-tag`）依記憶實作，本沙箱連不到 ptt.cc；解析器
   一律寬鬆（找不到元素回 None／空值），**線上首跑要對照實際頁面**。截至本節寫成時**尚未在線上跑過**。

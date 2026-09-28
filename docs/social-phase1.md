@@ -219,3 +219,26 @@
   `test_robots_connection_error_is_unreachable`；既有 disallow／unreachable 測試維持，
   `test_robots_detail_distinguishes_blocked_from_unreachable` 的 403 案例改斷言 `absent`。
   `tests/test_social.py` 35 → 40 案例。
+
+### 6.5 線上實測：GitHub runner 被 ptt.cc 拒絕（403）（2026-09-28，只記錄、不改程式）
+
+- **三班實測序列**（皆 `main`、`build-social.yml` 手動／排程 run）：
+  1. 第一班（run 36376947260）：`robots: "unreachable"`、`requests_n: 2`、`elapsed_s: 2.4`——只知道 robots.txt
+     兩次沒拿到，產物分不出種類 → 補 `robots_detail`／`fetch_errors`（§6.3）。
+  2. 第二班：`robots_detail = {status: 404, err: null, final_url: "https://www.ptt.cc/robots.txt", attempts: 2}`
+     → ptt.cc **沒有 robots.txt**、runner 連得到 → 4xx 改判 `absent` 照抓（§6.4）。
+  3. 第三班（run 36377888325，commit `6e35102`，產物 `data/social/2026-09-28.json`）：`robots: "absent"`（404），
+     但 `/bbs/Stock/index.html` **兩次都 HTTP 403**（`fetch_errors` 第 3、4 筆 `{path: "/bbs/Stock/index.html",
+     status: 403, err: null}`），`pages_fetched: 0`、`articles_n: 0`、`llm.skipped: "no-articles"`。
+- **結論**：robots 沒有規則，但站方對本 runner 的板首頁請求以 **403 明確拒絕**（請求帶 UA＝本班識別字串
+  `SOCIAL_UA`、cookie `over18=1`）。程式路徑本身走通了（robots → absent → 翻頁），卡在站方拒絕。
+- **未知、且本班刻意不測**：403 是依 **IP 段**（GitHub Actions／雲端出口）還是依 **UA**。**不以偽裝瀏覽器 UA
+  試探**——H5 的立場是未取得同意不抓，403 是站方的明確拒絕，換 UA 繞過等於違反同一條。
+- **待使用者裁決的兩條路**：
+  1. **改由自有機器跑同一支程式**（`python build_social.py --date …`，需 `FINMIND_TOKEN`／`ANTHROPIC_API_KEY`
+     環境變數），驗證是否純粹 IP 因素；程式一字不改。若自有機器拿得到 200，再決定排程要不要搬（GH cron
+     這條路對 ptt.cc 就是死的）。
+  2. **階段一到此為止**：留下程式、測試、fixture 樣本與本節紀錄，`build-social.yml` 停用或刪除。
+- **在裁決前**：cron 每晚仍會跑、每班產一份 `pages_fetched: 0` 的產物並 commit（exit 0、不紅燈——
+  「抓不到」不是分類失效）。這是刻意不擋的：多累積幾班 403 樣本本身也是證據；若不想累積，先把
+  `build-social.yml` 的 `schedule` 註解掉。
