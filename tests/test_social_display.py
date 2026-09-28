@@ -187,6 +187,11 @@ def test_disclaimer_and_tab_order():
     s = _html()
     assert "AI 研判，未經回測，非保證。" in s
     assert "非買賣訊號" not in s[s.index("// ==== 社群聲量"):s.index("// ---------- URL 狀態")]
+    # 本 tab 副標題（TAB_SUBS.social，在 URL 狀態段之後）也不得再寫舊句，須帶免責措辭
+    m = re.search(r'^\s*social: "([^"]*)",', s, re.M)
+    assert m, "找不到 TAB_SUBS.social"
+    assert "非買賣訊號" not in m.group(1) and "只作現況描述" not in m.group(1)
+    assert "AI 研判，未經回測，非保證" in m.group(1)
     tabs = re.findall(r'<div class="tab[^"]*" data-tab="([a-z]+)"', s)
     assert tabs == ["news", "daily", "morning", "insight", "track", "social"]
     assert re.search(r'const HASH_TABS = \[[^\]]*"social"\]', s)

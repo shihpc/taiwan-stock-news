@@ -45,7 +45,7 @@
 
 「新聞晨報」站：抓 FinMind `TaiwanStockNews` → 來源白名單過濾 → 產 `news.json`。
 線上 https://shihpc.github.io/taiwan-stock-news/ 。6 個 tab：新聞／每日晨報／昨日市場
-（原「晨報」tab 更名）／摘要分析／個股追蹤（`index.html` tabs 區）。「每日晨報」tab 以
+（原「晨報」tab 更名）／摘要分析／個股追蹤／社群聲量（`index.html` tabs 區）。「每日晨報」tab 以
 iframe 載入同 repo 的 `daily-brief.html`——該檔由雲端排程 session 每日台北 07:30 產製並
 push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製覆蓋）；**改版例外**——版式／
 規範本身的變更本來就得手改該檔（前例 `f09d406`／`b41e5f7`／`0bb433f`），這種手改**必須同步
@@ -70,7 +70,7 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
   - `index.html` 資料抓取一律走 `fetchFresh()`（`cache:"no-cache"` 條件式驗證）或 `bust()`，
     回退開關 `CACHE_BUST`（script 頂端「快取策略」註解；細節與 CDN `max-age` 殘留見 README
     「前端快取策略」節，2026-09-06）
-  - **hash 路由（2026-09-07）**：`#tab=&q=&src=&days=&code=`，只放非預設值；`applyHash()` 於
+  - **hash 路由（2026-09-07）**：`#tab=&q=&src=&days=&code=&sd=`（`sd`＝社群聲量日期，2026-09-28 新增，只在 tab=social 且非最新一天時寫出、須在非 fixture 日期清單內），只放非預設值；`applyHash()` 於
     載入時套用、切 tab／改篩選走 `history.replaceState`（不塞歷史）、外部改網址由 `hashchange`
     進入。**讀入一律白名單＋型別檢查**（tab 必在 6 個之一、days 1..30 正整數再由 `TDAYS` 夾住、
     code 為 4-6 位大寫英數、q／src 有長度與筆數上限），非法值靜默退回預設；值只進 state 與
