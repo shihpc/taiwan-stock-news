@@ -38,6 +38,10 @@
   "robots": "allow" | "disallow" | "unreachable",
   "robots_crawl_delay": null | 1.0,   // robots.txt 對 User-agent: * 宣告的 Crawl-delay（秒），null＝未宣告；
                                       // 生效值＝max(它, SOCIAL_MIN_INTERVAL)（2026-09-28 驗收後補）
+  "robots_detail": { "status": 200 | null, "err": null | "ConnectionError: …（遮罩後，≤200 字）",
+                     "final_url": null | "https://www.ptt.cc/…", "attempts": 1 },   // 2026-09-28 補：status 有值時 err 為 null；
+                                      // final_url＝實際回應 URL（看有沒有被 302 到 over18／擋牆頁）；fixture 模式 final_url 為 null
+  "fetch_errors": [ { "path": "/bbs/Stock/index.html", "status": 503 | null, "err": null | "…" } ],  // 失敗的每次嘗試，最多前 10 筆、path 不含 query
   "pages_fetched": 3, "articles_n": 187, "articles_fetched_n": 180, "failed_n": 7,
   "requests_n": 184, "elapsed_s": 212.3,
   "llm": { "model": "claude-opus-5", "prompt_ver": 1, "via": "batch"|"sync"|"mixed"|null,
@@ -183,3 +187,17 @@
 - 守門測試：`test_main_exit_2_on_classify_exception_but_product_written`、
   `test_main_exit_2_when_all_articles_fail_classification`、`test_main_exit_0_on_expected_skips`。
   `tests/test_social.py` 30 → 33 案例。
+
+### 6.3 線上首跑 `robots: unreachable` 的診斷欄位（2026-09-28）
+
+- **線上事實**（run 36376947260，main）：產物 `robots: "unreachable"`、`requests_n: 2`、`elapsed_s: 2.4`、
+  `articles_n: 0`——只知道 robots.txt 兩次都沒拿到，**分不出是被擋（403／302 到擋牆頁）還是連不到**。
+- **補的欄位**：`robots_detail` `{status, err, final_url, attempts}`（取 robots 那次 `PttFetcher.get()` 的
+  `last_detail`；`err`＝遮罩後的例外類別名＋訊息前 200 字，`status` 有值時為 null；`final_url`＝
+  `requests` 回應的 `.url`）與 `fetch_errors`（每次失敗嘗試 `{path, status, err}`，最多前
+  `FETCH_ERRORS_MAX`＝10 筆、path 去 query、err 過 `mask_secret`）。log 另印一行
+  `robots fetch: verdict=… status=… err=… final_url=… attempts=…`。
+- 守門測試：`test_robots_detail_distinguishes_blocked_from_unreachable`（403＋302 URL vs 連線例外含假 token；
+  斷言欄位、遮罩、截斷與 log 行）、`test_fetch_errors_capped_and_path_without_query`；schema 測試釘 fixture 的
+  `robots_detail`／`fetch_errors` 形狀。`tests/test_social.py` 33 → 35 案例。
+- **仍未知**：真正的失敗種類要看下一班的 `robots_detail`；本沙箱連不到 ptt.cc，無法在本機重現。

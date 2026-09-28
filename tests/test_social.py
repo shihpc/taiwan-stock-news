@@ -407,6 +407,53 @@ def test_throttle_interval_ua_cookie_and_request_cap():
     assert bs.SOCIAL_MIN_INTERVAL >= 1.0 and bs.SOCIAL_MAX_REQUESTS <= 400
 
 
+def test_robots_detail_distinguishes_blocked_from_unreachable(capsys):
+    """線上首跑 robots=unreachable 只知道抓不到；補 robots_detail／fetch_errors 分辨「被擋」與「連不到」。"""
+    class Blocked:
+        def get(self, url, **kw):
+            r = FakeResp(403, None, text="forbidden")
+            r.url = "https://www.ptt.cc/ask/over18?from=%2Frobots.txt"
+            return r
+
+    f = bs.PttFetcher(session=Blocked(), min_interval=0, sleep=lambda s: None)
+    out = bs.build(TARGET, f, _info(), key="")
+    assert out["robots"] == "unreachable"
+    assert out["robots_detail"] == {"status": 403, "err": None, "attempts": 2,
+                                    "final_url": "https://www.ptt.cc/ask/over18?from=%2Frobots.txt"}
+    assert out["fetch_errors"] == [{"path": "/robots.txt", "status": 403, "err": None}] * 2
+    log = capsys.readouterr().out
+    assert "robots fetch: verdict=unreachable status=403" in log and "final_url=https://www.ptt.cc/ask/over18" in log
+
+    class Down:
+        def get(self, url, **kw):
+            raise ConnectionError("proxy refused token=" + FAKE_KEY + " " + "x" * 300)
+
+    f = bs.PttFetcher(session=Down(), min_interval=0, sleep=lambda s: None)
+    out = bs.build(TARGET, f, _info(), key="")
+    d = out["robots_detail"]
+    assert d["status"] is None and d["final_url"] is None and d["attempts"] == 2
+    assert d["err"].startswith("ConnectionError: proxy refused") and len(d["err"]) <= 200
+    assert FAKE_KEY not in d["err"] and FAKE_KEY not in json.dumps(out["fetch_errors"])
+    assert "sk-ant-***" in d["err"] or "token=***" in d["err"]
+    assert "robots fetch: verdict=unreachable status=None err=ConnectionError" in capsys.readouterr().out
+
+
+def test_fetch_errors_capped_and_path_without_query():
+    class Flaky:
+        def get(self, url, **kw):
+            return FakeResp(500, None, text="")
+
+    f = bs.PttFetcher(session=Flaky(), min_interval=0, sleep=lambda s: None, max_requests=1000)
+    for i in range(12):
+        f.get(f"/bbs/Stock/index{i}.html?x=1")
+    assert f.errors_total == 24 and len(f.errors) == bs.FETCH_ERRORS_MAX == 10
+    assert f.errors[0] == {"path": "/bbs/Stock/index0.html", "status": 500, "err": None}
+    assert all("?" not in e["path"] for e in f.errors)
+    ok = bs.PttFetcher(session=None, fixture_dir=FIX, min_interval=0, sleep=lambda s: None)
+    ok.get(bs.PTT_ROBOTS_PATH)
+    assert ok.last_detail == {"status": 200, "err": None, "final_url": None, "attempts": 1} and ok.errors == []
+
+
 def test_fetch_retries_once_on_non_200():
     class Sess:
         def __init__(self):
@@ -434,7 +481,10 @@ def test_output_schema_no_body_no_judgement_and_index(tmp_path):
         assert k not in raw
     assert set(j) == {"schema", "date", "generated_at", "source", "robots", "pages_fetched", "articles_n",
                       "articles_fetched_n", "failed_n", "requests_n", "elapsed_s", "llm", "stocks",
-                      "articles", "teardown", "fixture", "robots_crawl_delay"}
+                      "articles", "teardown", "fixture", "robots_crawl_delay", "robots_detail", "fetch_errors"}
+    assert j["robots_detail"] == {"status": 200, "err": None, "final_url": None, "attempts": 1}
+    assert j["fetch_errors"] == [{"path": "/bbs/Stock/M.1758900005.A.005.html", "status": None,
+                                  "err": "FixtureMissing: no such file"}] * 2   # 缺檔那篇兩次嘗試各一筆
     assert j["robots_crawl_delay"] == 1.0            # robots_allow.txt 宣告 Crawl-delay: 1
     assert set(j["llm"]) == {"model", "prompt_ver", "via", "skipped", "classified_n", "failed_n", "usage"}
     assert j["fixture"] is True and j["teardown"]["since"] == bs.SOCIAL_SAMPLE_SINCE

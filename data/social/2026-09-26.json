@@ -1,10 +1,28 @@
 {
  "schema": 1,
  "date": "2026-09-26",
- "generated_at": "2026-09-28T03:46:21+08:00",
+ "generated_at": "2026-09-28T12:20:24+08:00",
  "source": "ptt-stock",
  "robots": "allow",
  "robots_crawl_delay": 1.0,
+ "robots_detail": {
+  "status": 200,
+  "err": null,
+  "final_url": null,
+  "attempts": 1
+ },
+ "fetch_errors": [
+  {
+   "path": "/bbs/Stock/M.1758900005.A.005.html",
+   "status": null,
+   "err": "FixtureMissing: no such file"
+  },
+  {
+   "path": "/bbs/Stock/M.1758900005.A.005.html",
+   "status": null,
+   "err": "FixtureMissing: no such file"
+  }
+ ],
  "pages_fetched": 3,
  "articles_n": 5,
  "articles_fetched_n": 4,

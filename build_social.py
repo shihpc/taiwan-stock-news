@@ -182,9 +182,16 @@ def robots_verdict(text: str | None) -> str:
 
 
 # ── 抓取（H4：節流＋上限＋UA）────────────────────────────────────────────
+FETCH_ERRORS_MAX = 10     # 產物 fetch_errors 最多留前 N 筆
+
+
 class PttFetcher:
     """對 ptt.cc 的唯一出口。get(path) 回 HTML 字串或 None（失敗／預算耗盡）。
-    fixture_dir 非 None 時改讀本機檔（測試與沙箱用），仍計 requests_n。"""
+    fixture_dir 非 None 時改讀本機檔（測試與沙箱用），仍計 requests_n。
+    診斷（2026-09-28 線上首跑 robots=unreachable 後補）：每次 get() 後 `last_detail`＝
+    {status, err, final_url, attempts}（status 有值時 err 為 None；err＝遮罩後的例外類別名＋訊息前 200 字；
+    final_url＝實際回應 URL，看有沒有被 302 到 over18／擋牆頁）；每個失敗的嘗試收進 `errors`
+    （最多 FETCH_ERRORS_MAX 筆，path 不含 query）。"""
 
     def __init__(self, session=None, min_interval: float = SOCIAL_MIN_INTERVAL,
                  max_requests: int = SOCIAL_MAX_REQUESTS, fixture_dir: str | None = None,
@@ -199,6 +206,9 @@ class PttFetcher:
         self.requests_n = 0
         self.last_at: float | None = None
         self.exhausted = False
+        self.errors: list[dict] = []
+        self.errors_total = 0
+        self.last_detail: dict = {"status": None, "err": None, "final_url": None, "attempts": 0}
 
     def _throttle(self) -> None:
         if self.last_at is not None and self.min_interval > 0:
@@ -217,34 +227,50 @@ class PttFetcher:
             return os.path.join(self.fixture_dir, "robots.txt")
         return os.path.join(self.fixture_dir, name)
 
-    def _one(self, path: str) -> str | None:
+    def _one(self, path: str) -> tuple[str | None, int | None, str | None]:
+        """回 (html|None, status|None, final_url|None)；例外由呼叫端接。"""
         if self.fixture_dir is not None:
             p = self._fixture_path(path)
             if not os.path.exists(p):
-                return None
+                return None, None, None
             with open(p, encoding="utf-8") as f:
-                return f.read()
+                return f.read(), 200, None
         r = self.session.get(PTT_BASE + path, headers={"User-Agent": SOCIAL_UA},
                              cookies={"over18": "1"}, timeout=(10, 30))
+        final_url = getattr(r, "url", None)
         if r.status_code != 200:
-            return None
-        return r.text
+            return None, r.status_code, final_url
+        return r.text, r.status_code, final_url
+
+    def _record_error(self, path: str, status: int | None, err: str | None) -> None:
+        self.errors_total += 1
+        if len(self.errors) < FETCH_ERRORS_MAX:
+            self.errors.append({"path": path.split("?", 1)[0], "status": status, "err": err})
 
     def get(self, path: str) -> str | None:
         """兩次機會（失敗退避 retry_sleep 再試一次），每次都計入 requests_n 與節流。"""
+        detail = {"status": None, "err": None, "final_url": None, "attempts": 0}
+        self.last_detail = detail
         for attempt in (1, 2):
             if self.requests_n >= self.max_requests:
                 self.exhausted = True
                 return None
             self._throttle()
             self.requests_n += 1
+            detail["attempts"] = attempt
             try:
-                html = self._one(path)
+                html, status, final_url = self._one(path)
+                detail.update(status=status, err=None, final_url=final_url)
+                if html is None and status is None and self.fixture_dir is not None:
+                    detail["err"] = "FixtureMissing: no such file"
             except Exception as e:
-                print(f"  fetch {path} 第{attempt}次例外：{mask_secret(e)}", flush=True)
                 html = None
+                detail.update(status=None, final_url=None,
+                              err=mask_secret(f"{type(e).__name__}: {e}")[:200])
+                print(f"  fetch {path} 第{attempt}次例外：{detail['err']}", flush=True)
             if html is not None:
                 return html
+            self._record_error(path, detail["status"], detail["err"])
             if attempt == 1:
                 self._sleep(self.retry_sleep)
         return None
@@ -856,6 +882,7 @@ def collect_day(fetcher: PttFetcher, target: date, info: dict[str, str | None] |
 def _finalize(out: dict, fetcher: PttFetcher, info, t0: float) -> dict:
     out["stocks"] = aggregate(out["articles"], info)
     out["requests_n"] = fetcher.requests_n
+    out["fetch_errors"] = [dict(e) for e in fetcher.errors]
     out["elapsed_s"] = round(time.monotonic() - t0, 1)
     out["generated_at"] = taipei_now().strftime("%Y-%m-%dT%H:%M:%S+08:00")
     return out
@@ -869,10 +896,14 @@ def build(target: date, fetcher: PttFetcher, info: dict[str, str | None] | None,
     t0 = time.monotonic()
     rb = parse_robots(fetcher.get(PTT_ROBOTS_PATH))
     robots = rb["verdict"]
+    robots_detail = dict(fetcher.last_detail)
+    print(f"robots fetch: verdict={robots} status={robots_detail['status']} err={robots_detail['err']} "
+          f"final_url={robots_detail['final_url']} attempts={robots_detail['attempts']}", flush=True)
     if rb["crawl_delay"]:
         fetcher.min_interval = max(fetcher.min_interval, rb["crawl_delay"])
     out = {"schema": 1, "date": target.isoformat(), "generated_at": None, "source": "ptt-stock",
-           "robots": robots, "robots_crawl_delay": rb["crawl_delay"], "pages_fetched": 0, "articles_n": 0, "articles_fetched_n": 0, "failed_n": 0,
+           "robots": robots, "robots_crawl_delay": rb["crawl_delay"], "robots_detail": robots_detail,
+           "fetch_errors": [], "pages_fetched": 0, "articles_n": 0, "articles_fetched_n": 0, "failed_n": 0,
            "requests_n": 0, "elapsed_s": 0.0,
            "llm": {"model": SOCIAL_MODEL, "prompt_ver": SOCIAL_PROMPT_VER, "via": None, "skipped": None,
                    "classified_n": 0, "failed_n": 0, "usage": {"input_tokens": 0, "output_tokens": 0}},

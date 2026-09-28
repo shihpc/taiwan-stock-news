@@ -210,6 +210,9 @@ python tests/test_incremental.py                               # 增量正確性
   `robots_crawl_delay`）、單班 ≤400 請求、UA 帶專案識別字串、cookie `over18=1`；robots `Disallow`
   支援 `*`／`$`，任一規則命中 `/`、`/bbs/`、`/bbs/Stock/` 即 `disallow`；判 `disallow` 或 `unreachable`
   都不抓文章，仍寫產物（`articles_n: 0`）並印 `::warning::`、exit 0。
+- **抓取診斷**（2026-09-28 線上首跑 `robots: unreachable` 後補）：產物 `robots_detail`
+  `{status, err, final_url, attempts}` 與 `fetch_errors`（失敗嘗試前 10 筆），用來分辨「被擋」（403／302 到
+  擋牆頁）與「連不到」（例外類別名）；err 一律過 `mask_secret`、截 200 字。
 - **LLM 路徑掛住不拖垮聲量資料**：進 LLM 前先落一版 `llm.skipped="pending"` 的完整產物，分類完再覆寫；
   同步回退總預算 `SOCIAL_SYNC_BUDGET_SEC`（15 分，與 batch 40 分合計仍留餘裕給 70 分 job）超過即停、
   剩餘篇計 `llm.failed_n`、代號記 `unk`；`classify()` 拋例外記 `skipped="error"`、exit 0。
