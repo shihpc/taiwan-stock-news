@@ -8,9 +8,10 @@
 #  情緒標籤，正文只在記憶體用完即丟（H3）；沒有任何「偏多／偏空／建議」欄位（H9）。
 #
 #  流程：
-#   1. robots.txt 守門（H5）：User-agent: * 對 / 或 /bbs/ Disallow → 不抓任何文章，
-#      仍寫產物（robots:"disallow"、articles_n:0）並 exit 0。抓不到 robots 也視同不抓
-#     （robots:"unreachable"，保守立場：量測班寧可缺一天、不可在未取得同意的狀態下抓）。
+#   1. robots.txt 守門（H5，四值，依 RFC 9309 §2.3.1）：200 且規則擋 → disallow（不抓）；200 且規則允許
+#      → allow；HTTP 4xx（含 404，ptt.cc 第二班實測就是 404）→ absent（RFC §2.3.1.3「unavailable」＝
+#      crawler 可存取任何資源，**照抓**、間隔維持 SOCIAL_MIN_INTERVAL）；5xx／連線例外／逾時 → unreachable
+#      （RFC §2.3.1.4 視為全站 disallow，不抓）。不抓時仍寫產物（articles_n:0）並 exit 0。
 #   2. 板首頁 index.html 向前翻頁（index{N}.html），最多 SOCIAL_MAX_PAGES 頁，
 #      直到整頁文章都早於目標日；只挑「月/日」＝目標日的列。
 #   3. 文章頁依推文數高者優先、最多 SOCIAL_MAX_ARTICLES 篇；台北日歸屬以文章頁的
@@ -138,12 +139,16 @@ def _robots_rule_re(pattern: str) -> re.Pattern:
     return re.compile(rx)
 
 
-def parse_robots(text: str | None) -> dict:
-    """回 {verdict: allow|disallow|unreachable, crawl_delay: float|None}。只看 User-agent: * 那組
+def parse_robots(text: str | None, status: int | None = None) -> dict:
+    """回 {verdict: allow|disallow|absent|unreachable, crawl_delay: float|None}。
+    text 為 None 時依 HTTP status 分：4xx → absent（RFC 9309 §2.3.1.3 unavailable＝無限制）、其餘
+    （5xx／None＝連線例外或逾時）→ unreachable（§2.3.1.4 視為全站 disallow）。只看 User-agent: * 那組
     （含多個 UA 共用一組的寫法）；**任一** Disallow 規則命中 ROBOTS_CHECK_PATHS 任一路徑
     （`/`、`/bbs/`、`/bbs/Stock/`、板首頁）即 disallow——含 `*`／`$` 萬用字元；Allow 不解、寧可多擋。
     Crawl-delay 只取 * 那組、解析失敗視同未宣告。"""
     if text is None:
+        if isinstance(status, int) and 400 <= status < 500:
+            return {"verdict": "absent", "crawl_delay": None}
         return {"verdict": "unreachable", "crawl_delay": None}
     applies = False
     seen_ua = False
@@ -177,8 +182,11 @@ def parse_robots(text: str | None) -> dict:
     return {"verdict": verdict, "crawl_delay": crawl_delay}
 
 
-def robots_verdict(text: str | None) -> str:
-    return parse_robots(text)["verdict"]
+def robots_verdict(text: str | None, status: int | None = None) -> str:
+    return parse_robots(text, status)["verdict"]
+
+
+ROBOTS_FETCH_OK = ("allow", "absent")   # 這兩值走同一條抓取路徑
 
 
 # ── 抓取（H4：節流＋上限＋UA）────────────────────────────────────────────
@@ -894,9 +902,10 @@ def build(target: date, fetcher: PttFetcher, info: dict[str, str | None] | None,
     """out_dir 非 None 時：進 LLM 之前先落一版 sent 全 null／llm.skipped="pending" 的產物，分類完成
     再由呼叫端覆寫——LLM 路徑掛住或 job 被砍時，該日聲量資料已在磁碟上（H7 精神）。"""
     t0 = time.monotonic()
-    rb = parse_robots(fetcher.get(PTT_ROBOTS_PATH))
-    robots = rb["verdict"]
+    robots_text = fetcher.get(PTT_ROBOTS_PATH)
     robots_detail = dict(fetcher.last_detail)
+    rb = parse_robots(robots_text, robots_detail["status"])
+    robots = rb["verdict"]
     print(f"robots fetch: verdict={robots} status={robots_detail['status']} err={robots_detail['err']} "
           f"final_url={robots_detail['final_url']} attempts={robots_detail['attempts']}", flush=True)
     if rb["crawl_delay"]:
@@ -910,7 +919,10 @@ def build(target: date, fetcher: PttFetcher, info: dict[str, str | None] | None,
            "stocks": {}, "articles": [], "teardown": teardown_info(target)}
     if fixture:
         out["fixture"] = True
-    if robots != "allow":
+    if robots == "absent":
+        print(f"robots.txt HTTP {robots_detail['status']}：依 RFC 9309 §2.3.1.3 視為無限制（absent），照抓、"
+              f"間隔維持 {fetcher.min_interval} 秒", flush=True)
+    if robots not in ROBOTS_FETCH_OK:
         warn(f"robots.txt 判定 {robots}：本班不抓任何文章（H5）")
         out["llm"]["skipped"] = "robots"
     else:

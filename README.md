@@ -208,8 +208,10 @@ python tests/test_incremental.py                               # 增量正確性
   **不存正文**、沒有任何偏多／偏空／建議欄位。
 - **節流與守門**：對 ptt.cc 每次請求間隔 ≥1 秒（robots 有 `Crawl-delay` 則取較大者，寫進產物
   `robots_crawl_delay`）、單班 ≤400 請求、UA 帶專案識別字串、cookie `over18=1`；robots `Disallow`
-  支援 `*`／`$`，任一規則命中 `/`、`/bbs/`、`/bbs/Stock/` 即 `disallow`；判 `disallow` 或 `unreachable`
-  都不抓文章，仍寫產物（`articles_n: 0`）並印 `::warning::`、exit 0。
+  支援 `*`／`$`，任一規則命中 `/`、`/bbs/`、`/bbs/Stock/` 即 `disallow`。**四值**（依 RFC 9309 §2.3.1，
+  2026-09-28）：`allow`／`disallow`（200 且規則）；`absent`（HTTP 4xx，含 404——ptt.cc 第二班實測就是 404，
+  **照抓**、間隔維持 1 秒）；`unreachable`（5xx／連線例外／逾時，不抓）。不抓時仍寫產物
+  （`articles_n: 0`、`llm.skipped: "robots"`）並印 `::warning::`、exit 0。
 - **抓取診斷**（2026-09-28 線上首跑 `robots: unreachable` 後補）：產物 `robots_detail`
   `{status, err, final_url, attempts}` 與 `fetch_errors`（失敗嘗試前 10 筆），用來分辨「被擋」（403／302 到
   擋牆頁）與「連不到」（例外類別名）；err 一律過 `mask_secret`、截 200 字。

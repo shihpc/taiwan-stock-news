@@ -12,7 +12,7 @@
 | H2 | **只做 PTT Stock 板**，不碰 Dcard、不碰其他板 | grep `dcard` 零命中（程式碼） |
 | H3 | **不存文章正文**：產物只存標題／作者／時間／推噓數／連結／命中代號／情緒標籤；正文只在記憶體用完即丟 | 產物 schema 檢查＋測試斷言無 `body` 欄 |
 | H4 | **抓取節流**：對 ptt.cc 的請求間隔 ≥ `SOCIAL_MIN_INTERVAL`（1.0 秒）、單班總請求 ≤ `SOCIAL_MAX_REQUESTS`（400）、UA 帶專案識別字串 | 測試以假 session 計數＋計時 |
-| H5 | **robots 守門**：每班先抓 `https://www.ptt.cc/robots.txt`，若 `User-agent: *` 對 `/bbs/` 或 `/` 為 `Disallow` → **不抓任何文章**，仍寫出產物並記 `robots: "disallow"`、`articles_n: 0`，exit 0 並印 `::warning::` | 測試餵 disallow 的 robots 文字 |
+| H5 | **robots 守門**（四值，2026-09-28 依 RFC 9309 §2.3.1 修正）：每班先抓 `https://www.ptt.cc/robots.txt`。200 且 `User-agent: *` 規則擋到 `/`／`/bbs/`／`/bbs/Stock/` → `disallow`、**不抓任何文章**；200 且允許 → `allow`；**HTTP 4xx（含 404）→ `absent`，照抓**（§2.3.1.3「unavailable」＝crawler 可存取任何資源）；5xx／連線例外／逾時 → `unreachable`、不抓（§2.3.1.4 視為全站 disallow）。不抓時仍寫出產物、`articles_n: 0`、`llm.skipped: "robots"`，exit 0 並印 `::warning::` | 測試餵 disallow 文字、404／403／500／503／連線例外 |
 | H6 | **金鑰不落地**：`ANTHROPIC_API_KEY`／`FINMIND_TOKEN` 只由環境變數讀、不進 log／產物／例外訊息；例外訊息過遮罩後才印 | grep 產物與測試輸出無 `sk-ant-`／token 字樣 |
 | H7 | **缺金鑰不丟資料**：`ANTHROPIC_API_KEY` 缺 → 情緒欄整批 `null`、`llm.skipped="no-key"`，聲量資料照寫、exit 0 | 測試 |
 | H8 | **不動既有管線**：`build_news.py`／`news_curation.py`／`build-news.yml` 零改動；Worker dispatch 清單不改（本班只靠 GH cron） | `git diff --stat` |
@@ -35,7 +35,7 @@
   "date": "2026-09-27",              // 台北日曆日（文章發文時間落在該日 00:00–23:59 台北）
   "generated_at": "2026-09-27T23:2x:xx+08:00",
   "source": "ptt-stock",
-  "robots": "allow" | "disallow" | "unreachable",
+  "robots": "allow" | "disallow" | "absent" | "unreachable",   // absent＝HTTP 4xx、照抓（2026-09-28 補）
   "robots_crawl_delay": null | 1.0,   // robots.txt 對 User-agent: * 宣告的 Crawl-delay（秒），null＝未宣告；
                                       // 生效值＝max(它, SOCIAL_MIN_INTERVAL)（2026-09-28 驗收後補）
   "robots_detail": { "status": 200 | null, "err": null | "ConnectionError: …（遮罩後，≤200 字）",
@@ -76,7 +76,8 @@
 - 每篇：解析 `.r-ent`（標題、作者、日期、推文數；「爆」→100、「X{n}」→ −n×10、「XX」→ −100，寫在註解）、去掉「(本文已被刪除)」與公告；標題以 `[分類]` 開頭者記 `cat`。
 - 文章頁只抓當日 `SOCIAL_MAX_ARTICLES`（300）篇，依推文數高者優先；解析發文時間（`.article-meta-value` 第 4 個，`%a %b %d %H:%M:%S %Y`）、正文（`#main-content` 去 meta 與推文區）、推噓（`.push-tag` 計數）。
 - 台北日歸屬用文章頁的發文時間；板首頁只有「月/日」，用來決定要不要抓文章頁。
-- robots `Disallow` 含 `*`／結尾 `$` 依萬用字元比對，任一規則命中 `/`、`/bbs/`、`/bbs/Stock/` 或板首頁即
+- robots 四值：`allow`／`disallow`（200 且規則）、`absent`（4xx，照抓、`robots_crawl_delay` null、間隔維持
+  `SOCIAL_MIN_INTERVAL`）、`unreachable`（5xx／例外／逾時，不抓）。`Disallow` 含 `*`／結尾 `$` 依萬用字元比對，任一規則命中 `/`、`/bbs/`、`/bbs/Stock/` 或板首頁即
   disallow；`Crawl-delay` 取 `max(它, SOCIAL_MIN_INTERVAL)` 生效並寫進 `robots_crawl_delay`（2026-09-28 補）。
 - 節流：H4；失敗（非 200／逾時／例外）退避一次再失敗即計入 `failed_n`，**不寫 `err` 到產物以外的地方**。
 - `--from-fixture DIR`：用目錄裡的 HTML 取代網路（測試與沙箱用；本沙箱連不到 ptt.cc）。
@@ -201,3 +202,20 @@
   斷言欄位、遮罩、截斷與 log 行）、`test_fetch_errors_capped_and_path_without_query`；schema 測試釘 fixture 的
   `robots_detail`／`fetch_errors` 形狀。`tests/test_social.py` 33 → 35 案例。
 - **仍未知**：真正的失敗種類要看下一班的 `robots_detail`；本沙箱連不到 ptt.cc，無法在本機重現。
+
+### 6.4 robots 判定改四值（2026-09-28，依 RFC 9309）
+
+- **第二班實測證據**（main 上的 `data/social/2026-09-28.json`）：`robots_detail = {status: 404, err: null,
+  final_url: "https://www.ptt.cc/robots.txt", attempts: 2}`——ptt.cc **沒有 robots.txt**、runner 連得到，
+  原本「非 200 一律 `unreachable`」把它判成不抓，過度保守。
+- **依據**：RFC 9309 §2.3.1.3「Unavailable」——伺服器回 4xx 時 crawler MAY 存取任何資源；§2.3.1.4
+  「Unreachable」——5xx 或連線失敗時 crawler MUST 假設全站 disallow。
+- **實作**：`parse_robots(text, status)`／`robots_verdict(text, status)`——text 為 None 時 4xx → `absent`、其餘
+  → `unreachable`；`ROBOTS_FETCH_OK = ("allow", "absent")` 走同一條抓取路徑；`absent` 印一行
+  「依 RFC 9309 §2.3.1.3 視為無限制」，`robots_crawl_delay` 為 null、fetcher 間隔維持 `SOCIAL_MIN_INTERVAL`；
+  `llm.skipped="robots"` 只在 `disallow`／`unreachable` 出現。
+- 守門測試：`test_robots_4xx_is_absent_and_fetch_proceeds[404／403]`（照抓 3 頁 5 篇、`skipped=no-key`
+  非 `robots`、間隔 1.0）、`test_robots_5xx_is_unreachable_and_fetch_skipped[500／503]`（只打 2 次、不抓）、
+  `test_robots_connection_error_is_unreachable`；既有 disallow／unreachable 測試維持，
+  `test_robots_detail_distinguishes_blocked_from_unreachable` 的 403 案例改斷言 `absent`。
+  `tests/test_social.py` 35 → 40 案例。

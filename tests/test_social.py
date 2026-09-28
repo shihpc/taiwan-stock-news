@@ -407,6 +407,56 @@ def test_throttle_interval_ua_cookie_and_request_cap():
     assert bs.SOCIAL_MIN_INTERVAL >= 1.0 and bs.SOCIAL_MAX_REQUESTS <= 400
 
 
+def _status_session(code: int, url: str = "https://www.ptt.cc/robots.txt"):
+    """robots.txt 回指定 status；其餘路徑讀 fixture 檔（模擬 ptt.cc 沒有 robots.txt 但站台正常）。"""
+    class Sess:
+        def get(self, u, **kw):
+            if u.endswith("/robots.txt"):
+                r = FakeResp(code, None, text="nope")
+                r.url = url
+                return r
+            p = os.path.join(FIX, os.path.basename(u))
+            if not os.path.exists(p):
+                return FakeResp(404, None, text="")
+            return FakeResp(200, None, text=open(p, encoding="utf-8").read())
+    return Sess()
+
+
+@pytest.mark.parametrize("code", [404, 403])
+def test_robots_4xx_is_absent_and_fetch_proceeds(code, capsys):
+    """RFC 9309 §2.3.1.3：4xx＝unavailable＝crawler 可存取任何資源。第二班實測 ptt.cc robots.txt 回 404。"""
+    f = bs.PttFetcher(session=_status_session(code), min_interval=1.0, sleep=lambda s: None)
+    out = bs.build(TARGET, f, _info(), key="")
+    assert out["robots"] == "absent" and out["robots_crawl_delay"] is None
+    assert out["robots_detail"]["status"] == code and out["robots_detail"]["attempts"] == 2
+    assert out["articles_n"] == 5 and len(out["articles"]) == 3 and out["pages_fetched"] == 3
+    assert out["llm"]["skipped"] == "no-key"                  # 不是 "robots"
+    assert f.min_interval == bs.SOCIAL_MIN_INTERVAL == 1.0
+    assert "RFC 9309" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("code", [500, 503])
+def test_robots_5xx_is_unreachable_and_fetch_skipped(code):
+    """RFC 9309 §2.3.1.4：5xx＝unreachable＝視為全站 disallow。"""
+    f = bs.PttFetcher(session=_status_session(code), min_interval=0, sleep=lambda s: None)
+    out = bs.build(TARGET, f, _info(), key="")
+    assert out["robots"] == "unreachable" and out["articles_n"] == 0 and f.requests_n == 2
+    assert out["llm"]["skipped"] == "robots"
+
+
+def test_robots_connection_error_is_unreachable():
+    class Down:
+        def get(self, url, **kw):
+            raise TimeoutError("connect timeout")
+
+    f = bs.PttFetcher(session=Down(), min_interval=0, sleep=lambda s: None)
+    out = bs.build(TARGET, f, _info(), key="")
+    assert out["robots"] == "unreachable" and out["articles_n"] == 0 and out["llm"]["skipped"] == "robots"
+    assert out["robots_detail"]["err"].startswith("TimeoutError")
+    assert bs.robots_verdict(None, 404) == "absent" and bs.robots_verdict(None, 500) == "unreachable"
+    assert bs.robots_verdict(None, None) == "unreachable" and bs.robots_verdict("", 200) == "allow"
+
+
 def test_robots_detail_distinguishes_blocked_from_unreachable(capsys):
     """線上首跑 robots=unreachable 只知道抓不到；補 robots_detail／fetch_errors 分辨「被擋」與「連不到」。"""
     class Blocked:
@@ -417,12 +467,13 @@ def test_robots_detail_distinguishes_blocked_from_unreachable(capsys):
 
     f = bs.PttFetcher(session=Blocked(), min_interval=0, sleep=lambda s: None)
     out = bs.build(TARGET, f, _info(), key="")
-    assert out["robots"] == "unreachable"
+    assert out["robots"] == "absent"                          # 4xx → absent（照抓；本假站台其餘頁也 403 → 板首頁抓不到）
     assert out["robots_detail"] == {"status": 403, "err": None, "attempts": 2,
                                     "final_url": "https://www.ptt.cc/ask/over18?from=%2Frobots.txt"}
-    assert out["fetch_errors"] == [{"path": "/robots.txt", "status": 403, "err": None}] * 2
+    assert out["fetch_errors"][:2] == [{"path": "/robots.txt", "status": 403, "err": None}] * 2
+    assert out["fetch_errors"][2]["path"] == bs.PTT_INDEX_PATH and out["pages_fetched"] == 0
     log = capsys.readouterr().out
-    assert "robots fetch: verdict=unreachable status=403" in log and "final_url=https://www.ptt.cc/ask/over18" in log
+    assert "robots fetch: verdict=absent status=403" in log and "final_url=https://www.ptt.cc/ask/over18" in log
 
     class Down:
         def get(self, url, **kw):
