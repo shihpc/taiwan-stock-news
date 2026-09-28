@@ -1,9 +1,9 @@
 {
  "schema": 1,
  "date": "2026-09-28",
- "generated_at": "2026-09-28T12:21:26+08:00",
+ "generated_at": "2026-09-28T12:29:17+08:00",
  "source": "ptt-stock",
- "robots": "unreachable",
+ "robots": "absent",
  "robots_crawl_delay": null,
  "robots_detail": {
   "status": 404,
@@ -21,19 +21,29 @@
    "path": "/robots.txt",
    "status": 404,
    "err": null
+  },
+  {
+   "path": "/bbs/Stock/index.html",
+   "status": 403,
+   "err": null
+  },
+  {
+   "path": "/bbs/Stock/index.html",
+   "status": 403,
+   "err": null
   }
  ],
  "pages_fetched": 0,
  "articles_n": 0,
  "articles_fetched_n": 0,
  "failed_n": 0,
- "requests_n": 2,
- "elapsed_s": 2.1,
+ "requests_n": 4,
+ "elapsed_s": 5.3,
  "llm": {
   "model": "claude-opus-5",
   "prompt_ver": 1,
   "via": null,
-  "skipped": "robots",
+  "skipped": "no-articles",
   "classified_n": 0,
   "failed_n": 0,
   "usage": {
