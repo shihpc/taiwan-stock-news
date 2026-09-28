@@ -44,7 +44,7 @@
 <!-- CANON:END v1 -->
 
 「新聞晨報」站：抓 FinMind `TaiwanStockNews` → 來源白名單過濾 → 產 `news.json`。
-線上 https://shihpc.github.io/taiwan-stock-news/ 。5 個 tab：新聞／每日晨報／昨日市場
+線上 https://shihpc.github.io/taiwan-stock-news/ 。6 個 tab：新聞／每日晨報／昨日市場
 （原「晨報」tab 更名）／摘要分析／個股追蹤（`index.html` tabs 區）。「每日晨報」tab 以
 iframe 載入同 repo 的 `daily-brief.html`——該檔由雲端排程 session 每日台北 07:30 產製並
 push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製覆蓋）；**改版例外**——版式／
@@ -72,7 +72,7 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
     「前端快取策略」節，2026-09-06）
   - **hash 路由（2026-09-07）**：`#tab=&q=&src=&days=&code=`，只放非預設值；`applyHash()` 於
     載入時套用、切 tab／改篩選走 `history.replaceState`（不塞歷史）、外部改網址由 `hashchange`
-    進入。**讀入一律白名單＋型別檢查**（tab 必在 5 個之一、days 1..30 正整數再由 `TDAYS` 夾住、
+    進入。**讀入一律白名單＋型別檢查**（tab 必在 6 個之一、days 1..30 正整數再由 `TDAYS` 夾住、
     code 為 4-6 位大寫英數、q／src 有長度與筆數上限），非法值靜默退回預設；值只進 state 與
     `input.value`，畫面字串仍走既有 `esc()` 路徑。`src` 需 `news.json` 才知道全體來源，故由
     `load()` 補套且**不寫回 localStorage**（不覆蓋使用者偏好）；`#code` 若不在追蹤清單只預填
@@ -83,11 +83,13 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
   - 手機適配（2026-09-06）：`.mtable` 全表 `nowrap`，**新增表格一律包 `<div class="tblwrap">`**
     （`overflow-x:auto`，同 `daily-brief.html` 的 `.poswrap`）；`.tabs` 已 `flex-wrap`，
     `@media (max-width:640px)` 收縮外距與字級。驗收慣例：Playwright 375／390／1280 三寬度
-    5 tab（含個股追蹤三分頁）`scrollWidth <= innerWidth`
+    6 tab（含個股追蹤三分頁）`scrollWidth <= innerWidth`
 - `.github/workflows/`：`build-news.yml` ＋ `test.yml` ＋ `canon.yml`
   （後者只守 CLAUDE.md 頂端的 CANON 區塊，不碰資料管線）＋ `build-social.yml`（下條）
 - **社群聲量量測班（階段一，2026-09-27）**：`build_social.py` → `data/social/YYYY-MM-DD.json`
-  ＋`index.json`，**只收資料、不顯示、不下判準**——規格與 H1–H9 硬約束正本＝`docs/social-phase1.md`，
+  ＋`index.json`；**2026-09-28 起上畫面**（第 6 個 tab「社群聲量」，驗收條件 `docs/social-display.md`）——含紅綠標籤、
+  偏多／偏空排行、情緒＋千張大戶雙確認的規則式買賣建議與參考價位，**皆為使用者裁決、未經回測**，畫面標「AI 研判，未經回測，
+  非保證」；籌碼讀同源 `../postmkt/data/diag/diag.json`（postmkt 該檔多一個前端消費者）。管線規格正本＝`docs/social-phase1.md`，
   改動前先讀。來源只有 PTT Stock 板（板首頁翻頁→當日文章頁，`html.parser`、不加 bs4）；產物不存
   正文（H3）；每班先看 robots.txt，四值（RFC 9309）：`allow`／`disallow`（200 且規則）、`absent`（4xx，
   照抓；ptt.cc 實測 404）、`unreachable`（5xx／例外，不抓）；不抓仍寫產物（H5）；對 ptt.cc 節流 `SOCIAL_MIN_INTERVAL`／
@@ -127,7 +129,7 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
    （postmkt 走 `fmtGenTaipei`），各站打自己 repo 的
    `api.github.com/repos/shihpc/<repo>/commits/main`（免金鑰、限 60 req/hr/IP，失敗靜默隱藏）。
    改行為四站一起改，但不強求逐字。清單正本在 `postmkt/CLAUDE.md` 第 2 條。
-4. **誠實原則（專案鐵律，逐字保留，`README.md:71`）**：分頁頂部固定免責卡
+4. **誠實原則（專案鐵律，逐字保留，`README.md:71`）**（**唯一例外：社群聲量 tab**，使用者 2026-09-28 裁決改紅綠並給規則式買賣建議，見 `docs/social-display.md` §1b；其他 tab 不變）：分頁頂部固定免責卡
    「技術指標為現況描述、非買賣訊號，僅供參考」；狀態詞用中性色、不寫該買該賣、不做預測。
 
 ## CSP 與注入面（2026-09-06）
@@ -211,5 +213,5 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 python tests/test_incremental.py   # 免 token 免網路，驗「增量輸出 == 全量輸出」六情境
                                    # （含抓取失敗不毒化 coverage、失敗後下一班自動補回）
 python -m pytest tests/ -q         # 晨報產製物守門 test_daily_brief.py＋管線韌性 test_pipeline_resilience.py（免 token 免網路）
-python -m http.server 8000         # 前端本機驗證，5 個 tab 逐一點擊 console 零 error
+python -m http.server 8000         # 前端本機驗證，6 個 tab 逐一點擊 console 零 error
 ```

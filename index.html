@@ -152,7 +152,7 @@
   .trk-vt{cursor:pointer;padding:6px 16px}
   .msection2{margin:16px 2px 5px;font-size:.9rem;font-weight:700;color:var(--muted)}
   .msection2::before{content:"·";margin-right:5px}
-  /* 社群聲量（2026-09-28，描述性顯示）：作者態度一律灰階，偏多／偏空只以文字與深淺區分，不用紅綠（誠實原則） */
+  /* 社群聲量（2026-09-28）：使用者裁決改紅綠——偏多紅、偏空綠（台股慣例）。這是 CLAUDE.md 誠實原則在本 tab 的明確例外，其他 tab 不變 */
   .soc-chip{cursor:default}
   .soc-chip:hover{border-color:var(--accent)}
   .soc-sel{background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:5px 8px;font-size:.84rem}
@@ -160,9 +160,9 @@
   .soc-status b{color:var(--txt);font-weight:600}
   .soc-bar{display:inline-flex;width:96px;height:10px;border:1px solid #5c6066;border-radius:3px;overflow:hidden;vertical-align:middle}
   .soc-bar i{display:block;height:100%}
-  .soc-pos{background:#e3e7ec}
+  .soc-pos{background:#ef5b5b}
   .soc-neu{background:#9aa3ae}
-  .soc-neg{background:#4f5866}
+  .soc-neg{background:#2fbf71}
   .soc-unk{background:repeating-linear-gradient(45deg,#2e3136 0 3px,#44484e 3px 6px)}
   .soc-legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.72rem;margin:6px 2px}
   .soc-legend .soc-sw{display:inline-block;width:12px;height:10px;border:1px solid #5c6066;border-radius:2px;vertical-align:middle;margin-right:4px}
@@ -174,6 +174,13 @@
   .soc-art a{color:var(--txt);text-decoration:none}
   .soc-art a:hover{color:var(--accent);text-decoration:underline}
   .soc-att{border:1px solid #5c6066;border-radius:5px;padding:0 6px;font-size:.68rem;color:var(--txt);white-space:nowrap}
+  .soc-tag{border:1px solid var(--line);border-radius:5px;padding:0 6px;font-size:.72rem;white-space:nowrap;color:var(--muted)}
+  .soc-tag.bull,.soc-tag.buy{color:#ef5b5b;border-color:#ef5b5b}
+  .soc-tag.bear,.soc-tag.sell{color:#2fbf71;border-color:#2fbf71}
+  .soc-adv{margin:6px 0 8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;line-height:1.75;font-size:.8rem;white-space:normal}
+  .soc-adv .hd{font-weight:700;font-size:.86rem}
+  .soc-adv .hd.buy{color:#ef5b5b} .soc-adv .hd.sell{color:#2fbf71} .soc-adv .hd.hold{color:var(--muted)}
+  .soc-adv .k{color:var(--muted)}
   /* 手機適配（2026-09-06）：縮外距與字級；表格由 .tblwrap 橫向捲動、tab 列 flex-wrap 換行 */
   @media (max-width:640px){
     body{padding:12px 10px 48px}
@@ -1121,11 +1128,13 @@ document.addEventListener("keydown", e => {
   if (e.key==="Enter" && e.target.id==="ghTok"){ const b=document.querySelector("[data-gh-save]"); if(b) b.click(); }
 });
 
-// ==== 社群聲量（2026-09-28，描述性顯示；驗收條件正本 docs/social-display.md）====
+// ==== 社群聲量（2026-09-28；驗收條件正本 docs/social-display.md，§1b 為使用者裁決的紅綠／排行／建議）====
 // 資料：同源 data/social/index.json（日期清單）＋ data/social/<YYYY-MM-DD>.json（單日產物，schema 見
 // docs/social-phase1.md §2）。**只在切到本 tab 時才抓**（首屏不載），走 fetchFresh、CSP 不需改。
-// 硬約束：①作者態度屬 AI 判讀的現況描述——一律灰階、不依情緒排序（情緒欄與偏多比不可排序）、
-// 不產生任何偏多／偏空訊號；②排除 fixture:true 的日子（index.json 與單日檔兩層都檢查）；
+// 使用者 2026-09-28 裁決（取代原「灰階、不排序、不給訊號」）：態度用紅綠、偏多比可排序、偏多／偏空排行、
+// 每檔標籤，並依「情緒＋千張大戶週變化」雙確認產生規則式買賣建議與參考價位——門檻與規則皆**未經回測**，
+// 畫面一律標「AI 研判，未經回測，非保證」（鐵律 8）。籌碼資料讀同源 ../postmkt/data/diag/diag.json。
+// 其餘硬約束：②排除 fixture:true 的日子（index.json 與單日檔兩層都檢查）；
 // ③外來字串（標題／股名／作者／錯誤路徑）一律 esc()，文章連結只接受 https://www.ptt.cc/ 開頭；
 // ④hash 只新增 tab 值 social 與 key sd（日期），sd 須在「日期選單列出的非 fixture 日子」內。
 // ---- social-pure:begin（純函式，tests/test_social_display.py 以 node 抽出來測，勿依賴 DOM）----
@@ -1181,26 +1190,102 @@ function socialDist(s, llm){
   o.unk = Math.max(0, n - o.pos - o.neu - o.neg);
   return o;
 }
-// 偏多比＝pos/(pos+neg+neu)；分母 0 → null（畫面顯「—」）。只是描述，不進任何排序。
+// 偏多比＝pos/(pos+neg+neu)；分母 0 → null（畫面顯「—」）。
 function socialPosRatio(d){
   const den = (d.pos || 0) + (d.neg || 0) + (d.neu || 0);
   return den > 0 ? d.pos / den : null;
 }
-// 個股列排序：只允許 n／push／boo（降序），次鍵代號升序；情緒相關欄不在允許清單內
-const SOCIAL_SORT_KEYS = ["n", "push", "boo"];
-function socialSortRows(stocks, key){
+// ---- 使用者 2026-09-28 裁決上線：門檻未經回測 ----
+const SOCIAL_RANK_MIN_N = 3;     // 有判斷篇數（偏多＋中性＋偏空）至少幾篇才貼標籤、才進排行
+const SOCIAL_BULL_TH = 0.65;     // 偏多比 ≥ 此值 → 偏多
+const SOCIAL_BEAR_TH = 0.35;     // 偏多比 ≤ 此值 → 偏空
+const SOCIAL_TAG_LABEL = { bull: "偏多", bear: "偏空", mixed: "分歧", few: "樣本不足" };
+const SOCIAL_ADV_LABEL = { buy: "買進", sell: "賣出", hold: "觀望" };
+function socialJudged(d){ return (d.pos || 0) + (d.neu || 0) + (d.neg || 0); }
+function socialTag(d){
+  const j = socialJudged(d);
+  if (j < SOCIAL_RANK_MIN_N) return "few";
+  const r = d.pos / j;
+  return r >= SOCIAL_BULL_TH ? "bull" : (r <= SOCIAL_BEAR_TH ? "bear" : "mixed");
+}
+// 個股列排序：n／push／boo／ratio（降序；ratio 的 null 排最後），次鍵篇數降序、代號升序
+const SOCIAL_SORT_KEYS = ["n", "push", "boo", "ratio"];
+function socialSortRows(stocks, key, llm){
   const k = SOCIAL_SORT_KEYS.includes(key) ? key : "n";
-  return Object.entries(stocks && typeof stocks === "object" ? stocks : {})
+  const rows = Object.entries(stocks && typeof stocks === "object" ? stocks : {})
     .filter(([c, s]) => s && typeof s === "object")
-    .map(([code, s]) => ({ code, s }))
-    .sort((a, b) => ((Number(b.s[k]) || 0) - (Number(a.s[k]) || 0)) || (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
+    .map(([code, s]) => { const d = socialDist(s, llm); return { code, s, d, ratio: socialPosRatio(d) }; });
+  const val = r => k === "ratio" ? r.ratio : (Number(r.s[k]) || 0);
+  return rows.sort((a, b) => {
+    const va = val(a), vb = val(b);
+    if (va == null && vb != null) return 1;
+    if (vb == null && va != null) return -1;
+    return ((vb || 0) - (va || 0)) || ((Number(b.s.n) || 0) - (Number(a.s.n) || 0))
+      || (a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+  });
+}
+// 偏多／偏空排行：只納入有判斷篇數 ≥ SOCIAL_RANK_MIN_N 者；bull 依偏多比降序、bear 依偏多比升序，次鍵篇數降序、代號
+function socialRankRows(rows, mode){
+  if (mode !== "bull" && mode !== "bear") return rows;
+  return rows.filter(r => socialJudged(r.d) >= SOCIAL_RANK_MIN_N && r.ratio != null)
+    .slice().sort((a, b) => (mode === "bull" ? b.ratio - a.ratio : a.ratio - b.ratio)
+      || ((Number(b.s.n) || 0) - (Number(a.s.n) || 0))
+      || (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
+}
+// 千張大戶週變化（postmkt diag.json 的 stocks[code].hdw，百分點）；缺值或非數字 → null
+function socialHdw(h){
+  if (!h || h.hdw == null || h.hdw === "") return null;
+  const v = Number(h.hdw);
+  return Number.isFinite(v) ? v : null;
+}
+// 雙確認建議：偏多＋大戶增持 → buy；偏空＋大戶減持 → sell；其餘（含籌碼未涵蓋、持平）→ hold
+function socialAdvice(tag, h){
+  const w = socialHdw(h);
+  if (tag === "bull" && w != null && w > 0) return "buy";
+  if (tag === "bear" && w != null && w < 0) return "sell";
+  return "hold";
+}
+// 由「現價距 MA% 」反推均線價位：MA＝c÷(1＋dist/100)（postmkt src/build_diag.py 的 ma5/ma20/ma60 定義）
+function socialMaPrice(c, dist){
+  if (c == null || dist == null || dist === "") return null;
+  const cv = Number(c), dv = Number(dist);
+  if (!(cv > 0) || !Number.isFinite(dv) || dv <= -100) return null;
+  return cv / (1 + dv / 100);
+}
+// 參考價位：buy → 進場參考＝min(現價, MA20)、停損參考＝MA60（僅在低於現價時）；sell → 減碼參考＝max(現價, MA20)；hold → null
+function socialLevels(adv, h){
+  if (!h || adv === "hold") return null;
+  const c = Number(h.c);
+  if (!(c > 0)) return null;
+  const m20 = socialMaPrice(c, h.ma20), m60 = socialMaPrice(c, h.ma60);
+  if (adv === "buy") return { c, entry: m20 != null ? Math.min(c, m20) : c, stop: m60 != null && m60 < c ? m60 : null };
+  if (adv === "sell") return { c, exit: m20 != null ? Math.max(c, m20) : c };
+  return null;
 }
 // ---- social-pure:end ----
 
 const SOCIAL = { idx: null, idxErr: null, days: null, date: null, hashSd: null,
-  cache: {}, err: {}, open: null, sort: "n", loading: false };
+  cache: {}, err: {}, open: null, sort: "n", rank: "all", loading: false,
+  diag: null, diagErr: null, diagLoading: false };
+const SOCIAL_DIAG_URL = "../postmkt/data/diag/diag.json";   // 同源（shihpc.github.io），CSP connect-src 'self' 已涵蓋
+
+// 千張大戶／價位來源：只在本 tab 首次需要時載一次；讀不到只讓建議退回觀望、不影響聲量表
+async function loadSocialDiag(){
+  if (SOCIAL.diag || SOCIAL.diagErr || SOCIAL.diagLoading) return;
+  SOCIAL.diagLoading = true;
+  try{
+    const r = await fetchFresh(SOCIAL_DIAG_URL);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    if (!j || typeof j !== "object" || !j.stocks || typeof j.stocks !== "object") throw new Error("shape");
+    SOCIAL.diag = j;
+  }catch(e){ SOCIAL.diagErr = "讀不到籌碼資料（postmkt 診斷素材庫），建議一律退回觀望"; }
+  SOCIAL.diagLoading = false;
+  if (state.tab === "social") renderSocial();
+}
 
 async function loadSocial(){
+  loadSocialDiag();
   if (SOCIAL.days === null && !SOCIAL.loading){
     SOCIAL.loading = true; renderSocial();
     try{
@@ -1265,6 +1350,32 @@ function socialEmptyHtml(j){
     + (lines ? `<div class="soc-status">抓取紀錄（原樣列出，不代表判讀）：${lines}</div>` : "") + `</div>`;
 }
 
+const fmtPx = v => v == null ? "—" : (v >= 100 ? v.toFixed(1) : v.toFixed(2));
+function socialAdviceHtml(j, code, s, d, tag, adv, h){
+  const hd = h && Array.isArray(h.hd) && h.hd.length && h.hd[0] != null && Number.isFinite(Number(h.hd[0])) ? Number(h.hd[0]) : null;
+  const w = socialHdw(h);
+  const head = adv === "buy" ? "建議：偏多操作（買進）" : adv === "sell" ? "建議：偏空操作（賣出或避開）" : "建議：觀望";
+  const facts = `${socialJudged(d)} 篇有判斷，其中偏多 ${d.pos}、偏空 ${d.neg}、中性 ${d.neu}（無法判斷 ${d.unk}）；推 ${Number(s.push) || 0}、噓 ${Number(s.boo) || 0}；社群資料日 ${esc(String(j.date))}。`
+    + (h ? `千張大戶持股 ${hd == null ? "—" : hd.toFixed(2) + "%"}，週變化 ${w == null ? "—" : (w > 0 ? "+" : "") + w.toFixed(2) + " pp"}（集保 ${esc(String(h.hdd || "—"))}）。`
+         : (SOCIAL.diag ? "籌碼資料未涵蓋此檔（postmkt 診斷素材庫外）。" : "籌碼資料未載入。"));
+  const chip = w == null ? "未知" : w > 0 ? "增持" : w < 0 ? "減持" : "持平";
+  const both = adv !== "hold" ? "兩者同向，雙確認成立。" : "兩者未同向或資料不足，雙確認未成立。";
+  const infer = `社群作者態度${SOCIAL_TAG_LABEL[tag]}，大戶${chip}；${both}門檻未經回測，屬 AI 研判，非保證。`;
+  const lv = socialLevels(adv, h);
+  let lvHtml = "";
+  if (lv){
+    const dd = SOCIAL.diag && SOCIAL.diag.date ? `（素材庫資料日 ${esc(String(SOCIAL.diag.date))}）` : "";
+    lvHtml = adv === "buy"
+      ? `<div><span class="k">參考價位：</span>收盤 ${fmtPx(lv.c)}${dd}；進場參考約 ${fmtPx(lv.entry)}（現價與 MA20 取低者）`
+        + (lv.stop != null ? `；停損參考約 ${fmtPx(lv.stop)}（MA60）` : "；MA60 不在現價下方，不列停損參考")
+        + `。均線價位由素材庫「現價距 MA%」反推，為近似值，未經回測。</div>`
+      : `<div><span class="k">參考價位：</span>收盤 ${fmtPx(lv.c)}${dd}；減碼參考約 ${fmtPx(lv.exit)}（現價與 MA20 取高者）。均線價位由素材庫「現價距 MA%」反推，為近似值，未經回測。</div>`;
+  }
+  return `<div class="soc-adv"><div class="hd ${adv}">${head}</div>`
+    + `<div><span class="k">依據（事實）：</span>${facts}</div>`
+    + `<div><span class="k">研判（推論）：</span>${infer}</div>${lvHtml}</div>`;
+}
+
 function socialArticlesHtml(j, code){
   const arts = (Array.isArray(j.articles) ? j.articles : [])
     .filter(a => a && Array.isArray(a.codes) && a.codes.includes(code));
@@ -1286,10 +1397,10 @@ function renderSocial(){
   if (!el) return;
   const j = SOCIAL.date ? SOCIAL.cache[SOCIAL.date] : null;
   const llm = (j && j.llm) || {};
-  let h = `<div class="mcard" style="font-size:.84rem">聲量與作者態度為 AI 判讀的現況描述，非買賣訊號，無回測依據。`
+  let h = `<div class="mcard" style="font-size:.84rem">AI 研判，未經回測，非保證。聲量、態度標籤與買賣建議皆由規則與 AI 判讀產生，僅供參考。`
     + `<div class="mut" style="font-size:.74rem;margin-top:4px">判讀模型 ${esc(llm.model == null ? "—" : String(llm.model))}`
     + ` · prompt 版本 ${esc(llm.prompt_ver == null ? "—" : String(llm.prompt_ver))}`
-    + ` · 態度只判「發文者對該檔的態度」，不預測股價；不依態度排序。</div></div>`;
+    + ` · 標籤門檻：偏多比 ≥${Math.round(SOCIAL_BULL_TH * 100)}% 偏多、≤${Math.round(SOCIAL_BEAR_TH * 100)}% 偏空、判斷篇數 <${SOCIAL_RANK_MIN_N} 為樣本不足（未經回測）</div></div>`;
   if (SOCIAL.loading){ el.innerHTML = h + `<div class="empty">載入中…</div>`; return; }
   if (SOCIAL.idxErr){ el.innerHTML = h + `<div class="empty">${esc(SOCIAL.idxErr)}</div>`; return; }
   if (!SOCIAL.days){ el.innerHTML = h + `<div class="empty">載入中…</div>`; return; }
@@ -1303,15 +1414,22 @@ function renderSocial(){
   if (!j){ el.innerHTML = h + `<div class="empty">載入中…</div>`; return; }
   h += socialStatusHtml(j);
   if (!(Number(j.articles_n) > 0)){ el.innerHTML = h + socialEmptyHtml(j); return; }
-  const rows = socialSortRows(j.stocks, SOCIAL.sort);
+  const rows = socialRankRows(socialSortRows(j.stocks, SOCIAL.sort, llm), SOCIAL.rank);
+  const rk = (m, t) => `<span class="chip${SOCIAL.rank === m ? " active" : ""}" data-soc-rank="${m}">${t}</span>`;
+  h += `<div class="row" style="margin:4px 0"><span class="lbl">檢視</span>${rk("all", "全部")}${rk("bull", "偏多排行")}${rk("bear", "偏空排行")}</div>`;
+  if (SOCIAL.rank !== "all" && !rows.length){ el.innerHTML = h + `<div class="mcard"><div class="empty" style="padding:18px 10px">沒有判斷篇數達 ${SOCIAL_RANK_MIN_N} 篇的個股，無法排行。</div></div>`; return; }
   if (!rows.length){ el.innerHTML = h + `<div class="mcard"><div class="empty" style="padding:18px 10px">本日文章未命中任何股票代號或全名。</div></div>`; return; }
-  const th = (k, t) => `<th class="soc-th${SOCIAL.sort === k ? " on" : ""}" data-soc-sort="${k}">${t}${SOCIAL.sort === k ? " ▼" : ""}</th>`;
+  const th = (k, t) => SOCIAL.rank !== "all" ? `<th>${t}</th>`
+    : `<th class="soc-th${SOCIAL.sort === k ? " on" : ""}" data-soc-sort="${k}">${t}${SOCIAL.sort === k ? " ▼" : ""}</th>`;
+  const diagRows = SOCIAL.diag ? SOCIAL.diag.stocks : null;
   h += `<div class="mcard"><div class="tblwrap"><table class="mtable"><thead><tr><th>代號</th><th style="text-align:left">股名</th>`
     + th("n", "篇數") + th("push", "推") + th("boo", "噓")
-    + `<th style="text-align:left">作者態度分布</th><th>偏多比</th></tr></thead><tbody>`;
-  for (const { code, s } of rows){
-    const d = socialDist(s, llm);
+    + `<th style="text-align:left">作者態度分布</th>` + th("ratio", "偏多比") + `<th>標籤</th><th>建議</th></tr></thead><tbody>`;
+  for (const { code, s, d } of rows){
     const n = Math.max(1, d.pos + d.neu + d.neg + d.unk);
+    const tag = socialTag(d);
+    const hrow = diagRows && diagRows[code] && typeof diagRows[code] === "object" ? diagRows[code] : null;
+    const adv = socialAdvice(tag, hrow);
     const seg = k => d[k] > 0 ? `<i class="soc-${k}" style="width:${(d[k] / n * 100).toFixed(1)}%"></i>` : "";
     const tip = SOCIAL_SENT_KEYS.map(k => `${SOCIAL_SENT_LABEL[k]} ${d[k]}`).join("／");
     const r = socialPosRatio(d);
@@ -1320,19 +1438,24 @@ function renderSocial(){
     h += `<tr><td><span class="soc-code" data-soc-code="${esc(code)}">${op ? "▾" : "▸"} ${esc(code)}</span></td>`
       + `<td style="text-align:left">${esc(nm)}</td><td>${Number(s.n) || 0}</td><td>${Number(s.push) || 0}</td><td>${Number(s.boo) || 0}</td>`
       + `<td style="text-align:left"><span class="soc-bar" title="${esc(tip)}">${SOCIAL_SENT_KEYS.map(seg).join("")}</span></td>`
-      + `<td>${r == null ? "—" : Math.round(r * 100) + "%"}</td></tr>`;
-    if (op) h += `<tr><td colspan="7" style="text-align:left;white-space:normal">${socialArticlesHtml(j, code)}</td></tr>`;
+      + `<td>${r == null ? "—" : Math.round(r * 100) + "%"}</td>`
+      + `<td><span class="soc-tag ${tag}">${SOCIAL_TAG_LABEL[tag]}</span></td>`
+      + `<td><span class="soc-tag ${adv}">${SOCIAL_ADV_LABEL[adv]}</span></td></tr>`;
+    if (op) h += `<tr><td colspan="9" style="text-align:left;white-space:normal">${socialAdviceHtml(j, code, s, d, tag, adv, hrow)}${socialArticlesHtml(j, code)}</td></tr>`;
   }
   h += `</tbody></table></div>`
     + `<div class="soc-legend">${SOCIAL_SENT_KEYS.map(k => `<span><i class="soc-sw soc-${k}"></i>${SOCIAL_SENT_LABEL[k]}</span>`).join("")}</div>`
     + `<div class="insight-note">篇數＝提及該檔的篇數；推／噓＝那些篇的推噓數加總。偏多比＝偏多÷（偏多＋中性＋偏空），不含無法判斷，分母 0 顯「—」。`
-    + `點代號展開該檔文章。可依篇數／推／噓排序，態度相關欄不可排序。</div></div>`;
+    + `建議採雙確認：社群偏多且千張大戶週增持 → 買進；社群偏空且大戶週減持 → 賣出；其餘觀望。點代號展開依據與參考價位。`
+    + `${SOCIAL.diagErr ? "<br>" + esc(SOCIAL.diagErr) : (SOCIAL.diag ? "" : "<br>籌碼資料載入中，建議暫以觀望顯示。")}</div></div>`;
   el.innerHTML = h;
 }
 
 document.addEventListener("click", e => {
   const c = e.target.closest && e.target.closest("[data-soc-code]");
   if (c){ const k = c.dataset.socCode; SOCIAL.open = SOCIAL.open === k ? null : k; renderSocial(); return; }
+  const rkEl = e.target.closest && e.target.closest("[data-soc-rank]");
+  if (rkEl){ const m = rkEl.dataset.socRank; SOCIAL.rank = (m === "bull" || m === "bear") ? m : "all"; SOCIAL.open = null; renderSocial(); return; }
   const s = e.target.closest && e.target.closest("[data-soc-sort]");
   if (s){ SOCIAL.sort = SOCIAL_SORT_KEYS.includes(s.dataset.socSort) ? s.dataset.socSort : "n"; renderSocial(); }
 });

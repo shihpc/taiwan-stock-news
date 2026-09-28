@@ -8,7 +8,7 @@
 
 | # | 約束 | 驗法 |
 |---|------|------|
-| H1 | **不顯示**：`index.html` 一字不改、`news.json` 格式不改、Worker 不改 | `git diff --stat` 不含 `index.html`／`news.json` |
+| H1 | ~~**不顯示**~~（**2026-09-28 使用者裁決解除**，上畫面的規格見 `docs/social-display.md`；以下為原條文）：`index.html` 一字不改、`news.json` 格式不改、Worker 不改 | `git diff --stat` 不含 `index.html`／`news.json` |
 | H2 | **只做 PTT Stock 板**，不碰 Dcard、不碰其他板 | grep `dcard` 零命中（程式碼） |
 | H3 | **不存文章正文**：產物只存標題／作者／時間／推噓數／連結／命中代號／情緒標籤；正文只在記憶體用完即丟 | 產物 schema 檢查＋測試斷言無 `body` 欄 |
 | H4 | **抓取節流**：對 ptt.cc 的請求間隔 ≥ `SOCIAL_MIN_INTERVAL`（1.0 秒）、單班總請求 ≤ `SOCIAL_MAX_REQUESTS`（400）、UA 帶專案識別字串 | 測試以假 session 計數＋計時 |
