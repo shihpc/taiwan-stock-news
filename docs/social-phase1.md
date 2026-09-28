@@ -273,3 +273,25 @@
 - **已知限制**：Hetzner cron 失敗**不會開 issue**——只有 exit code 與 `/var/log/social_cron.log`，與 claude-harness
   `tools/sync_machine.py` 同一個盲區（Actions 上的 `notify-failure` 看不到機器本地）。exit 2（LLM 失效）同樣只在 log。
   要主動告警得在該機放憑證，屬另案。§6.5 寫的「cron 每晚仍會跑並 commit 空產物」自本節起不再成立（GH schedule 已移除）。
+
+## 7. 其他社群來源評估紀錄（2026-09-28，結論：目前只用 PTT）
+
+留給之後的人，**不要重走一次**。
+
+### 7.1 CMoney 股市爆料同學會：停在 401
+- robots.txt：`User-agent: *` 為 `Allow: /`，禁止清單只有 `/cashflow/`、`/member/`、`/identity/` 等，`/forum` 與 `/api/` 未被禁止（Hetzner 實測）。
+- 條款（`/member/tos.aspx` 關鍵字比對，非逐字讀完）：未見明文禁止爬蟲或自動化；禁止「未經他人同意而擅自複製他人資訊轉售、轉載」與「未經 CMoney 事前授權的商業行為」。
+- 個股頁 `/forum/stock/<代號>` 伺服器輸出的 HTML 與 `__NUXT__`（Nuxt 2 函式形式）**都沒有文章串**；ld+json 只有 BreadcrumbList／WebPage／Corporation。另有 `windSnapshots`（CMoney 自己的「風向」情緒分數），屬其衍生產品，不採用。
+- 文章串由前端 `POST https://www.cmoney.tw/api/mach/api/Article/GetChannelsArticleByWeight?count=N`，body `{"items":["Popular-Stock.<代號>"]}` 載入（依權重排序的熱門文，非完整時間序）。
+- **不帶憑證打該 API 回 HTTP 401**（Hetzner 實測）。取得憑證只能用使用者帳號或模仿前端取訪客 token，兩者都是繞過站方存取控制，**不做**。使用者 2026-09-28 的「視同授權」只決定我方承擔條款風險，不能替 CMoney 開放鎖住的介面。唯一合規路徑：向 CMoney 申請資料授權。
+
+### 7.2 Threads：使用者 2026-09-28 決定放棄
+- 官方 `keyword_search` 需 `threads_keyword_search` 權限；**審核前只搜得到授權帳號自己的貼文**，測試者亦同。
+- 進階權限須連結已完成 **Business Verification** 的商家帳號，個人無行號／稅籍多半過不了（未查證到確定答案）。
+- 他人貼文的讚數／回覆數很可能拿不到（未實測）。
+- 查證限制：Meta 官方頁在研究沙箱被擋，以上依 GitHub 逐字轉貼的官方原文與搜尋摘要。
+
+### 7.3 其他已排除
+Dcard（Cloudflare 擋、無官方 API）、Facebook 社團（Groups API 2024 關閉）、LINE 社群（無讀取介面）、X（免費層取消、按則計價）、Mobile01／玩股網／鉅亨討論區（無 API）。
+仍可考慮但未做：YouTube 財經頻道留言（官方 API，訊號偏弱）、Telegram 公開頻道（官方 API，屬意見領袖單向發文）。
+交易行為類情緒指標（期交所 Put/Call 比、臺指 VIX、小台散戶多空比）不屬社群文本，另案。
