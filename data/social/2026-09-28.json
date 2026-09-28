@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "date": "2026-09-28",
- "generated_at": "2026-09-28T12:29:17+08:00",
+ "generated_at": "2026-09-29T01:43:38+08:00",
  "source": "ptt-stock",
  "robots": "absent",
  "robots_crawl_delay": null,
@@ -21,38 +21,962 @@
    "path": "/robots.txt",
    "status": 404,
    "err": null
-  },
-  {
-   "path": "/bbs/Stock/index.html",
-   "status": 403,
-   "err": null
-  },
-  {
-   "path": "/bbs/Stock/index.html",
-   "status": 403,
-   "err": null
   }
  ],
- "pages_fetched": 0,
- "articles_n": 0,
- "articles_fetched_n": 0,
+ "pages_fetched": 4,
+ "articles_n": 25,
+ "articles_fetched_n": 25,
  "failed_n": 0,
- "requests_n": 4,
- "elapsed_s": 5.3,
+ "requests_n": 31,
+ "elapsed_s": 81.2,
  "llm": {
   "model": "claude-opus-5",
   "prompt_ver": 1,
-  "via": null,
-  "skipped": "no-articles",
-  "classified_n": 0,
+  "via": "sync",
+  "skipped": null,
+  "classified_n": 19,
   "failed_n": 0,
   "usage": {
-   "input_tokens": 0,
-   "output_tokens": 0
+   "input_tokens": 16404,
+   "output_tokens": 1111
   }
  },
- "stocks": {},
- "articles": [],
+ "stocks": {
+  "2025": {
+   "name": "千興",
+   "n": 6,
+   "push": 372,
+   "boo": 64,
+   "pos": 0,
+   "neg": 0,
+   "neu": 6,
+   "unk": 0
+  },
+  "2023": {
+   "name": "燁輝",
+   "n": 4,
+   "push": 377,
+   "boo": 57,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "unk": 0
+  },
+  "2024": {
+   "name": "志聯",
+   "n": 4,
+   "push": 377,
+   "boo": 57,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "unk": 0
+  },
+  "2330": {
+   "name": "台積電",
+   "n": 4,
+   "push": 201,
+   "boo": 110,
+   "pos": 1,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "3167": {
+   "name": "大量",
+   "n": 4,
+   "push": 99,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "unk": 0
+  },
+  "2027": {
+   "name": "大成鋼",
+   "n": 3,
+   "push": 37,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "5347": {
+   "name": "世界",
+   "n": 3,
+   "push": 59,
+   "boo": 5,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "0050": {
+   "name": "元大台灣50",
+   "n": 2,
+   "push": 227,
+   "boo": 113,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "2002": {
+   "name": "中鋼",
+   "n": 2,
+   "push": 62,
+   "boo": 5,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "2022": {
+   "name": "聚亨",
+   "n": 2,
+   "push": 139,
+   "boo": 21,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "2303": {
+   "name": "聯電",
+   "n": 2,
+   "push": 29,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "5287": {
+   "name": "數字",
+   "n": 2,
+   "push": 62,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "9921": {
+   "name": "巨大",
+   "n": 2,
+   "push": 67,
+   "boo": 10,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "1210": {
+   "name": "大成",
+   "n": 1,
+   "push": 11,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1315": {
+   "name": "達新",
+   "n": 1,
+   "push": 30,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1475": {
+   "name": "業旺",
+   "n": 1,
+   "push": 25,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1519": {
+   "name": "華城",
+   "n": 1,
+   "push": 8,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1704": {
+   "name": "榮化",
+   "n": 1,
+   "push": 25,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2015": {
+   "name": "豐興",
+   "n": 1,
+   "push": 48,
+   "boo": 10,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2020": {
+   "name": "美亞",
+   "n": 1,
+   "push": 48,
+   "boo": 10,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2028": {
+   "name": "威致",
+   "n": 1,
+   "push": 11,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2030": {
+   "name": "彰源",
+   "n": 1,
+   "push": 11,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2359": {
+   "name": "所羅門",
+   "n": 1,
+   "push": 19,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2454": {
+   "name": "聯發科",
+   "n": 1,
+   "push": 19,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2455": {
+   "name": "全新",
+   "n": 1,
+   "push": 8,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2748": {
+   "name": "雲品",
+   "n": 1,
+   "push": 30,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2801": {
+   "name": "彰銀",
+   "n": 1,
+   "push": 19,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2880": {
+   "name": "華南金",
+   "n": 1,
+   "push": 19,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2886": {
+   "name": "兆豐金",
+   "n": 1,
+   "push": 19,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2889": {
+   "name": "國票金",
+   "n": 1,
+   "push": 19,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2892": {
+   "name": "第一金",
+   "n": 1,
+   "push": 19,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2903": {
+   "name": "遠百",
+   "n": 1,
+   "push": 8,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2926": {
+   "name": "誠品生活",
+   "n": 1,
+   "push": 30,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3061": {
+   "name": "璨圓",
+   "n": 1,
+   "push": 91,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3481": {
+   "name": "群創",
+   "n": 1,
+   "push": 19,
+   "boo": 1,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "4743": {
+   "name": "合一",
+   "n": 1,
+   "push": 19,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "5522": {
+   "name": "遠雄",
+   "n": 1,
+   "push": 8,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6435": {
+   "name": "大中",
+   "n": 1,
+   "push": 48,
+   "boo": 10,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6770": {
+   "name": "力積電",
+   "n": 1,
+   "push": 18,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "7743": {
+   "name": "金利食安",
+   "n": 1,
+   "push": 923,
+   "boo": 179,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8440": {
+   "name": "綠電",
+   "n": 1,
+   "push": 30,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8482": {
+   "name": "商億-KY",
+   "n": 1,
+   "push": 30,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8923": {
+   "name": "時報",
+   "n": 1,
+   "push": 18,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8940": {
+   "name": "新天地",
+   "n": 1,
+   "push": 8,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "911606": {
+   "name": "超級",
+   "n": 1,
+   "push": 37,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1790528726.A.991",
+   "title": "Re: [請益] 基本面投資如何驗證自己錯了",
+   "author": "LINPINPARK (lalalo)",
+   "ts": "2026-09-28 01:05",
+   "push": 19,
+   "boo": 0,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790528726.A.991.html",
+   "codes": [
+    "3167",
+    "9921",
+    "2359",
+    "2330",
+    "2454"
+   ],
+   "sent": {
+    "3167": "neu",
+    "9921": "neu",
+    "2359": "neu",
+    "2330": "neu",
+    "2454": "neu"
+   }
+  },
+  {
+   "aid": "M.1790529488.A.AD7",
+   "title": "Re: [請益] 基本面投資如何驗證自己錯了",
+   "author": "afflic (afflic)",
+   "ts": "2026-09-28 01:18",
+   "push": 11,
+   "boo": 0,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790529488.A.AD7.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790530955.A.DFB",
+   "title": "Re: [請益] 基本面投資如何驗證自己錯了",
+   "author": "eierom (非)",
+   "ts": "2026-09-28 01:42",
+   "push": 5,
+   "boo": 1,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790530955.A.DFB.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": {
+    "2330": "pos"
+   }
+  },
+  {
+   "aid": "M.1790535886.A.A44",
+   "title": "Re: [請益] 基本面投資如何驗證自己錯了",
+   "author": "a000000000 (比古A十郎)",
+   "ts": "2026-09-28 03:04",
+   "push": 62,
+   "boo": 6,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790535886.A.A44.html",
+   "codes": [
+    "2023",
+    "2024"
+   ],
+   "sent": {
+    "2023": "neu",
+    "2024": "neu"
+   }
+  },
+  {
+   "aid": "M.1790555405.A.A9C",
+   "title": "[閒聊] 2026/09/28 盤後閒聊",
+   "author": "laptic (嶼天聖林)",
+   "ts": "2026-09-28 08:30",
+   "push": 923,
+   "boo": 179,
+   "cat": "閒聊",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790555405.A.A9C.html",
+   "codes": [
+    "7743"
+   ],
+   "sent": {
+    "7743": "neu"
+   }
+  },
+  {
+   "aid": "M.1790556555.A.303",
+   "title": "[新聞] GPU旁邊的小晶片也開始缺了！AI燒進成熟",
+   "author": "aapcao (助人為快樂之本)",
+   "ts": "2026-09-28 08:49",
+   "push": 18,
+   "boo": 3,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790556555.A.303.html",
+   "codes": [
+    "2303",
+    "5347",
+    "6770",
+    "8923",
+    "2027",
+    "3167"
+   ],
+   "sent": {
+    "2303": "neu",
+    "5347": "neu",
+    "6770": "neu",
+    "8923": "neu",
+    "2027": "neu",
+    "3167": "neu"
+   }
+  },
+  {
+   "aid": "M.1790556848.A.118",
+   "title": "Re: [請益] 基本面投資如何驗證自己錯了",
+   "author": "devidevi (凱特)",
+   "ts": "2026-09-28 08:54",
+   "push": 4,
+   "boo": 0,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790556848.A.118.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790560077.A.3D5",
+   "title": "[新聞] 公公併不是大就好！財政部劃下紅線",
+   "author": "wu73 (早八晚五其實已經9小時了)",
+   "ts": "2026-09-28 09:47",
+   "push": 19,
+   "boo": 6,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790560077.A.3D5.html",
+   "codes": [
+    "2889",
+    "2801",
+    "4743",
+    "2892",
+    "2886",
+    "2880",
+    "2025"
+   ],
+   "sent": {
+    "2889": "neu",
+    "2801": "neu",
+    "4743": "neu",
+    "2892": "neu",
+    "2886": "neu",
+    "2880": "neu",
+    "2025": "neu"
+   }
+  },
+  {
+   "aid": "M.1790561876.A.0B9",
+   "title": "Re: [請益] 基本面投資如何驗證自己錯了",
+   "author": "AM903651 (安仔)",
+   "ts": "2026-09-28 10:17",
+   "push": 0,
+   "boo": 0,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790561876.A.0B9.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790564904.A.676",
+   "title": "[新聞] 韓中FTA10年爆慘案！韓貨中國市占慘掉3成",
+   "author": "Su22 (裝配匠)",
+   "ts": "2026-09-28 11:08",
+   "push": 48,
+   "boo": 10,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790564904.A.676.html",
+   "codes": [
+    "6435",
+    "2015",
+    "2025",
+    "2022",
+    "2020",
+    "9921",
+    "2023",
+    "2024"
+   ],
+   "sent": {
+    "6435": "neu",
+    "2015": "neu",
+    "2025": "neu",
+    "2022": "neu",
+    "2020": "neu",
+    "9921": "neu",
+    "2023": "neu",
+    "2024": "neu"
+   }
+  },
+  {
+   "aid": "M.1790565890.A.200",
+   "title": "Re: [新聞] Meta新AI代理一炮而紅，但反彈聲浪已開始",
+   "author": "capssan (Miracle)",
+   "ts": "2026-09-28 11:24",
+   "push": 58,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790565890.A.200.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790567194.A.234",
+   "title": "Re: [新聞] 股市暴賺不想上班了！55歲以上掀退休潮",
+   "author": "abc3268 (The Point)",
+   "ts": "2026-09-28 11:46",
+   "push": 176,
+   "boo": 30,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790567194.A.234.html",
+   "codes": [
+    "2024",
+    "2023",
+    "2025"
+   ],
+   "sent": {
+    "2024": "neu",
+    "2023": "neu",
+    "2025": "neu"
+   }
+  },
+  {
+   "aid": "M.1790571787.A.411",
+   "title": "[新聞] 美伊最快今重啟談判！川普仍留後手",
+   "author": "omanorboyo (omanorboyo)",
+   "ts": "2026-09-28 13:03",
+   "push": 32,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790571787.A.411.html",
+   "codes": [
+    "5287",
+    "3167"
+   ],
+   "sent": {
+    "5287": "neu",
+    "3167": "neu"
+   }
+  },
+  {
+   "aid": "M.1790573149.A.F1C",
+   "title": "Re: [新聞] 股市暴賺不想上班了！55歲以上掀退休潮",
+   "author": "xross (xross)",
+   "ts": "2026-09-28 13:25",
+   "push": 30,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790573149.A.F1C.html",
+   "codes": [
+    "5347"
+   ],
+   "sent": {
+    "5347": "neu"
+   }
+  },
+  {
+   "aid": "M.1790574131.A.EC8",
+   "title": "Re: [新聞] 新北將添2座新百貨！遠百進駐板橋TPARK",
+   "author": "NovaShin ()",
+   "ts": "2026-09-28 13:42",
+   "push": 8,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790574131.A.EC8.html",
+   "codes": [
+    "2903",
+    "2027",
+    "8940",
+    "1519",
+    "2455",
+    "2025",
+    "5522"
+   ],
+   "sent": {
+    "2903": "neu",
+    "2027": "neu",
+    "8940": "neu",
+    "1519": "neu",
+    "2455": "neu",
+    "2025": "neu",
+    "5522": "neu"
+   }
+  },
+  {
+   "aid": "M.1790575045.A.D41",
+   "title": "[新聞] 餐飲無感1》錢賺太多吃不多？台股狂飆餐",
+   "author": "ChanHoPark (公園先生)",
+   "ts": "2026-09-28 13:57",
+   "push": 91,
+   "boo": 11,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790575045.A.D41.html",
+   "codes": [
+    "2022",
+    "2023",
+    "2024",
+    "2025",
+    "3061"
+   ],
+   "sent": {
+    "2022": "neu",
+    "2023": "neu",
+    "2024": "neu",
+    "2025": "neu",
+    "3061": "neu"
+   }
+  },
+  {
+   "aid": "M.1790576399.A.624",
+   "title": "Re: [新聞] 餐飲無感1》錢賺太多吃不多？台股狂飆餐",
+   "author": "iammatrix (母體)",
+   "ts": "2026-09-28 14:19",
+   "push": 37,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790576399.A.624.html",
+   "codes": [
+    "911606",
+    "2002"
+   ],
+   "sent": {
+    "911606": "neu",
+    "2002": "neu"
+   }
+  },
+  {
+   "aid": "M.1790576988.A.232",
+   "title": "Re: [請益] 3481群創還值得續抱嗎？ 硬撐盤",
+   "author": "ambrian (是布萊恩)",
+   "ts": "2026-09-28 14:29",
+   "push": 19,
+   "boo": 1,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790576988.A.232.html",
+   "codes": [
+    "3481"
+   ],
+   "sent": {
+    "3481": "pos"
+   }
+  },
+  {
+   "aid": "M.1790578918.A.6A9",
+   "title": "[新聞] 傳產業吃不到AI紅利　專家：資源排擠加劇",
+   "author": "cjol (勤樸)",
+   "ts": "2026-09-28 15:01",
+   "push": 30,
+   "boo": 7,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790578918.A.6A9.html",
+   "codes": [
+    "8440",
+    "5287",
+    "2025",
+    "1315",
+    "8482",
+    "3167",
+    "2748",
+    "2926"
+   ],
+   "sent": {
+    "8440": "neu",
+    "5287": "neu",
+    "2025": "neu",
+    "1315": "neu",
+    "8482": "neu",
+    "3167": "neu",
+    "2748": "neu",
+    "2926": "neu"
+   }
+  },
+  {
+   "aid": "M.1790579172.A.2AC",
+   "title": "Re: [新聞] 股市暴賺不想上班了！55歲以上掀退休潮",
+   "author": "safelove (安全的愛)",
+   "ts": "2026-09-28 15:06",
+   "push": 61,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790579172.A.2AC.html",
+   "codes": [
+    "0050"
+   ],
+   "sent": {
+    "0050": "neu"
+   }
+  },
+  {
+   "aid": "M.1790584735.A.64B",
+   "title": "[新聞] 台股明恐補跌！韓股跌2.7％、日經跌486點",
+   "author": "bamama56 (bamama)",
+   "ts": "2026-09-28 16:38",
+   "push": 160,
+   "boo": 19,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790584735.A.64B.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790587681.A.DD0",
+   "title": "[新聞] 〈VSMC開幕〉方略：產能已經「徹底爆掉」",
+   "author": "aapcao (助人為快樂之本)",
+   "ts": "2026-09-28 17:27",
+   "push": 11,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790587681.A.DD0.html",
+   "codes": [
+    "5347",
+    "1210",
+    "2330",
+    "2027",
+    "2028",
+    "2030",
+    "2303"
+   ],
+   "sent": {
+    "5347": "neu",
+    "1210": "neu",
+    "2330": "neu",
+    "2027": "neu",
+    "2028": "neu",
+    "2030": "neu",
+    "2303": "neu"
+   }
+  },
+  {
+   "aid": "M.1790590736.A.E19",
+   "title": "Re: [新聞] 餐飲無感1》錢賺太多吃不多？台股狂飆餐",
+   "author": "Geiwoyujie (https://reurl.cc/Rlnen?)",
+   "ts": "2026-09-28 18:18",
+   "push": 25,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790590736.A.E19.html",
+   "codes": [
+    "2002",
+    "1475",
+    "1704"
+   ],
+   "sent": {
+    "2002": "neu",
+    "1475": "neu",
+    "1704": "neu"
+   }
+  },
+  {
+   "aid": "M.1790591199.A.5FD",
+   "title": "[新聞] 台股連假後恐跌1千點？ 郭哲榮揭2關鍵",
+   "author": "diefishfish ()",
+   "ts": "2026-09-28 18:26",
+   "push": 82,
+   "boo": 16,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790591199.A.5FD.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790601312.A.75E",
+   "title": "[請益] 投資部位變大 已經影響工作心情 如何調適",
+   "author": "goodpoint (worry)",
+   "ts": "2026-09-28 21:15",
+   "push": 166,
+   "boo": 109,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790601312.A.75E.html",
+   "codes": [
+    "0050",
+    "2330"
+   ],
+   "sent": {
+    "0050": "neu",
+    "2330": "neu"
+   }
+  }
+ ],
  "teardown": {
   "since": "2026-09-27",
   "age_days": 1,
