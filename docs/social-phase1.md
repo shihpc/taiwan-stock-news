@@ -242,3 +242,34 @@
 - **在裁決前**：cron 每晚仍會跑、每班產一份 `pages_fetched: 0` 的產物並 commit（exit 0、不紅燈——
   「抓不到」不是分類失效）。這是刻意不擋的：多累積幾班 403 樣本本身也是證據；若不想累積，先把
   `build-social.yml` 的 `schedule` 註解掉。
+
+### 6.6 執行環境搬到 Hetzner（2026-09-28，使用者裁定：GitHub 只當資料倉）
+
+- **Hetzner 實測**（2026-09-28 台北中午，commit `2477cf5`，`--no-llm`、兩個 token 清空）：robots 404 → `absent`、
+  板首頁 **200**、`pages_fetched: 3`、`articles_n: 14`、`articles_fetched_n: 14`、`failed_n: 0`、
+  `requests_n: 19`、`elapsed_s: 19.8`。**結論**：§6.5 的 403 是 GitHub Actions 出口 IP 被 ptt.cc 擋；
+  依記憶實作的 DOM 解析器與節流在真實頁面上正確（14 篇全抓到、零失敗）。
+- **改動**：
+  - 新增 `tools/social_cron.sh`（bash，`set -euo pipefail`）：`REPO_DIR`（預設 `/root/projects/taiwan-stock-news`）
+    ／`ENV_FILE`（預設 `/root/.config/taiwan-stock-news.env`，須存在且 **0600**，否則 exit 3）／`--dry-run`
+    （不 commit 不 push）／`--no-llm` 透傳／`SOCIAL_EXTRA_ARGS`（測試透傳 fixture 參數）。流程：工作樹不乾淨
+    exit 4（不 stash）→ `fetch` → `checkout main` → `pull --ff-only`（失敗 exit 4）→ `set -a; . ENV_FILE` →
+    目標日＝台北時刻減 6 小時（與 workflow 同口徑）→ `python3 build_social.py`（exit code 記下、不中斷）→
+    `git add data/social` → 有變化才 commit（`social update <日> (<UTC>, hetzner)`）→ `pull --rebase` 重試 5 次、
+    衝突以本班 `data/social` 為準（`--theirs`）→ 以 build 的 exit code 退出（2＝LLM 失效）。全程不 echo
+    任何環境變數值。
+  - `build-social.yml` 移除 `schedule`、原位留註解；只剩 `workflow_dispatch` 供診斷（預期 403）。
+  - 守門測試 `tests/test_social_cron.py`（6 案例，臨時 bare repo＋clone）：`--dry-run` 產物寫出但不 push
+    不 commit、log 不含金鑰值；假 `build_social.py` 回 2 → 腳本 exit 2；ENV_FILE 0644／不存在 → exit 3；
+    工作樹髒 → exit 4；未知參數 exit 2；`bash -n`。
+- **安裝**（詳見 claude-harness `Harness/server-hetzner.md`「每日社群班」）：
+  1. `ENV_FILE`（`/root/.config/taiwan-stock-news.env`，`chmod 600`），內容只有兩行、鍵名如下（值不得出現在任何文件）：
+     ```
+     FINMIND_TOKEN=
+     ANTHROPIC_API_KEY=
+     ```
+  2. `crontab -e`：`20 15 * * * cd /root/projects/taiwan-stock-news && bash tools/social_cron.sh >> /var/log/social_cron.log 2>&1`
+     （UTC 15:20＝台北 23:20，每日含週末；用 PATH 的 `python3`，不硬編路徑）。先手動 `bash tools/social_cron.sh --dry-run --no-llm` 一次。
+- **已知限制**：Hetzner cron 失敗**不會開 issue**——只有 exit code 與 `/var/log/social_cron.log`，與 claude-harness
+  `tools/sync_machine.py` 同一個盲區（Actions 上的 `notify-failure` 看不到機器本地）。exit 2（LLM 失效）同樣只在 log。
+  要主動告警得在該機放憑證，屬另案。§6.5 寫的「cron 每晚仍會跑並 commit 空產物」自本節起不再成立（GH schedule 已移除）。

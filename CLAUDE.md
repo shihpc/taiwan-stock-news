@@ -93,9 +93,9 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
   照抓；ptt.cc 實測 404）、`unreachable`（5xx／例外，不抓）；不抓仍寫產物（H5）；對 ptt.cc 節流 `SOCIAL_MIN_INTERVAL`／
   `SOCIAL_MAX_REQUESTS`（H4）。情緒分類走 Message Batches→逐篇同步回退（`call_batch`／`call_sync`／
   `classify`，移植自 postmkt `build_summary.py`、**刻意不共用**；進 LLM 前先落一版 `skipped="pending"`
-  產物、同步回退總預算 `SOCIAL_SYNC_BUDGET_SEC` 15 分），缺 `ANTHROPIC_API_KEY` 情緒整批 null（H7）。排程只靠
-  `build-social.yml` 的 GH cron 台北 23:20（不進 Worker dispatch 清單，H8）；目標日＝起跑時刻減
-  6 小時的台北日（cron 延遲不滾日）。`data/social/2026-09-26.json` 是 fixture 產的 **schema 樣本**
+  產物、同步回退總預算 `SOCIAL_SYNC_BUDGET_SEC` 15 分），缺 `ANTHROPIC_API_KEY` 情緒整批 null（H7）。**排程在
+  Hetzner cron**（`tools/social_cron.sh`，台北 23:20；GitHub runner 出口 IP 被 ptt.cc 403，`build-social.yml`
+  只剩 `workflow_dispatch` 供診斷；不進 Worker dispatch 清單，H8）。`data/social/2026-09-26.json` 是 fixture 產的 **schema 樣本**
   （檔內 `"fixture": true`），不是線上資料。⚠ PTT DOM 依記憶實作，**線上首跑要對照實際頁面**。
   測試 `tests/test_social.py`（fixtures 在 `tests/fixtures/social/`）；拆除提醒常數
   `SOCIAL_SAMPLE_SINCE`／`SOCIAL_TEARDOWN_DUE_DAYS`（到期只印 warning）。

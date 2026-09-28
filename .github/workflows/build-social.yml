@@ -15,9 +15,9 @@ on:
         description: '跳過情緒分類（true/false）'
         required: false
         default: 'false'
-  schedule:
-    # 台北 23:20，每日含週末：PTT 討論到晚間才齊，且避開 21:37 的 news 備援班
-    - cron: '20 15 * * *'
+  # 2026-09-28 實測 GitHub Actions 出口 IP 被 ptt.cc 403，排程改由 Hetzner cron
+  # （`tools/social_cron.sh`，台北 23:20）執行，本 workflow 只保留 `workflow_dispatch`
+  # 供診斷（預期 403），見 docs/social-phase1.md §6.6。原 schedule：`20 15 * * *`（台北 23:20）。
 
 permissions:
   contents: write

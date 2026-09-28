@@ -227,11 +227,11 @@ python tests/test_incremental.py                               # 增量正確性
 - **金鑰**：`ANTHROPIC_API_KEY`／`FINMIND_TOKEN` 只由環境變數讀；例外訊息過 `mask_secret()` 才印。
   缺 `ANTHROPIC_API_KEY` → 情緒整批 null、`llm.skipped="no-key"`，聲量資料照寫。缺 `FINMIND_TOKEN`
   且無當日快取（`data/cache/social_info_<YYYYMMDD>.json`，不進 git）→ 只認代號、`name` 為 null。
-- **排程**：`.github/workflows/build-social.yml` cron `20 15 * * *`（台北 23:20，每日含週末）＋
-  `workflow_dispatch`（可指定 `date`／`no_llm`）。**只靠 GH cron、不進 Worker dispatch 清單**。
-  目標日＝起跑時刻減 6 小時的台北日，GitHub cron 延遲 ≤6 小時不會把目標日滾成隔天；白天手動
-  dispatch 不帶 `date` 會算到**前一天**（刻意）。push 走 `build-news.yml` 同款 rebase 重試，
-  失敗開 issue（`pipeline: news-social`）。
+- **排程（2026-09-28 起搬到 Hetzner，GitHub 只當資料倉）**：`tools/social_cron.sh` 由 Hetzner crontab
+  `20 15 * * *`（台北 23:20，每日含週末）執行：pull --ff-only → `build_social.py` → commit `data/social` →
+  `pull --rebase` 重試 push main；金鑰只從 `ENV_FILE`（0600）載入。目標日＝起跑時刻減 6 小時的台北日。
+  `.github/workflows/build-social.yml` **已移除 schedule**、只剩 `workflow_dispatch` 供診斷（GitHub runner 出口
+  IP 被 ptt.cc 403，預期抓不到）。安裝步驟與已知限制（cron 失敗不開 issue）見 `docs/social-phase1.md` §6.6。
 - **拆除提醒**：`SOCIAL_SAMPLE_SINCE="2026-09-27"`、滿 45 個日曆日起每班印
   `::warning::社群量測班已滿 N 日…`，不開 issue、不 dispatch；到期只代表「該回頭看樣本」。
 - **本機驗證（免 token 免網路）**：
