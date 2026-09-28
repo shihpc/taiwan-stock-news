@@ -180,6 +180,11 @@ def test_extract_codes_yearlike_needs_name_evidence():
     # 後接日期的那次出現不算：位置改以股名為準（影響排序與截斷）
     assert bs.extract_codes("2025年 台積電 與 千興", info) == ["2330", "2025"]
     assert bs.extract_codes("2025 台積電 與 千興", info) == ["2025", "2330"]
+    # 日期格式（/ - . ．）那次出現同樣不算、位置改以股名為準（驗收建議：原本只有「年」被守住）
+    assert bs.extract_codes("2025/09/28 台積電 千興", info) == ["2330", "2025"]
+    assert bs.extract_codes("2025-09 台積電 千興", info) == ["2330", "2025"]
+    assert bs.extract_codes("2025.9 台積電 千興", info) == ["2330", "2025"]
+    assert bs.extract_codes("2025．9 台積電 千興", info) == ["2330", "2025"]
 
 
 def test_extract_codes_name_stopwords_only_with_adjacent_code():

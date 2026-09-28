@@ -764,6 +764,10 @@ def classify(articles: list[dict], bodies: dict[str, str], key: str, session, mo
     cids = batch_custom_ids(todo)
     reqs = {cid: user_prompt(a["title"], bodies.get(a["aid"], ""), a["codes"]) for cid, a in zip(cids, todo)}
     got = call_batch(reqs, key, session, deadline_sec, model=model, sleep=sleep, clock=clock, poll_sec=poll_sec)
+    # call_batch 的 log 只印 cid；這裡補一行 cid→aid，出事時對得回是哪一篇（只進 log、不進產物）
+    miss = [f"{cid}={a['aid']}" for cid, a in zip(cids, todo) if got.get(cid) is None]
+    if miss and len(miss) < len(cids):
+        print(f"  batch 未成功而將同步回退：{', '.join(miss[:20])}{' …' if len(miss) > 20 else ''}", flush=True)
     n_batch = n_sync = 0
     sync_t0: float | None = None
     budget_hit = 0
