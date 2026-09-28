@@ -515,9 +515,28 @@ def parse_article(html: str) -> dict | None:
 
 
 # ── 標的抽取 ────────────────────────────────────────────────────────────
+# 看起來像西元年的 4 碼數字（2023／2024／2025 本身都是上市代號）：只有在同篇文字也出現該股股名，
+# 或代號與股名緊鄰（「2025千興」「千興(2025)」）時才算；後接「年」或日期格式一律不算。
+# 2026-09-28 Hetzner 首班實證：2023 燁輝／2024 志聯／2025 千興 被年份灌成排行前幾名。
+YEARLIKE_MIN, YEARLIKE_MAX = 1990, 2039
+DATE_AFTER_RE = re.compile(r"[ \t　]*(?:年|[/\-.．][ \t　]*\d{1,2}(?!\d))")
+# 常用詞股名停用清單：這些名字在文中多半是普通詞（「大量」「數字」「巨大」…），
+# 名字本身不算命中；要算只能靠代號（代號與名字緊鄰時，代號本身就會命中）。
+# 只收「有 09-28 產物實證」或「明顯是高頻常用詞」者，不確定的不收（見 docs/social-phase1.md §6.7）。
+NAME_STOPWORDS = frozenset({
+    "大量", "世界", "數字", "巨大", "時報", "綠電", "全新", "大中",   # 09-28 產物實際命中
+    "聯合", "國產", "中華", "三星", "新興", "綠能", "物聯", "全國",   # 高頻常用詞／外部實體名
+})
+
+
+def _yearlike(code: str) -> bool:
+    return len(code) == 4 and code.isdigit() and YEARLIKE_MIN <= int(code) <= YEARLIKE_MAX
+
+
 def extract_codes(text: str, info: dict[str, str | None],
                   limit: int = SOCIAL_MAX_CODES_PER_ARTICLE) -> list[str]:
-    """代號：regex 命中且存在於 info；股名：info 的完整 stock_name（≥2 字）整詞命中
+    """代號：regex 命中且存在於 info；像年份的代號另需股名佐證（見 YEARLIKE_*）。
+    股名：info 的完整 stock_name（≥2 字）整詞命中，停用清單 NAME_STOPWORDS 內的名字不算
     （同一位置有較長股名命中時，較短的前綴名不算——避免「中華」吃掉「中華電」）。
     依首次出現位置排序，最多 limit 個。"""
     if not text:
@@ -525,11 +544,19 @@ def extract_codes(text: str, info: dict[str, str | None],
     hits: dict[str, int] = {}
     for m in CODE_RE.finditer(text):
         c = m.group(0)
-        if c in info and c not in hits:
-            hits[c] = m.start()
+        if c not in info or c in hits:
+            continue
+        if _yearlike(c):
+            if DATE_AFTER_RE.match(text, m.end()):
+                continue
+            # 「緊鄰股名」（2025千興／千興(2025)）必然也是「同篇有股名」，一個條件涵蓋兩者
+            name = info.get(c)
+            if not (name and len(name) >= 2 and name in text):
+                continue
+        hits[c] = m.start()
     name_hits: list[tuple[int, int, str]] = []  # (pos, len, code)
     for code, name in info.items():
-        if not name or len(name) < 2:
+        if not name or len(name) < 2 or name in NAME_STOPWORDS:
             continue
         pos = text.find(name)
         if pos >= 0:
@@ -711,6 +738,14 @@ def call_sync(user_msg: str, key: str, session, model: str = SOCIAL_MODEL, sleep
     return None
 
 
+CUSTOM_ID_RE = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")   # Message Batches 對 custom_id 的限制
+
+
+def batch_custom_ids(todo: list) -> list[str]:
+    """每篇一個 batch custom_id：a0、a1…（依 todo 順序，與 aid 內容無關，重複 aid 也不撞）。"""
+    return [f"a{i}" for i in range(len(todo))]
+
+
 def classify(articles: list[dict], bodies: dict[str, str], key: str, session, model: str = SOCIAL_MODEL,
              deadline_sec: int = SOCIAL_BATCH_DEADLINE_SEC, sleep=time.sleep, clock=time.monotonic,
              poll_sec: float = SOCIAL_BATCH_POLL_SEC, sync_budget_sec: float = SOCIAL_SYNC_BUDGET_SEC) -> dict:
@@ -723,7 +758,11 @@ def classify(articles: list[dict], bodies: dict[str, str], key: str, session, mo
     if not todo:
         llm["skipped"] = "no-articles"
         return llm
-    reqs = {a["aid"]: user_prompt(a["title"], bodies.get(a["aid"], ""), a["codes"]) for a in todo}
+    # custom_id 不可直接用 aid：PTT 文章 id 含「.」（M.xxxx.A.xxx），Batches API 要求
+    # ^[a-zA-Z0-9_-]{1,64}$，整包提交會被拒而全數走同步（2026-09-28 Hetzner 首班實證）。
+    # 改用 todo 內序號 a0、a1…（重複 aid 也不撞），結果一律依 cid 對回同一篇。
+    cids = batch_custom_ids(todo)
+    reqs = {cid: user_prompt(a["title"], bodies.get(a["aid"], ""), a["codes"]) for cid, a in zip(cids, todo)}
     got = call_batch(reqs, key, session, deadline_sec, model=model, sleep=sleep, clock=clock, poll_sec=poll_sec)
     n_batch = n_sync = 0
     sync_t0: float | None = None
@@ -736,12 +775,12 @@ def classify(articles: list[dict], bodies: dict[str, str], key: str, session, mo
             return True
         return clock() - sync_t0 <= sync_budget_sec
 
-    for a in todo:
-        res = got.get(a["aid"])
+    for cid, a in zip(cids, todo):
+        res = got.get(cid)
         path = "batch"
         if res is None:
             if sync_allowed():
-                res = call_sync(reqs[a["aid"]], key, session, model=model, sleep=sleep)
+                res = call_sync(reqs[cid], key, session, model=model, sleep=sleep)
             else:
                 budget_hit += 1
             path = "sync"
@@ -755,7 +794,7 @@ def classify(articles: list[dict], bodies: dict[str, str], key: str, session, mo
         parsed = parse_sent(text, a["codes"])
         if parsed is None:
             # 回應不是合法 JSON：再試一次（同步，仍受預算約束），仍不合法 → 該篇全 unk
-            res2 = call_sync(reqs[a["aid"]], key, session, model=model, sleep=sleep) if sync_allowed() else None
+            res2 = call_sync(reqs[cid], key, session, model=model, sleep=sleep) if sync_allowed() else None
             path = "sync" if path == "sync" else "mixed"
             if res2 is not None:
                 text2, usage2 = res2

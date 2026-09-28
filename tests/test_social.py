@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import re as _re
 import sys
 from datetime import date
 
@@ -162,6 +163,37 @@ def test_extract_codes_positive_and_negative():
     assert len(bs.extract_codes(" ".join(many), many)) == bs.SOCIAL_MAX_CODES_PER_ARTICLE
 
 
+def test_extract_codes_yearlike_needs_name_evidence():
+    """2026-09-28 首班：2023 燁輝／2024 志聯／2025 千興 被年份灌成排行前幾名。"""
+    info = {"2023": "燁輝", "2024": "志聯", "2025": "千興", "2330": "台積電", "1990": "某股"}
+    assert bs.extract_codes("2025 年營收可望成長，2024 表現平平", info) == []   # 無股名佐證
+    assert bs.extract_codes("2025年目標", info) == []
+    assert bs.extract_codes("2025/09/28 盤後 2025-09 月報 2025.9 公布", info) == []
+    assert bs.extract_codes("2023 2024 2025 三年都在漲", info) == []
+    assert bs.extract_codes("1990 年代", info) == []                            # 區間下界
+    assert bs.extract_codes("2025千興 今天漲停", info) == ["2025"]               # 代號後緊鄰股名
+    assert bs.extract_codes("看好 2025 千興", info) == ["2025"]
+    assert bs.extract_codes("千興(2025) 與 燁輝（2023）", info) == ["2025", "2023"]
+    assert bs.extract_codes("千興 2025", info) == ["2025"]
+    assert bs.extract_codes("代號 2025 那檔，就是千興", info) == ["2025"]        # 同篇有股名
+    assert bs.extract_codes("2330 台積電 2330", info) == ["2330"]                 # 非年份區間不受影響
+    # 後接日期的那次出現不算：位置改以股名為準（影響排序與截斷）
+    assert bs.extract_codes("2025年 台積電 與 千興", info) == ["2330", "2025"]
+    assert bs.extract_codes("2025 台積電 與 千興", info) == ["2025", "2330"]
+
+
+def test_extract_codes_name_stopwords_only_with_adjacent_code():
+    info = {"3167": "大量", "5287": "數字", "9921": "巨大", "2412": "中華電", "2204": "中華",
+            "2317": "鴻海"}
+    assert "大量" in bs.NAME_STOPWORDS and "中華" in bs.NAME_STOPWORDS
+    assert bs.extract_codes("外資大量買進，數字很巨大", info) == []
+    assert bs.extract_codes("3167大量 今天爆量", info) == ["3167"]
+    assert bs.extract_codes("大量(3167) 與 鴻海", info) == ["3167", "2317"]
+    assert bs.extract_codes("中華電 配息穩定", info) == ["2412"]                  # 長名不受停用詞影響
+    assert bs.extract_codes("中華民國", info) == []
+    assert bs.extract_codes("鴻海大量出貨", info) == ["2317"]
+
+
 # ── 聚合 ────────────────────────────────────────────────────────────────
 def test_aggregate_invariant_pos_neg_neu_unk_equals_n():
     arts = [
@@ -195,6 +227,58 @@ def test_batch_results_matched_by_custom_id_out_of_order_and_errored_falls_to_sy
     assert llm["usage"] == {"input_tokens": 700 + 100, "output_tokens": 35 + 10}
     assert llm["model"] == bs.SOCIAL_MODEL and llm["prompt_ver"] == bs.SOCIAL_PROMPT_VER
     assert sum(1 for m, u in fake.calls if u == bs.URL_MESSAGES) == 1
+
+
+def test_batch_custom_ids_match_api_pattern_and_unique():
+    todo = [{"aid": "M.1790528726.A.991"}, {"aid": "M.1790528726.A.991"}, {"aid": ""},
+            {"aid": "x" * 200}] + [{"aid": f"M.{i}.A.ABC"} for i in range(500)]
+    ids = bs.batch_custom_ids(todo)
+    assert len(ids) == len(todo) == len(set(ids))
+    assert all(bs.CUSTOM_ID_RE.fullmatch(c) for c in ids)
+    assert not bs.CUSTOM_ID_RE.fullmatch("M.1790528726.A.991")               # 舊作法（aid）必被拒
+
+
+_jsonmod = json  # post() 的參數名 json 會遮蔽模組
+
+
+class StrictBatchAnthropic(FakeAnthropic):
+    """比照真 API：custom_id 不合 ^[a-zA-Z0-9_-]{1,64}$ 或重複 → 整包 400；結果 JSONL 反序回傳，
+    每筆回覆依該筆 prompt 的代號清單產生（第一個代號 pos、其餘 neg）。"""
+
+    def post(self, url, headers=None, json=None, timeout=None):
+        if url == bs.URL_BATCHES:
+            ids = [r["custom_id"] for r in json["requests"]]
+            if len(set(ids)) != len(ids) or not all(
+                    _re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", c) for c in ids):
+                self.calls.append(("POST", url))
+                return FakeResp(400, {"type": "error", "error": {"message": "requests.0.custom_id: String should match pattern"}})
+            lines = []
+            for r in reversed(json["requests"]):
+                codes = _jsonmod.loads(
+                    r["params"]["messages"][0]["content"].split("代號清單：")[1].split("\n")[0])
+                reply = {c: ("pos" if i == 0 else "neg") for i, c in enumerate(codes)}
+                lines.append(_jsonmod.dumps({"custom_id": r["custom_id"], "result": {
+                    "type": "succeeded", "message": {"content": [{"type": "text", "text": _jsonmod.dumps(reply)}],
+                                                     "usage": {"input_tokens": 10, "output_tokens": 1}}}}))
+            self.jsonl = "\n".join(lines)
+        return super().post(url, headers=headers, json=json, timeout=timeout)
+
+
+def test_classify_batch_with_dotted_and_duplicate_aids_maps_back_without_sync():
+    arts = [
+        {"aid": "M.1790528726.A.991", "title": "t1", "codes": ["2330", "2317"], "push": 0, "boo": 0},
+        {"aid": "M.1790528726.A.991", "title": "t2", "codes": ["2454"], "push": 0, "boo": 0},   # 重複 aid
+        {"aid": "M.1790535886.A.A44", "title": "t3", "codes": [], "push": 0, "boo": 0},
+        {"aid": "M.1790560077.A.3D5", "title": "t4", "codes": ["2412", "3105"], "push": 0, "boo": 0},
+    ]
+    fake = StrictBatchAnthropic(sync_reply="{}")
+    llm = bs.classify(arts, {}, FAKE_KEY, fake, sleep=lambda s: None, poll_sec=0)
+    assert llm["via"] == "batch" and llm["classified_n"] == 3 and llm["failed_n"] == 0
+    assert sum(1 for m, u in fake.calls if u == bs.URL_MESSAGES) == 0      # 沒有任何同步回退
+    assert arts[0]["sent"] == {"2330": "pos", "2317": "neg"}
+    assert arts[1]["sent"] == {"2454": "pos"}
+    assert "sent" not in arts[2]
+    assert arts[3]["sent"] == {"2412": "pos", "3105": "neg"}
 
 
 def test_batch_submit_failure_falls_back_to_sync_for_all():
