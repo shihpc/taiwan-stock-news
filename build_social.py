@@ -527,6 +527,10 @@ NAME_STOPWORDS = frozenset({
     "大量", "世界", "數字", "巨大", "時報", "綠電", "全新", "大中",   # 09-28 產物實際命中
     "聯合", "國產", "中華", "三星", "新興", "綠能", "物聯", "全國",   # 高頻常用詞／外部實體名
 })
+# 停用名的全稱別名（2026-09-29 使用者裁決）：FinMind 把 5347 的 stock_name 記成「世界」，
+# 列入停用後連寫全名「世界先進」的文章也會漏。別名只在 info 裡該代號的股名確實等於
+# 對應停用名時生效——代號對應若變了，這條規則自動失效、不會把別檔誤算進來。
+NAME_ALIASES = {"世界先進": ("5347", "世界")}   # 別名 → (代號, info 中應有的股名)
 
 
 def _yearlike(code: str) -> bool:
@@ -561,6 +565,11 @@ def extract_codes(text: str, info: dict[str, str | None],
         pos = text.find(name)
         if pos >= 0:
             name_hits.append((pos, len(name), code))
+    for alias, (code, expect) in NAME_ALIASES.items():
+        if info.get(code) == expect:
+            pos = text.find(alias)
+            if pos >= 0:
+                name_hits.append((pos, len(alias), code))
     name_hits.sort(key=lambda x: (x[0], -x[1]))
     covered: list[tuple[int, int]] = []
     for pos, ln, code in name_hits:

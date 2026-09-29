@@ -187,6 +187,17 @@ def test_extract_codes_yearlike_needs_name_evidence():
     assert bs.extract_codes("2025．9 台積電 千興", info) == ["2330", "2025"]
 
 
+def test_extract_codes_alias_world_vanguard():
+    """2026-09-29 使用者裁決：「世界」在停用清單，但全名「世界先進」要算 5347。"""
+    info = {"5347": "世界", "2330": "台積電"}
+    assert bs.extract_codes("世界先進 今天漲停", info) == ["5347"]
+    assert bs.extract_codes("全世界都在買台積電", info) == ["2330"]          # 單寫「世界」仍不算
+    assert bs.extract_codes("台積電 與 世界先進", info) == ["2330", "5347"]   # 依位置排序
+    # 代號對應變了（5347 不再叫「世界」）→ 別名自動失效
+    assert bs.extract_codes("世界先進 今天漲停", {"5347": "某某", "2330": "台積電"}) == []
+    assert bs.extract_codes("世界先進 今天漲停", {"2330": "台積電"}) == []
+
+
 def test_extract_codes_name_stopwords_only_with_adjacent_code():
     info = {"3167": "大量", "5287": "數字", "9921": "巨大", "2412": "中華電", "2204": "中華",
             "2317": "鴻海"}
