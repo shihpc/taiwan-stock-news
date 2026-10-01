@@ -146,6 +146,7 @@ push 到 main，**常態勿手動編輯**（手改當期內容會被隔日產製
 | iframe | `#dailyFrame` 載同源 `daily-brief.html`；`postMessage` 高度回報有 `e.origin === location.origin` 檢查 | `frame-src 'self'`；**該文件不受本 meta 管轄**（自身無 CSP，由產製 session 產出，外連只有新聞來源 `<a>`，`:459` 一個內嵌 script） |
 | fetch 目標 origin | 同源 `news.json`／`daily-brief.html`；`raw.githubusercontent.com`（taiwan-flow-live-v2 morning／us／daysummary、postmkt analyses）；`taiwan-flow-v2.shihpc.workers.dev`（/fundamentals /chips /technical /uswatch /usersync）；`api.anthropic.com`（callClaude）；`api.github.com`（ghSaveAnalysis 寫 postmkt、loadSiteVer） | `connect-src` 白名單恰為此 5 個 |
 | 純導覽外連 | Yahoo 技術分析（`linkifyStocks`／新聞連結）、GitHub、Hub；皆 `target="_blank" rel="noopener"` | 不受 CSP 限制（無 `navigate-to`） |
+| 金鑰（2026-10-01） | Anthropic key／GitHub PAT **不再存 localStorage**：摘要分析 tab 的 `<form data-cred>`（readonly username `anthropic-api-key`／`github-pat-postmkt-analyses`＋`current-password` 密碼欄）由瀏覽器密碼管理器填入，按「載入」先打免費驗證（`api.anthropic.com/v1/models`、`api.github.com/repos/shihpc/postmkt`，token 放 header），通過才收進記憶體 `CRED`；勾「只在本分頁記住」才寫 sessionStorage。舊 key `anthropic_key`／`gh_token` 只用於搬移提示卡與刪除（2026-10-15 後載入即刪）。四站同一套，正本 `postmkt/CLAUDE.md` 約定 6；`tflive2_usw_sync` 不搬 | 驗證請求都在既有 `connect-src` 內，CSP 未改 |
 
 **`innerHTML` 拼字串（16 處）逃逸稽核**：不可信輸入全部過 `esc()`——新聞標題／來源／連結
 （`newsItem`）、來源面板（`renderSrcPanel`）、美股表（`usHtml`／`loadUsWatch`）、晨報籌碼名單
