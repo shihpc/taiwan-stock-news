@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-01T08:09:08+08:00",
+ "generated_at": "2026-10-01T09:08:57+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-09-23",
@@ -10,10 +10,10 @@
  ],
  "pool_size": 150,
  "stocks_with_news": 63,
- "total_news": 352,
+ "total_news": 354,
  "stats": {
-  "n_raw": 352,
-  "n_unique_articles": 326
+  "n_raw": 354,
+  "n_unique_articles": 327
  },
  "coverage": {
   "dates": [
@@ -689,8 +689,8 @@
    "industry": "電子工業",
    "heavyweight": true,
    "weight_per": 0.0,
-   "count": 24,
-   "market_count": 5,
+   "count": 25,
+   "market_count": 6,
    "news": [
     {
      "date": "2026-10-01 05:11:11",
@@ -699,6 +699,17 @@
      "link": "https://news.cnyes.com/news/id/6619070",
      "impact": "market",
      "aid": "b339be882750"
+    },
+    {
+     "date": "2026-10-01 03:00:00",
+     "source": "工商時報",
+     "title": "外資Q3狂賣台股4,250億！反手重押22檔 加碼南亞科、欣興、長榮逾400億 - 工商時報",
+     "link": "https://www.ctee.com.tw/news/20261001700236-439901",
+     "impact": "market",
+     "aid": "be277f870bd8",
+     "related": [
+      "2408"
+     ]
     },
     {
      "date": "2026-10-01 02:26:04",
@@ -2243,6 +2254,92 @@
    ]
   },
   {
+   "stock_id": "2408",
+   "name": "南亞科",
+   "industry": "半導體業",
+   "heavyweight": true,
+   "weight_per": 0.0,
+   "count": 8,
+   "market_count": 2,
+   "news": [
+    {
+     "date": "2026-10-01 03:00:00",
+     "source": "工商時報",
+     "title": "外資Q3狂賣台股4,250億！反手重押22檔 加碼南亞科、欣興、長榮逾400億 - 工商時報",
+     "link": "https://www.ctee.com.tw/news/20261001700236-439901",
+     "impact": "market",
+     "aid": "be277f870bd8",
+     "related": [
+      "3037"
+     ]
+    },
+    {
+     "date": "2026-10-01 02:49:17",
+     "source": "經濟日報",
+     "title": "三星示警 DRAM明年更吃緊 有助南亞科、華邦接單量能 | 產業熱點 | 產業 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5612/9786934",
+     "impact": "heavy",
+     "aid": "b19b83d6c665"
+    },
+    {
+     "date": "2026-09-27 17:50:00",
+     "source": "今周刊",
+     "title": "南亞科(2408)、華邦電(2344)、欣興(3037)、景碩(3189)…台股節後衝關5萬？老手盤點3大利多，記憶體、載板股卡位先搶誰 - 今周刊",
+     "link": "https://www.businesstoday.com.tw/article/category/183008/post/202609270011/",
+     "impact": "market",
+     "aid": "dfb86049f1a6",
+     "related": [
+      "3037",
+      "3189"
+     ]
+    },
+    {
+     "date": "2026-09-27 15:15:19",
+     "source": "經濟日報",
+     "title": "南亞科8月營收月、年雙增 法人估今年 EPS 上看74.6元 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5710/9780106",
+     "impact": "heavy",
+     "aid": "817a494d1e52"
+    },
+    {
+     "date": "2026-09-24 07:03:00",
+     "source": "FTNN新聞",
+     "title": "南亞科抓內鬼1／AI獲利絕密武器「HKMG」前腳被盜！ 中國記憶體龍頭「長鑫存儲」後腳開趴內幕 - FTNN 新聞",
+     "link": "https://www.ftnn.com.tw/news/581664",
+     "impact": "heavy",
+     "aid": "315d132d4a16"
+    },
+    {
+     "date": "2026-09-24 07:00:00",
+     "source": "FTNN新聞",
+     "title": "南亞科抓內鬼4／經濟部怎麼了？ 2公文「國安間諜喜變商業叛徒」刑度少一半 - FTNN 新聞",
+     "link": "https://www.ftnn.com.tw/news/581679",
+     "impact": "heavy",
+     "aid": "e7217656e1ec"
+    },
+    {
+     "date": "2026-09-23 11:36:00",
+     "source": "今周刊",
+     "title": "南亞科、華邦電、旺宏、力積電…記憶體股回血要選誰？內外資都愛它！目標價8字頭：甜頭還有5成 - 今周刊",
+     "link": "https://www.businesstoday.com.tw/article/category/183008/post/202609230021/",
+     "impact": "heavy",
+     "aid": "bb5144cd21b1",
+     "related": [
+      "2337",
+      "6770"
+     ]
+    },
+    {
+     "date": "2026-09-23 03:46:46",
+     "source": "UDN",
+     "title": "全民權證／南亞科 選中長期 - UDN",
+     "link": "https://udn.com/news/story/7255/9771360",
+     "impact": "heavy",
+     "aid": "e9c128c89d5e"
+    }
+   ]
+  },
+  {
    "stock_id": "2337",
    "name": "旺宏",
    "industry": "半導體業",
@@ -2313,81 +2410,6 @@
      "related": [
       "8299"
      ]
-    }
-   ]
-  },
-  {
-   "stock_id": "2408",
-   "name": "南亞科",
-   "industry": "半導體業",
-   "heavyweight": true,
-   "weight_per": 0.0,
-   "count": 7,
-   "market_count": 1,
-   "news": [
-    {
-     "date": "2026-10-01 02:49:17",
-     "source": "經濟日報",
-     "title": "三星示警 DRAM明年更吃緊 有助南亞科、華邦接單量能 | 產業熱點 | 產業 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5612/9786934",
-     "impact": "heavy",
-     "aid": "b19b83d6c665"
-    },
-    {
-     "date": "2026-09-27 17:50:00",
-     "source": "今周刊",
-     "title": "南亞科(2408)、華邦電(2344)、欣興(3037)、景碩(3189)…台股節後衝關5萬？老手盤點3大利多，記憶體、載板股卡位先搶誰 - 今周刊",
-     "link": "https://www.businesstoday.com.tw/article/category/183008/post/202609270011/",
-     "impact": "market",
-     "aid": "dfb86049f1a6",
-     "related": [
-      "3037",
-      "3189"
-     ]
-    },
-    {
-     "date": "2026-09-27 15:15:19",
-     "source": "經濟日報",
-     "title": "南亞科8月營收月、年雙增 法人估今年 EPS 上看74.6元 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5710/9780106",
-     "impact": "heavy",
-     "aid": "817a494d1e52"
-    },
-    {
-     "date": "2026-09-24 07:03:00",
-     "source": "FTNN新聞",
-     "title": "南亞科抓內鬼1／AI獲利絕密武器「HKMG」前腳被盜！ 中國記憶體龍頭「長鑫存儲」後腳開趴內幕 - FTNN 新聞",
-     "link": "https://www.ftnn.com.tw/news/581664",
-     "impact": "heavy",
-     "aid": "315d132d4a16"
-    },
-    {
-     "date": "2026-09-24 07:00:00",
-     "source": "FTNN新聞",
-     "title": "南亞科抓內鬼4／經濟部怎麼了？ 2公文「國安間諜喜變商業叛徒」刑度少一半 - FTNN 新聞",
-     "link": "https://www.ftnn.com.tw/news/581679",
-     "impact": "heavy",
-     "aid": "e7217656e1ec"
-    },
-    {
-     "date": "2026-09-23 11:36:00",
-     "source": "今周刊",
-     "title": "南亞科、華邦電、旺宏、力積電…記憶體股回血要選誰？內外資都愛它！目標價8字頭：甜頭還有5成 - 今周刊",
-     "link": "https://www.businesstoday.com.tw/article/category/183008/post/202609230021/",
-     "impact": "heavy",
-     "aid": "bb5144cd21b1",
-     "related": [
-      "2337",
-      "6770"
-     ]
-    },
-    {
-     "date": "2026-09-23 03:46:46",
-     "source": "UDN",
-     "title": "全民權證／南亞科 選中長期 - UDN",
-     "link": "https://udn.com/news/story/7255/9771360",
-     "impact": "heavy",
-     "aid": "e9c128c89d5e"
     }
    ]
   },
