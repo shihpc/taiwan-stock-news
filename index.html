@@ -266,7 +266,7 @@ const state = {
   q: "",
   days: parseInt(localStorage.getItem(LS_DAYS) || "3", 10),
   disabled: new Set(JSON.parse(localStorage.getItem(LS_DISABLED) || "[]")),
-  // 摘要分析（API key 用全站共用名 anthropic_key/insight_model，非 tsn_ 前綴，三站同 origin 共用）
+  // 摘要分析（insight_model 用全站共用名、非 tsn_ 前綴，三站同 origin 共用；API key 2026-10-01 起改存密碼管理器，見「前端憑證」）
   insight: null, insightLoading: false, insightErr: null,
   insightModel: localStorage.getItem("insight_model") || "claude-opus-4-8",
 };
@@ -1125,7 +1125,7 @@ function insightHtml(){
       + `key 由瀏覽器密碼管理器保管、載入後只在本分頁記憶體，不會寫入網站或傳給 Anthropic 以外的任何地方；載入時會先打一次免費的列模型 API 驗證。`) + `</div>`;
   }
   if (!ghToken()){
-    h += `<div class="mcard" style="font-size:.84rem">` + credFormHtml("gh", `選填：GitHub Fine-grained PAT（只勾 postmkt repo、Contents Read/write）→ 分析結果自動存雲端跨裝置讀取；不載入則只存本機。讀取歷史不需要 token。載入時會先唯讀查一次 postmkt repo 驗證。`) + `</div>`;
+    h += `<div class="mcard" style="font-size:.84rem">` + credFormHtml("gh", `選填：GitHub Fine-grained PAT（只勾 postmkt repo、Contents Read/write）→ 分析結果自動存雲端跨裝置讀取；不載入則只存本機。讀取歷史不需要 token。載入時會先唯讀查一次 postmkt repo 驗證——這只證明 PAT 有效，postmkt 是 public repo，不證明它有 Contents 寫入權限；權限不足要到實際存雲端時才會顯示錯誤。`) + `</div>`;
   }
   const modelOpts = INSIGHT_MODELS.map(([v,l])=>`<option value="${v}"${state.insightModel===v?" selected":""}>${esc(l)}</option>`).join("");
   h += `<div class="mcard" style="padding:12px 14px"><div class="qrow">`
