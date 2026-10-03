@@ -1,0 +1,701 @@
+{
+ "schema": 1,
+ "date": "2026-10-03",
+ "generated_at": "2026-10-03T23:23:28+08:00",
+ "source": "ptt-stock",
+ "robots": "absent",
+ "robots_crawl_delay": null,
+ "robots_detail": {
+  "status": 404,
+  "err": null,
+  "final_url": "https://www.ptt.cc/robots.txt",
+  "attempts": 2
+ },
+ "fetch_errors": [
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  },
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  }
+ ],
+ "pages_fetched": 3,
+ "articles_n": 27,
+ "articles_fetched_n": 27,
+ "failed_n": 0,
+ "requests_n": 32,
+ "elapsed_s": 201.7,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": "mixed",
+  "skipped": null,
+  "classified_n": 19,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 17346,
+   "output_tokens": 1584
+  }
+ },
+ "stocks": {
+  "2330": {
+   "name": "台積電",
+   "n": 9,
+   "push": 310,
+   "boo": 57,
+   "pos": 2,
+   "neg": 0,
+   "neu": 7,
+   "unk": 0
+  },
+  "0050": {
+   "name": "元大台灣50",
+   "n": 4,
+   "push": 218,
+   "boo": 46,
+   "pos": 1,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "00406A": {
+   "name": "主動中信台灣收益",
+   "n": 1,
+   "push": 13,
+   "boo": 1,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "0052": {
+   "name": "富邦科技",
+   "n": 1,
+   "push": 66,
+   "boo": 1,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "1321": {
+   "name": "大洋",
+   "n": 1,
+   "push": 48,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1324": {
+   "name": "地球",
+   "n": 1,
+   "push": 66,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1560": {
+   "name": "中砂",
+   "n": 1,
+   "push": 14,
+   "boo": 0,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "1601": {
+   "name": "台光",
+   "n": 1,
+   "push": 13,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2360": {
+   "name": "致茂",
+   "n": 1,
+   "push": 13,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2371": {
+   "name": "大同",
+   "n": 1,
+   "push": 8,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2501": {
+   "name": "國建",
+   "n": 1,
+   "push": 7,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2630": {
+   "name": "亞航",
+   "n": 1,
+   "push": 0,
+   "boo": 0,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "3017": {
+   "name": "奇鋐",
+   "n": 1,
+   "push": 13,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3023": {
+   "name": "信邦",
+   "n": 1,
+   "push": 1,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3308": {
+   "name": "聯德",
+   "n": 1,
+   "push": 23,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "4923": {
+   "name": "力士",
+   "n": 1,
+   "push": 25,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6510": {
+   "name": "精測",
+   "n": 1,
+   "push": 11,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6561": {
+   "name": "是方",
+   "n": 1,
+   "push": 13,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6669": {
+   "name": "緯穎",
+   "n": 1,
+   "push": 13,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8046": {
+   "name": "南電",
+   "n": 1,
+   "push": 20,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8299": {
+   "name": "群聯",
+   "n": 1,
+   "push": 13,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "911606": {
+   "name": "超級",
+   "n": 1,
+   "push": 119,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1790957727.A.3CA",
+   "title": "Re: [新聞]00406A不只收權利金！20％買權搭20％台指",
+   "author": "medama ( )",
+   "ts": "2026-10-03 00:15",
+   "push": 9,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790957727.A.3CA.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790959605.A.ED5",
+   "title": "[新聞] 風水輪流轉！Netflix風光不再股價暴跌4成",
+   "author": "keel90135 (尼可)",
+   "ts": "2026-10-03 00:46",
+   "push": 119,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790959605.A.ED5.html",
+   "codes": [
+    "911606"
+   ],
+   "sent": {
+    "911606": "neu"
+   }
+  },
+  {
+   "aid": "M.1790964950.A.696",
+   "title": "[請益] 該把個股全賣換TSM跟etf嗎？",
+   "author": "SethBeer (SethBeer)",
+   "ts": "2026-10-03 02:15",
+   "push": 107,
+   "boo": 29,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790964950.A.696.html",
+   "codes": [
+    "2330",
+    "0050"
+   ],
+   "sent": {
+    "2330": "neu",
+    "0050": "neu"
+   }
+  },
+  {
+   "aid": "M.1790982422.A.93F",
+   "title": "Re: [請益] 該把個股全賣換TSM跟etf嗎？",
+   "author": "onekoni (一貓人我的超人)",
+   "ts": "2026-10-03 07:07",
+   "push": 66,
+   "boo": 1,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790982422.A.93F.html",
+   "codes": [
+    "0050",
+    "0052",
+    "1324"
+   ],
+   "sent": {
+    "0050": "pos",
+    "0052": "pos",
+    "1324": "neu"
+   }
+  },
+  {
+   "aid": "M.1790987057.A.C3E",
+   "title": "Re: [請益] 該把個股全賣換TSM跟etf嗎？",
+   "author": "LBJshit (LBJshitOWNewsOWnews今山)",
+   "ts": "2026-10-03 08:24",
+   "push": 20,
+   "boo": 10,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790987057.A.C3E.html",
+   "codes": [
+    "2330",
+    "0050"
+   ],
+   "sent": {
+    "2330": "neu",
+    "0050": "neu"
+   }
+  },
+  {
+   "aid": "M.1790991940.A.024",
+   "title": "[情報] 3023 信邦 9月營收 M:2.08% Y:25.51%",
+   "author": "q1a1 (一問一答)",
+   "ts": "2026-10-03 09:45",
+   "push": 1,
+   "boo": 0,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790991940.A.024.html",
+   "codes": [
+    "3023"
+   ],
+   "sent": {
+    "3023": "neu"
+   }
+  },
+  {
+   "aid": "M.1790992062.A.4AD",
+   "title": "[情報] 中砂 9月營收",
+   "author": "greatliona (The Blessed)",
+   "ts": "2026-10-03 09:47",
+   "push": 14,
+   "boo": 0,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790992062.A.4AD.html",
+   "codes": [
+    "1560"
+   ],
+   "sent": {
+    "1560": "pos"
+   }
+  },
+  {
+   "aid": "M.1790992474.A.954",
+   "title": "[新聞] 白宮首席經濟顧問：料聯準會今年不再升息",
+   "author": "kof70380 (小隆)",
+   "ts": "2026-10-03 09:54",
+   "push": 66,
+   "boo": 6,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790992474.A.954.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1790996435.A.03C",
+   "title": "[新聞] 有利可圖才投資？南韓又惹怒川普：不參與",
+   "author": "leepingyo (御前一品帶刀龍侍衛)",
+   "ts": "2026-10-03 11:00",
+   "push": 48,
+   "boo": 9,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790996435.A.03C.html",
+   "codes": [
+    "1321"
+   ],
+   "sent": {
+    "1321": "neu"
+   }
+  },
+  {
+   "aid": "M.1790998297.A.E71",
+   "title": "Re: [新聞]00406A不只收權利金！20％買權搭20％台指",
+   "author": "practice24 (練習*24)",
+   "ts": "2026-10-03 11:31",
+   "push": 13,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790998297.A.E71.html",
+   "codes": [
+    "6561",
+    "6669",
+    "1601",
+    "3017",
+    "8299",
+    "2360",
+    "00406A"
+   ],
+   "sent": {
+    "6561": "neu",
+    "6669": "neu",
+    "1601": "neu",
+    "3017": "neu",
+    "8299": "neu",
+    "2360": "neu",
+    "00406A": "pos"
+   }
+  },
+  {
+   "aid": "M.1790999668.A.A0F",
+   "title": "Re: [請益] 該把個股全賣換TSM跟etf嗎？",
+   "author": "ddd852 (123站著穿)",
+   "ts": "2026-10-03 11:54",
+   "push": 25,
+   "boo": 6,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1790999668.A.A0F.html",
+   "codes": [
+    "2330",
+    "0050"
+   ],
+   "sent": {
+    "2330": "neu",
+    "0050": "neu"
+   }
+  },
+  {
+   "aid": "M.1791001428.A.E39",
+   "title": "[請益] 為什麼期貨要3~5口(或更多)的錢作一口",
+   "author": "illucion (凡所有相皆是虛妄)",
+   "ts": "2026-10-03 12:23",
+   "push": 63,
+   "boo": 7,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791001428.A.E39.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791001686.A.B8A",
+   "title": "[請益] 大盤快5w，還有這麼多股票能下跌？",
+   "author": "kgppra (討厭blue)",
+   "ts": "2026-10-03 12:28",
+   "push": 94,
+   "boo": 31,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791001686.A.B8A.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791003309.A.02E",
+   "title": "[情報] 8046 南電 9月營收 Mom:4.36% Yoy:57.82%",
+   "author": "q1a1 (一問一答)",
+   "ts": "2026-10-03 12:55",
+   "push": 20,
+   "boo": 1,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791003309.A.02E.html",
+   "codes": [
+    "8046"
+   ],
+   "sent": {
+    "8046": "neu"
+   }
+  },
+  {
+   "aid": "M.1791003551.A.4BC",
+   "title": "[情報] 6510 精測 9月營收 Mom:2.11% Yoy:55.85%",
+   "author": "q1a1 (一問一答)",
+   "ts": "2026-10-03 12:59",
+   "push": 11,
+   "boo": 2,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791003551.A.4BC.html",
+   "codes": [
+    "6510"
+   ],
+   "sent": {
+    "6510": "neu"
+   }
+  },
+  {
+   "aid": "M.1791003899.A.499",
+   "title": "[請益] 買投等債ETF如今該如何操作？",
+   "author": "xzcb2008 (可愛老娘變態貓貓=.=)",
+   "ts": "2026-10-03 13:04",
+   "push": 117,
+   "boo": 12,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791003899.A.499.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791008356.A.744",
+   "title": "[新聞] 台積電傳與馬斯克Terafab探索合作 考慮美",
+   "author": "thinksilver (銀白色的沉思)",
+   "ts": "2026-10-03 14:19",
+   "push": 65,
+   "boo": 6,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791008356.A.744.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": {
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1791009627.A.74E",
+   "title": "[新聞] 台股9月開戶數衝破1,476萬續創高 30歲以",
+   "author": "diefishfish ()",
+   "ts": "2026-10-03 14:40",
+   "push": 90,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791009627.A.74E.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791011815.A.363",
+   "title": "[新聞] 三星HBM4報價逾前代3倍 搶攻AI記憶體定價",
+   "author": "madeinheaven ()",
+   "ts": "2026-10-03 15:16",
+   "push": 25,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791011815.A.363.html",
+   "codes": [
+    "4923"
+   ],
+   "sent": {
+    "4923": "neu"
+   }
+  },
+  {
+   "aid": "M.1791016608.A.717",
+   "title": "Re: [新聞] 台積電傳與馬斯克Terafab探索合作 考慮美",
+   "author": "waitrop (嘴砲無雙)",
+   "ts": "2026-10-03 16:36",
+   "push": 62,
+   "boo": 5,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791016608.A.717.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": {
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1791019476.A.81C",
+   "title": "[請益] 台股看這個樣子有機會五萬點",
+   "author": "U384 (皮皮)",
+   "ts": "2026-10-03 17:24",
+   "push": 144,
+   "boo": 35,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791019476.A.81C.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791022555.A.DF0",
+   "title": "Re: [標的] 2630亞航 （中期投資多）",
+   "author": "yousking (京)",
+   "ts": "2026-10-03 18:15",
+   "push": 0,
+   "boo": 0,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791022555.A.DF0.html",
+   "codes": [
+    "2630",
+    "2330"
+   ],
+   "sent": {
+    "2630": "pos",
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1791023577.A.ABA",
+   "title": "Re: [新聞] 台積電傳與馬斯克Terafab探索合作 考慮美",
+   "author": "dion5558 (dion)",
+   "ts": "2026-10-03 18:32",
+   "push": 7,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791023577.A.ABA.html",
+   "codes": [
+    "2330",
+    "2501"
+   ],
+   "sent": {
+    "2330": "neu",
+    "2501": "neu"
+   }
+  },
+  {
+   "aid": "M.1791027218.A.519",
+   "title": "Re: [新聞] 台積電傳與馬斯克Terafab探索合作 考慮美",
+   "author": "PTTJCY (胖豬)",
+   "ts": "2026-10-03 19:33",
+   "push": 8,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791027218.A.519.html",
+   "codes": [
+    "2330",
+    "2371"
+   ],
+   "sent": {
+    "2330": "pos",
+    "2371": "neu"
+   }
+  },
+  {
+   "aid": "M.1791027249.A.019",
+   "title": "[新聞] 華為最新麒麟 9050 Pro 晶片照曝光！兩層",
+   "author": "tanted (為何世界會那麼不單純)",
+   "ts": "2026-10-03 19:34",
+   "push": 174,
+   "boo": 27,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791027249.A.019.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791035117.A.9F4",
+   "title": "[新聞] 韓國雞肉價格半年跌近4成！炸雞卻沒變便",
+   "author": "troy30408 (南宮洛)",
+   "ts": "2026-10-03 21:45",
+   "push": 23,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791035117.A.9F4.html",
+   "codes": [
+    "3308"
+   ],
+   "sent": {
+    "3308": "neu"
+   }
+  },
+  {
+   "aid": "M.1791037420.A.799",
+   "title": "Re: [新聞] 台積電傳與馬斯克Terafab探索合作 考慮美",
+   "author": "asahi98 (あさひ)",
+   "ts": "2026-10-03 22:23",
+   "push": 16,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791037420.A.799.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": {
+    "2330": "pos"
+   }
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": 6,
+  "due": false
+ }
+}
