@@ -1,0 +1,607 @@
+{
+ "schema": 1,
+ "date": "2026-10-10",
+ "generated_at": "2026-10-10T23:26:43+08:00",
+ "source": "ptt-stock",
+ "robots": "absent",
+ "robots_crawl_delay": null,
+ "robots_detail": {
+  "status": 404,
+  "err": null,
+  "final_url": "https://www.ptt.cc/robots.txt",
+  "attempts": 2
+ },
+ "fetch_errors": [
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  },
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  }
+ ],
+ "pages_fetched": 3,
+ "articles_n": 22,
+ "articles_fetched_n": 22,
+ "failed_n": 0,
+ "requests_n": 27,
+ "elapsed_s": 397.0,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": "mixed",
+  "skipped": null,
+  "classified_n": 15,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 12180,
+   "output_tokens": 797
+  }
+ },
+ "stocks": {
+  "2330": {
+   "name": "台積電",
+   "n": 3,
+   "push": 83,
+   "boo": 11,
+   "pos": 2,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2317": {
+   "name": "鴻海",
+   "n": 2,
+   "push": 109,
+   "boo": 6,
+   "pos": 0,
+   "neg": 1,
+   "neu": 1,
+   "unk": 0
+  },
+  "3006": {
+   "name": "晶豪科",
+   "n": 2,
+   "push": 60,
+   "boo": 13,
+   "pos": 1,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  },
+  "0050": {
+   "name": "元大台灣50",
+   "n": 1,
+   "push": 34,
+   "boo": 2,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "0052": {
+   "name": "富邦科技",
+   "n": 1,
+   "push": 43,
+   "boo": 32,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "1259": {
+   "name": "安心",
+   "n": 1,
+   "push": 36,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2308": {
+   "name": "台達電",
+   "n": 1,
+   "push": 75,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2357": {
+   "name": "華碩",
+   "n": 1,
+   "push": 134,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2382": {
+   "name": "廣達",
+   "n": 1,
+   "push": 75,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2498": {
+   "name": "宏達電",
+   "n": 1,
+   "push": 34,
+   "boo": 2,
+   "pos": 0,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  },
+  "2751": {
+   "name": "王座",
+   "n": 1,
+   "push": 97,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2850": {
+   "name": "新產",
+   "n": 1,
+   "push": 97,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3037": {
+   "name": "欣興",
+   "n": 1,
+   "push": 34,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3058": {
+   "name": "立德",
+   "n": 1,
+   "push": 6,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3372": {
+   "name": "典範",
+   "n": 1,
+   "push": 97,
+   "boo": 7,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "4916": {
+   "name": "事欣科",
+   "n": 1,
+   "push": 7,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "5475": {
+   "name": "德宏",
+   "n": 1,
+   "push": 10,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6209": {
+   "name": "今國光",
+   "n": 1,
+   "push": 7,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6505": {
+   "name": "台塑化",
+   "n": 1,
+   "push": 6,
+   "boo": 1,
+   "pos": 0,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  },
+  "6811": {
+   "name": "宏碁資訊",
+   "n": 1,
+   "push": 75,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8927": {
+   "name": "北基",
+   "n": 1,
+   "push": 34,
+   "boo": 2,
+   "pos": 0,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1791568749.A.C92",
+   "title": "[新聞]美債跌到能買了？大摩債券高手十年來首度",
+   "author": "medama ( )",
+   "ts": "2026-10-10 01:59",
+   "push": 53,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791568749.A.C92.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791581886.A.01D",
+   "title": "[請益] 晶豪科（3006）該止損嗎",
+   "author": "qweraakk ()",
+   "ts": "2026-10-10 05:38",
+   "push": 41,
+   "boo": 10,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791581886.A.01D.html",
+   "codes": [
+    "3006"
+   ],
+   "sent": {
+    "3006": "neg"
+   }
+  },
+  {
+   "aid": "M.1791582601.A.833",
+   "title": "[情報] 美國將開始採購俄羅斯柴油",
+   "author": "zzahoward (Cheshire Cat)",
+   "ts": "2026-10-10 05:49",
+   "push": 302,
+   "boo": 35,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791582601.A.833.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791597121.A.81D",
+   "title": "[情報] 4916 事欣科 9月營收 M:7.82% Y:70.31%",
+   "author": "q1a1 (一問一答)",
+   "ts": "2026-10-10 09:51",
+   "push": 7,
+   "boo": 2,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791597121.A.81D.html",
+   "codes": [
+    "4916"
+   ],
+   "sent": {
+    "4916": "neu"
+   }
+  },
+  {
+   "aid": "M.1791599151.A.EE2",
+   "title": "Re: [請益] 怎麼抱住股票？",
+   "author": "bandongo (簡單愛)",
+   "ts": "2026-10-10 10:25",
+   "push": 34,
+   "boo": 2,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791599151.A.EE2.html",
+   "codes": [
+    "3037",
+    "0050",
+    "2498",
+    "2317",
+    "8927",
+    "2330"
+   ],
+   "sent": {
+    "3037": "neu",
+    "0050": "pos",
+    "2498": "neg",
+    "2317": "neg",
+    "8927": "neg",
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1791601609.A.989",
+   "title": "Re: [情報] 美國將開始採購俄羅斯柴油",
+   "author": "omanorboyo (omanorboyo)",
+   "ts": "2026-10-10 11:06",
+   "push": 36,
+   "boo": 0,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791601609.A.989.html",
+   "codes": [
+    "1259"
+   ],
+   "sent": {
+    "1259": "neu"
+   }
+  },
+  {
+   "aid": "M.1791604545.A.A40",
+   "title": "Re: [請益] 怎麼抱住股票？",
+   "author": "operatorm (雲淡風輕,風和日麗)",
+   "ts": "2026-10-10 11:55",
+   "push": 8,
+   "boo": 1,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791604545.A.A40.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": {
+    "2330": "pos"
+   }
+  },
+  {
+   "aid": "M.1791606300.A.961",
+   "title": "[請益] 請問去中國用免翻牆sim卡可以看盤嗎",
+   "author": "xg (smile)",
+   "ts": "2026-10-10 12:24",
+   "push": 38,
+   "boo": 7,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791606300.A.961.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791606601.A.E61",
+   "title": "Re: [情報] 美國將開始採購俄羅斯柴油",
+   "author": "outofsurvive (survival of the fittest)",
+   "ts": "2026-10-10 12:29",
+   "push": 14,
+   "boo": 17,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791606601.A.E61.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791609721.A.2CA",
+   "title": "[標的] 3006晶豪科",
+   "author": "hesenberg (2030美食家 )",
+   "ts": "2026-10-10 13:21",
+   "push": 19,
+   "boo": 3,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791609721.A.2CA.html",
+   "codes": [
+    "3006"
+   ],
+   "sent": {
+    "3006": "pos"
+   }
+  },
+  {
+   "aid": "M.1791613287.A.D93",
+   "title": "[請益] 高股息買滿了 想配置市值型",
+   "author": "LimitDown (跌停)",
+   "ts": "2026-10-10 14:21",
+   "push": 43,
+   "boo": 32,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791613287.A.D93.html",
+   "codes": [
+    "0052"
+   ],
+   "sent": {
+    "0052": "pos"
+   }
+  },
+  {
+   "aid": "M.1791614343.A.971",
+   "title": "[新聞] 川普與普丁達協議　俄將向美國與全球市場",
+   "author": "justin531xx (吉他手 喵喵)",
+   "ts": "2026-10-10 14:38",
+   "push": 97,
+   "boo": 8,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791614343.A.971.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791619997.A.881",
+   "title": "Re: [新聞] 川普與普丁達協議　俄將向美國與全球市場",
+   "author": "im609 ()",
+   "ts": "2026-10-10 16:13",
+   "push": 41,
+   "boo": 8,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791619997.A.881.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": {
+    "2330": "pos"
+   }
+  },
+  {
+   "aid": "M.1791621231.A.E97",
+   "title": "[新聞] GoPro衰退跌落神壇出售！市占剩3%，9成相",
+   "author": "leepingyo (御前一品帶刀龍侍衛)",
+   "ts": "2026-10-10 16:33",
+   "push": 97,
+   "boo": 7,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791621231.A.E97.html",
+   "codes": [
+    "2751",
+    "3372",
+    "2850"
+   ],
+   "sent": {
+    "2751": "neu",
+    "3372": "neu",
+    "2850": "neu"
+   }
+  },
+  {
+   "aid": "M.1791622803.A.407",
+   "title": "[情報] 6209 今國光 9月營收 M:20.12% Y:81.57%",
+   "author": "q1a1 (一問一答)",
+   "ts": "2026-10-10 17:00",
+   "push": 7,
+   "boo": 1,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791622803.A.407.html",
+   "codes": [
+    "6209"
+   ],
+   "sent": {
+    "6209": "neu"
+   }
+  },
+  {
+   "aid": "M.1791623591.A.12E",
+   "title": "Re: [新聞] 川普與普丁達協議　俄將向美國與全球市場",
+   "author": "n3w96284 (皇．城之內)",
+   "ts": "2026-10-10 17:13",
+   "push": 6,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791623591.A.12E.html",
+   "codes": [
+    "6505"
+   ],
+   "sent": {
+    "6505": "neg"
+   }
+  },
+  {
+   "aid": "M.1791624479.A.964",
+   "title": "Re: [新聞] 川普與普丁達協議　俄將向美國與全球市場",
+   "author": "s800525 (Tim)",
+   "ts": "2026-10-10 17:27",
+   "push": 12,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791624479.A.964.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1791625009.A.C75",
+   "title": "[新聞] 美對多家企業發起337調查 涉及立訊、鴻海",
+   "author": "DrowningPool (My broken dreams)",
+   "ts": "2026-10-10 17:36",
+   "push": 75,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791625009.A.C75.html",
+   "codes": [
+    "2317",
+    "2382",
+    "6811",
+    "2308"
+   ],
+   "sent": {
+    "2317": "neu",
+    "2382": "neu",
+    "6811": "neu",
+    "2308": "neu"
+   }
+  },
+  {
+   "aid": "M.1791628311.A.F53",
+   "title": "[新聞] 電腦太貴賣不動！全球PC出貨暴跌20%",
+   "author": "keel90135 (尼可)",
+   "ts": "2026-10-10 18:31",
+   "push": 134,
+   "boo": 12,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791628311.A.F53.html",
+   "codes": [
+    "2357"
+   ],
+   "sent": {
+    "2357": "neu"
+   }
+  },
+  {
+   "aid": "M.1791636095.A.7A5",
+   "title": "[情報] 5475 德宏 9月營收 M:27.10% Y:227.61%",
+   "author": "q1a1 (一問一答)",
+   "ts": "2026-10-10 20:41",
+   "push": 10,
+   "boo": 0,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791636095.A.7A5.html",
+   "codes": [
+    "5475"
+   ],
+   "sent": {
+    "5475": "neu"
+   }
+  },
+  {
+   "aid": "M.1791638032.A.C8C",
+   "title": "[新聞] 〈財報〉機票都漲價還不夠！達美航空Q3",
+   "author": "abian746 ( )",
+   "ts": "2026-10-10 21:13",
+   "push": 6,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791638032.A.C8C.html",
+   "codes": [
+    "3058"
+   ],
+   "sent": {
+    "3058": "neu"
+   }
+  },
+  {
+   "aid": "M.1791642333.A.003",
+   "title": "Re: [新聞] 川普與普丁達協議　俄將向美國與全球市場",
+   "author": "dion5558 (dion)",
+   "ts": "2026-10-10 22:25",
+   "push": 11,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1791642333.A.003.html",
+   "codes": [],
+   "sent": null
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": 13,
+  "due": false
+ }
+}
