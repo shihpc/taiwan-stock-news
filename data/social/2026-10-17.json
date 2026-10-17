@@ -1,0 +1,765 @@
+{
+ "schema": 1,
+ "date": "2026-10-17",
+ "generated_at": "2026-10-17T23:22:27+08:00",
+ "source": "ptt-stock",
+ "robots": "absent",
+ "robots_crawl_delay": null,
+ "robots_detail": {
+  "status": 404,
+  "err": null,
+  "final_url": "https://www.ptt.cc/robots.txt",
+  "attempts": 2
+ },
+ "fetch_errors": [
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  },
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  }
+ ],
+ "pages_fetched": 4,
+ "articles_n": 31,
+ "articles_fetched_n": 31,
+ "failed_n": 0,
+ "requests_n": 37,
+ "elapsed_s": 140.1,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": "batch",
+  "skipped": null,
+  "classified_n": 20,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 17037,
+   "output_tokens": 780
+  }
+ },
+ "stocks": {
+  "8450": {
+   "name": "霹靂",
+   "n": 3,
+   "push": 105,
+   "boo": 45,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "1710": {
+   "name": "東聯",
+   "n": 2,
+   "push": 93,
+   "boo": 8,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "6561": {
+   "name": "是方",
+   "n": 2,
+   "push": 101,
+   "boo": 45,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "6568": {
+   "name": "宏觀",
+   "n": 2,
+   "push": 277,
+   "boo": 32,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "911606": {
+   "name": "超級",
+   "n": 2,
+   "push": 101,
+   "boo": 45,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "0050": {
+   "name": "元大台灣50",
+   "n": 1,
+   "push": 6,
+   "boo": 0,
+   "pos": 0,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  },
+  "1216": {
+   "name": "統一",
+   "n": 1,
+   "push": 28,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1603": {
+   "name": "華電",
+   "n": 1,
+   "push": 7,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2317": {
+   "name": "鴻海",
+   "n": 1,
+   "push": 27,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2330": {
+   "name": "台積電",
+   "n": 1,
+   "push": 92,
+   "boo": 27,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2454": {
+   "name": "聯發科",
+   "n": 1,
+   "push": 190,
+   "boo": 54,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "2471": {
+   "name": "資通",
+   "n": 1,
+   "push": 100,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2482": {
+   "name": "連宇",
+   "n": 1,
+   "push": 20,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2526": {
+   "name": "大陸",
+   "n": 1,
+   "push": 7,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2614": {
+   "name": "東森",
+   "n": 1,
+   "push": 45,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3008": {
+   "name": "大立光",
+   "n": 1,
+   "push": 190,
+   "boo": 54,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3017": {
+   "name": "奇鋐",
+   "n": 1,
+   "push": 190,
+   "boo": 54,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3025": {
+   "name": "星通",
+   "n": 1,
+   "push": 209,
+   "boo": 13,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6443": {
+   "name": "元晶",
+   "n": 1,
+   "push": 100,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6811": {
+   "name": "宏碁資訊",
+   "n": 1,
+   "push": 100,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "7703": {
+   "name": "銳澤",
+   "n": 1,
+   "push": 92,
+   "boo": 27,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "7722": {
+   "name": "LINEPAY",
+   "n": 1,
+   "push": 7,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "7856": {
+   "name": "漢測",
+   "n": 1,
+   "push": 51,
+   "boo": 23,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8088": {
+   "name": "品安",
+   "n": 1,
+   "push": 5,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1792171579.A.639",
+   "title": "[新聞] 快訊／科技股賣壓擴大費半下探　台指期",
+   "author": "GivemeApen (給我欸片)",
+   "ts": "2026-10-17 01:26",
+   "push": 92,
+   "boo": 27,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792171579.A.639.html",
+   "codes": [
+    "7703",
+    "2330"
+   ],
+   "sent": {
+    "7703": "neu",
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1792175056.A.FE3",
+   "title": "[新聞] 「外國人還我錢」韓股7天市值蒸發逾28兆",
+   "author": "icedog122 (冰狗)",
+   "ts": "2026-10-17 02:24",
+   "push": 111,
+   "boo": 8,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792175056.A.FE3.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792197276.A.FAC",
+   "title": "[請益] 成本3500塊錢的聯發科一股沒賣?太貪心了?",
+   "author": "Crazyloveyou (當君懷歸日是妾斷腸時)",
+   "ts": "2026-10-17 08:34",
+   "push": 190,
+   "boo": 54,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792197276.A.FAC.html",
+   "codes": [
+    "2454",
+    "3017",
+    "3008"
+   ],
+   "sent": {
+    "2454": "pos",
+    "3017": "neu",
+    "3008": "neu"
+   }
+  },
+  {
+   "aid": "M.1792202323.A.55A",
+   "title": "[新聞] 費半連八黑創金融海嘯最長頹勢 黃仁勳：",
+   "author": "bamama56 (bamama)",
+   "ts": "2026-10-17 09:58",
+   "push": 208,
+   "boo": 17,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792202323.A.55A.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792204805.A.AC3",
+   "title": "[請益] 4%提領法  何時提領？",
+   "author": "xu3 ( (~￣▽￣)~)",
+   "ts": "2026-10-17 10:40",
+   "push": 40,
+   "boo": 8,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792204805.A.AC3.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792205004.A.625",
+   "title": "[新聞] 快訊／川普突簽行政命令！ 宣布「豁免多",
+   "author": "omanorboyo (omanorboyo)",
+   "ts": "2026-10-17 10:43",
+   "push": 320,
+   "boo": 53,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792205004.A.625.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792206563.A.F42",
+   "title": "Re: [新聞] 快訊／川普突簽行政命令！ 宣布「豁免多",
+   "author": "kcy05785 (肥宅一號)",
+   "ts": "2026-10-17 11:09",
+   "push": 35,
+   "boo": 6,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792206563.A.F42.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792211040.A.E54",
+   "title": "Re: [新聞] 快訊／川普突簽行政命令！ 宣布「豁免多",
+   "author": "jump2j (Lockel)",
+   "ts": "2026-10-17 12:23",
+   "push": 23,
+   "boo": 6,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792211040.A.E54.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792211819.A.7D6",
+   "title": "[新聞] 星鏈烏克蘭限速誰主使？川普：「不是我",
+   "author": "thinksilver (銀白色的沉思)",
+   "ts": "2026-10-17 12:36",
+   "push": 209,
+   "boo": 13,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792211819.A.7D6.html",
+   "codes": [
+    "3025"
+   ],
+   "sent": {
+    "3025": "neu"
+   }
+  },
+  {
+   "aid": "M.1792215270.A.1A6",
+   "title": "Re: [新聞] 特斯拉全新一代Roadster發表「真的能飛",
+   "author": "ilw4e (可以吃嗎？)",
+   "ts": "2026-10-17 13:34",
+   "push": 55,
+   "boo": 30,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792215270.A.1A6.html",
+   "codes": [
+    "911606",
+    "8450",
+    "6561"
+   ],
+   "sent": {
+    "911606": "neu",
+    "8450": "neu",
+    "6561": "neu"
+   }
+  },
+  {
+   "aid": "M.1792216251.A.89E",
+   "title": "[請益] 漢測這波還抱得住嗎？",
+   "author": "orton417 (不行啦不行啦)",
+   "ts": "2026-10-17 13:50",
+   "push": 51,
+   "boo": 23,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792216251.A.89E.html",
+   "codes": [
+    "7856"
+   ],
+   "sent": {
+    "7856": "neu"
+   }
+  },
+  {
+   "aid": "M.1792217639.A.9F1",
+   "title": "[新聞] 全球AI熱潮最大輸家？中國科創50指數半年",
+   "author": "doozia (天龍人)",
+   "ts": "2026-10-17 14:13",
+   "push": 20,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792217639.A.9F1.html",
+   "codes": [
+    "2482"
+   ],
+   "sent": {
+    "2482": "neu"
+   }
+  },
+  {
+   "aid": "M.1792218484.A.92E",
+   "title": "[新聞] 美股1指標拉警報「156年來僅見3次」 前2",
+   "author": "diefishfish ()",
+   "ts": "2026-10-17 14:28",
+   "push": 45,
+   "boo": 16,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792218484.A.92E.html",
+   "codes": [
+    "2614"
+   ],
+   "sent": {
+    "2614": "neu"
+   }
+  },
+  {
+   "aid": "M.1792221449.A.FE6",
+   "title": "Re: [新聞] 特斯拉全新一代Roadster發表「真的能飛",
+   "author": "enunion (回來囉)",
+   "ts": "2026-10-17 15:17",
+   "push": 46,
+   "boo": 15,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792221449.A.FE6.html",
+   "codes": [
+    "911606",
+    "8450",
+    "6561"
+   ],
+   "sent": {
+    "911606": "neu",
+    "8450": "neu",
+    "6561": "neu"
+   }
+  },
+  {
+   "aid": "M.1792225485.A.2A0",
+   "title": "[請益] 新手想請問鄉民說的暗台到底是什麼？",
+   "author": "pin32668020 (生科的員工)",
+   "ts": "2026-10-17 16:24",
+   "push": 99,
+   "boo": 16,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792225485.A.2A0.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792225589.A.AB6",
+   "title": "[新聞] AI籌資更貴了！Anthropic拚600億美元晶片融資傳給黑石逾10%殖利率",
+   "author": "kof70380 (小隆)",
+   "ts": "2026-10-17 16:26",
+   "push": 100,
+   "boo": 9,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792225589.A.AB6.html",
+   "codes": [
+    "6443",
+    "6811",
+    "2471"
+   ],
+   "sent": {
+    "6443": "neu",
+    "6811": "neu",
+    "2471": "neu"
+   }
+  },
+  {
+   "aid": "M.1792228801.A.919",
+   "title": "Re: [新聞] 特斯拉全新一代Roadster發表「真的能飛",
+   "author": "dion5558 (dion)",
+   "ts": "2026-10-17 17:19",
+   "push": 7,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792228801.A.919.html",
+   "codes": [
+    "1603"
+   ],
+   "sent": {
+    "1603": "neu"
+   }
+  },
+  {
+   "aid": "M.1792230364.A.4FD",
+   "title": "[新聞] 鴻海斥資235億元買股權 與三菱電機簽訂策略聯盟",
+   "author": "qazxc1156892 (QQ)",
+   "ts": "2026-10-17 17:46",
+   "push": 27,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792230364.A.4FD.html",
+   "codes": [
+    "2317"
+   ],
+   "sent": {
+    "2317": "neu"
+   }
+  },
+  {
+   "aid": "M.1792232257.A.F8E",
+   "title": "[新聞] 台股今年大漲62% 基金經理人反掀離職潮",
+   "author": "goddamnhuge (超!!級!!!!大!!!!!!!)",
+   "ts": "2026-10-17 18:17",
+   "push": 28,
+   "boo": 3,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792232257.A.F8E.html",
+   "codes": [
+    "1216"
+   ],
+   "sent": {
+    "1216": "neu"
+   }
+  },
+  {
+   "aid": "M.1792232758.A.147",
+   "title": "Re: [新聞] 特斯拉全新一代Roadster發表「真的能飛",
+   "author": "afacebook (A臉書)",
+   "ts": "2026-10-17 18:25",
+   "push": 3,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792232758.A.147.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792232833.A.9DF",
+   "title": "Re: [新聞] 特斯拉全新一代Roadster發表「真的能飛",
+   "author": "linwuno ()",
+   "ts": "2026-10-17 18:27",
+   "push": 4,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792232833.A.9DF.html",
+   "codes": [
+    "8450"
+   ],
+   "sent": {
+    "8450": "neu"
+   }
+  },
+  {
+   "aid": "M.1792233909.A.D07",
+   "title": "[創作] 甲乙丙丁",
+   "author": "Roy721222 (老吳)",
+   "ts": "2026-10-17 18:45",
+   "push": 6,
+   "boo": 0,
+   "cat": "創作",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792233909.A.D07.html",
+   "codes": [
+    "0050"
+   ],
+   "sent": {
+    "0050": "neg"
+   }
+  },
+  {
+   "aid": "M.1792234459.A.4D6",
+   "title": "Re: [新聞] 台股今年大漲62% 基金經理人反掀離職潮",
+   "author": "logate (xxx)",
+   "ts": "2026-10-17 18:54",
+   "push": 11,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792234459.A.4D6.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792235124.A.8EB",
+   "title": "[請益] 這波下殺有比7月恐怖嗎？",
+   "author": "tony5110 (Tonyton)",
+   "ts": "2026-10-17 19:05",
+   "push": 253,
+   "boo": 25,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792235124.A.8EB.html",
+   "codes": [
+    "6568"
+   ],
+   "sent": {
+    "6568": "neu"
+   }
+  },
+  {
+   "aid": "M.1792237126.A.CCA",
+   "title": "[新聞] 貨輪遭擊沉「海面飄滿iPhone」畫面曝光！",
+   "author": "justin531xx (吉他手 喵喵)",
+   "ts": "2026-10-17 19:38",
+   "push": 81,
+   "boo": 7,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792237126.A.CCA.html",
+   "codes": [
+    "1710"
+   ],
+   "sent": {
+    "1710": "neu"
+   }
+  },
+  {
+   "aid": "M.1792237479.A.834",
+   "title": "[新聞] 四部門督促車企加強測試驗證 要求車企抵",
+   "author": "madeinheaven ()",
+   "ts": "2026-10-17 19:44",
+   "push": 5,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792237479.A.834.html",
+   "codes": [
+    "8088"
+   ],
+   "sent": {
+    "8088": "neu"
+   }
+  },
+  {
+   "aid": "M.1792240347.A.C4F",
+   "title": "[新聞] IMF發布報告 預計中國經濟2027年進一步放",
+   "author": "Su22 (裝配匠)",
+   "ts": "2026-10-17 20:32",
+   "push": 24,
+   "boo": 7,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792240347.A.C4F.html",
+   "codes": [
+    "6568"
+   ],
+   "sent": {
+    "6568": "neu"
+   }
+  },
+  {
+   "aid": "M.1792240715.A.28F",
+   "title": "Re: [新聞] 貨輪遭擊沉「海面飄滿iPhone」畫面曝光！",
+   "author": "yingjeou (英九)",
+   "ts": "2026-10-17 20:38",
+   "push": 12,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792240715.A.28F.html",
+   "codes": [
+    "1710"
+   ],
+   "sent": {
+    "1710": "neu"
+   }
+  },
+  {
+   "aid": "M.1792243685.A.100",
+   "title": "[情報] 7722 LINEPAY 澄清媒體報導",
+   "author": "q1a1 (一問一答)",
+   "ts": "2026-10-17 21:28",
+   "push": 7,
+   "boo": 1,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792243685.A.100.html",
+   "codes": [
+    "7722",
+    "2526"
+   ],
+   "sent": {
+    "7722": "neu",
+    "2526": "neu"
+   }
+  },
+  {
+   "aid": "M.1792245974.A.673",
+   "title": "[標的] 大盤 歷史重演多",
+   "author": "allen910106 (allen910106)",
+   "ts": "2026-10-17 22:06",
+   "push": 55,
+   "boo": 11,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792245974.A.673.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792249281.A.90C",
+   "title": "Re: [標的] 大盤 歷史重演多",
+   "author": "im609 ()",
+   "ts": "2026-10-17 23:01",
+   "push": 0,
+   "boo": 0,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792249281.A.90C.html",
+   "codes": [],
+   "sent": null
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": 20,
+  "due": false
+ }
+}
