@@ -1,0 +1,577 @@
+{
+ "schema": 1,
+ "date": "2026-10-18",
+ "generated_at": "2026-10-18T23:22:36+08:00",
+ "source": "ptt-stock",
+ "robots": "absent",
+ "robots_crawl_delay": null,
+ "robots_detail": {
+  "status": 404,
+  "err": null,
+  "final_url": "https://www.ptt.cc/robots.txt",
+  "attempts": 2
+ },
+ "fetch_errors": [
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  },
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  }
+ ],
+ "pages_fetched": 3,
+ "articles_n": 17,
+ "articles_fetched_n": 17,
+ "failed_n": 0,
+ "requests_n": 22,
+ "elapsed_s": 149.8,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": "mixed",
+  "skipped": null,
+  "classified_n": 12,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 11827,
+   "output_tokens": 891
+  }
+ },
+ "stocks": {
+  "2330": {
+   "name": "台積電",
+   "n": 4,
+   "push": 362,
+   "boo": 76,
+   "pos": 0,
+   "neg": 0,
+   "neu": 4,
+   "unk": 0
+  },
+  "2356": {
+   "name": "英業達",
+   "n": 3,
+   "push": 208,
+   "boo": 54,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "2392": {
+   "name": "正崴",
+   "n": 3,
+   "push": 208,
+   "boo": 54,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "6806": {
+   "name": "森崴能源",
+   "n": 3,
+   "push": 208,
+   "boo": 54,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "4923": {
+   "name": "力士",
+   "n": 2,
+   "push": 129,
+   "boo": 17,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "0050": {
+   "name": "元大台灣50",
+   "n": 1,
+   "push": 33,
+   "boo": 8,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "0056": {
+   "name": "元大高股息",
+   "n": 1,
+   "push": 33,
+   "boo": 8,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1101": {
+   "name": "台泥",
+   "n": 1,
+   "push": 147,
+   "boo": 18,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1216": {
+   "name": "統一",
+   "n": 1,
+   "push": 43,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1418": {
+   "name": "東華",
+   "n": 1,
+   "push": 41,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1605": {
+   "name": "華新",
+   "n": 1,
+   "push": 147,
+   "boo": 18,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1802": {
+   "name": "台玻",
+   "n": 1,
+   "push": 147,
+   "boo": 18,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1815": {
+   "name": "富喬",
+   "n": 1,
+   "push": 147,
+   "boo": 18,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2106": {
+   "name": "建大",
+   "n": 1,
+   "push": 39,
+   "boo": 17,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2526": {
+   "name": "大陸",
+   "n": 1,
+   "push": 41,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2603": {
+   "name": "長榮",
+   "n": 1,
+   "push": 147,
+   "boo": 18,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2850": {
+   "name": "新產",
+   "n": 1,
+   "push": 86,
+   "boo": 13,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2883": {
+   "name": "凱基金",
+   "n": 1,
+   "push": 147,
+   "boo": 18,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3025": {
+   "name": "星通",
+   "n": 1,
+   "push": 27,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "5202": {
+   "name": "力新",
+   "n": 1,
+   "push": 53,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "5522": {
+   "name": "遠雄",
+   "n": 1,
+   "push": 108,
+   "boo": 22,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6505": {
+   "name": "台塑化",
+   "n": 1,
+   "push": 147,
+   "boo": 18,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "TAIEX": {
+   "name": "加權指數",
+   "n": 1,
+   "push": 133,
+   "boo": 37,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1792252868.A.5BD",
+   "title": "[請益] 0056或00878都比0050來的分散？",
+   "author": "crystalvue (到哪裡不CP)",
+   "ts": "2026-10-18 00:01",
+   "push": 33,
+   "boo": 8,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792252868.A.5BD.html",
+   "codes": [
+    "0056",
+    "0050"
+   ],
+   "sent": {
+    "0056": "neu",
+    "0050": "neu"
+   }
+  },
+  {
+   "aid": "M.1792253793.A.FE9",
+   "title": "[新聞] 澤倫斯基籲歐盟明年額外援助700億歐元",
+   "author": "omanorboyo (omanorboyo)",
+   "ts": "2026-10-18 00:16",
+   "push": 108,
+   "boo": 22,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792253793.A.FE9.html",
+   "codes": [
+    "5522"
+   ],
+   "sent": {
+    "5522": "neu"
+   }
+  },
+  {
+   "aid": "M.1792256253.A.EA1",
+   "title": "[新聞] 獨／大型行庫集體踩雷離岸風電聯貸 經濟",
+   "author": "troy30408 (南宮洛)",
+   "ts": "2026-10-18 00:57",
+   "push": 154,
+   "boo": 36,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792256253.A.EA1.html",
+   "codes": [
+    "6806",
+    "2392",
+    "2356"
+   ],
+   "sent": {
+    "6806": "neu",
+    "2392": "neu",
+    "2356": "neu"
+   }
+  },
+  {
+   "aid": "M.1792281487.A.D4E",
+   "title": "Re: [標的] 大盤 歷史重演多",
+   "author": "devidevi (凱特)",
+   "ts": "2026-10-18 07:58",
+   "push": 16,
+   "boo": 7,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792281487.A.D4E.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792283834.A.BD2",
+   "title": "[新聞] 美股逢低搶進？美銀：選後再考慮",
+   "author": "IzumiKonata ( )",
+   "ts": "2026-10-18 08:37",
+   "push": 46,
+   "boo": 12,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792283834.A.BD2.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792288638.A.CFB",
+   "title": "[新聞] 俄羅斯封禁江淮等5款中國車 網嘲「知子莫",
+   "author": "Su22 (裝配匠)",
+   "ts": "2026-10-18 09:57",
+   "push": 27,
+   "boo": 11,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792288638.A.CFB.html",
+   "codes": [
+    "3025"
+   ],
+   "sent": {
+    "3025": "neu"
+   }
+  },
+  {
+   "aid": "M.1792298231.A.E25",
+   "title": "[新聞] 為機器人謀出路？軟銀傳有意砸300億美元",
+   "author": "manlike ( )",
+   "ts": "2026-10-18 12:37",
+   "push": 41,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792298231.A.E25.html",
+   "codes": [
+    "2526",
+    "1418"
+   ],
+   "sent": {
+    "2526": "neu",
+    "1418": "neu"
+   }
+  },
+  {
+   "aid": "M.1792299611.A.718",
+   "title": "Re: [新聞] 獨／大型行庫集體踩雷離岸風電聯貸 經濟",
+   "author": "kensmile (高雄很讚)",
+   "ts": "2026-10-18 13:00",
+   "push": 39,
+   "boo": 17,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792299611.A.718.html",
+   "codes": [
+    "6806",
+    "2392",
+    "2356",
+    "2106",
+    "2330"
+   ],
+   "sent": {
+    "6806": "neu",
+    "2392": "neu",
+    "2356": "neu",
+    "2106": "neu",
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1792303450.A.D27",
+   "title": "[請益] 想質押200萬要歐印還是分批撿？",
+   "author": "gn01982667 (冬瓜茶)",
+   "ts": "2026-10-18 14:04",
+   "push": 37,
+   "boo": 8,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792303450.A.D27.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792303824.A.4B8",
+   "title": "Re: [新聞] 獨／大型行庫集體踩雷離岸風電聯貸 經濟",
+   "author": "motan (警察先生就是這個人)",
+   "ts": "2026-10-18 14:10",
+   "push": 15,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792303824.A.4B8.html",
+   "codes": [
+    "6806",
+    "2392",
+    "2356"
+   ],
+   "sent": {
+    "6806": "neu",
+    "2392": "neu",
+    "2356": "neu"
+   }
+  },
+  {
+   "aid": "M.1792306639.A.5DB",
+   "title": "[新聞] 下周一恐血洗1100點…千萬別做錯！「15檔",
+   "author": "icedog122 (冰狗)",
+   "ts": "2026-10-18 14:57",
+   "push": 147,
+   "boo": 18,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792306639.A.5DB.html",
+   "codes": [
+    "2330",
+    "1815",
+    "2883",
+    "1101",
+    "1802",
+    "1605",
+    "6505",
+    "2603"
+   ],
+   "sent": {
+    "2330": "neu",
+    "1815": "neu",
+    "2883": "neu",
+    "1101": "neu",
+    "1802": "neu",
+    "1605": "neu",
+    "6505": "neu",
+    "2603": "neu"
+   }
+  },
+  {
+   "aid": "M.1792311210.A.AA9",
+   "title": "[新聞] 台股一周跌逾3000點！陳嘉偉示警M頭：年",
+   "author": "diefishfish ()",
+   "ts": "2026-10-18 16:13",
+   "push": 133,
+   "boo": 37,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792311210.A.AA9.html",
+   "codes": [
+    "2330",
+    "TAIEX"
+   ],
+   "sent": {
+    "2330": "neu",
+    "TAIEX": "neu"
+   }
+  },
+  {
+   "aid": "M.1792316424.A.A21",
+   "title": "Re: [標的] asts還有救嗎？",
+   "author": "Baling99 (巴陵99)",
+   "ts": "2026-10-18 17:40",
+   "push": 25,
+   "boo": 0,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792316424.A.A21.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792320907.A.904",
+   "title": "[新聞]三星也得配合！輝達下一代HBM指定台積電3奈米製程",
+   "author": "GNZ48 (廣州48)",
+   "ts": "2026-10-18 18:55",
+   "push": 43,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792320907.A.904.html",
+   "codes": [
+    "2330",
+    "4923",
+    "1216"
+   ],
+   "sent": {
+    "2330": "neu",
+    "4923": "neu",
+    "1216": "neu"
+   }
+  },
+  {
+   "aid": "M.1792321954.A.D42",
+   "title": "[新聞] 黃仁勳也救不了？CoreWeave股價狂瀉25%",
+   "author": "a0808996 (dammmmm)",
+   "ts": "2026-10-18 19:12",
+   "push": 53,
+   "boo": 11,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792321954.A.D42.html",
+   "codes": [
+    "5202"
+   ],
+   "sent": {
+    "5202": "neu"
+   }
+  },
+  {
+   "aid": "M.1792331399.A.600",
+   "title": "[新聞] 好日子不多了？南韓財長：記憶體榮景至少",
+   "author": "justin531xx (吉他手 喵喵)",
+   "ts": "2026-10-18 21:49",
+   "push": 86,
+   "boo": 13,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792331399.A.600.html",
+   "codes": [
+    "4923",
+    "2850"
+   ],
+   "sent": {
+    "4923": "neu",
+    "2850": "neu"
+   }
+  },
+  {
+   "aid": "M.1792334936.A.638",
+   "title": "[新聞] AI再添疑「雲」微軟傳已取消與英國新雲端",
+   "author": "DrowningPool (My broken dreams)",
+   "ts": "2026-10-18 22:48",
+   "push": 15,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792334936.A.638.html",
+   "codes": [],
+   "sent": null
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": 21,
+  "due": false
+ }
+}
