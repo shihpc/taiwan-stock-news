@@ -1,0 +1,559 @@
+{
+ "schema": 1,
+ "date": "2026-10-26",
+ "generated_at": "2026-10-26T23:22:15+08:00",
+ "source": "ptt-stock",
+ "robots": "absent",
+ "robots_crawl_delay": null,
+ "robots_detail": {
+  "status": 404,
+  "err": null,
+  "final_url": "https://www.ptt.cc/robots.txt",
+  "attempts": 2
+ },
+ "fetch_errors": [
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  },
+  {
+   "path": "/robots.txt",
+   "status": 404,
+   "err": null
+  }
+ ],
+ "pages_fetched": 3,
+ "articles_n": 14,
+ "articles_fetched_n": 14,
+ "failed_n": 0,
+ "requests_n": 19,
+ "elapsed_s": 128.1,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": "mixed",
+  "skipped": null,
+  "classified_n": 10,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 10204,
+   "output_tokens": 924
+  }
+ },
+ "stocks": {
+  "2330": {
+   "name": "台積電",
+   "n": 3,
+   "push": 204,
+   "boo": 41,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "2526": {
+   "name": "大陸",
+   "n": 3,
+   "push": 65,
+   "boo": 37,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "3376": {
+   "name": "新日興",
+   "n": 3,
+   "push": 197,
+   "boo": 49,
+   "pos": 0,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "2850": {
+   "name": "新產",
+   "n": 2,
+   "push": 134,
+   "boo": 43,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "4923": {
+   "name": "力士",
+   "n": 2,
+   "push": 32,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "6811": {
+   "name": "宏碁資訊",
+   "n": 2,
+   "push": 134,
+   "boo": 43,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "0050": {
+   "name": "元大台灣50",
+   "n": 1,
+   "push": 22,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1210": {
+   "name": "大成",
+   "n": 1,
+   "push": 89,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1259": {
+   "name": "安心",
+   "n": 1,
+   "push": 33,
+   "boo": 34,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1595": {
+   "name": "川寶",
+   "n": 1,
+   "push": 89,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2303": {
+   "name": "聯電",
+   "n": 1,
+   "push": 119,
+   "boo": 24,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2308": {
+   "name": "台達電",
+   "n": 1,
+   "push": 119,
+   "boo": 24,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2317": {
+   "name": "鴻海",
+   "n": 1,
+   "push": 63,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2337": {
+   "name": "旺宏",
+   "n": 1,
+   "push": 119,
+   "boo": 24,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2408": {
+   "name": "南亞科",
+   "n": 1,
+   "push": 119,
+   "boo": 24,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2409": {
+   "name": "友達",
+   "n": 1,
+   "push": 119,
+   "boo": 24,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2419": {
+   "name": "仲琦",
+   "n": 1,
+   "push": 89,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2454": {
+   "name": "聯發科",
+   "n": 1,
+   "push": 119,
+   "boo": 24,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3025": {
+   "name": "星通",
+   "n": 1,
+   "push": 119,
+   "boo": 24,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3663": {
+   "name": "鑫科",
+   "n": 1,
+   "push": 16,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3708": {
+   "name": "上緯投控",
+   "n": 1,
+   "push": 5,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "4733": {
+   "name": "上緯",
+   "n": 1,
+   "push": 5,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "5603": {
+   "name": "陸海",
+   "n": 1,
+   "push": 16,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6568": {
+   "name": "宏觀",
+   "n": 1,
+   "push": 0,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "911606": {
+   "name": "超級",
+   "n": 1,
+   "push": 89,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1792969857.A.C63",
+   "title": "Re: [新聞] 美股23小時交易新制即將上路 五大券商搶Q",
+   "author": "Antihuman ()",
+   "ts": "2026-10-26 07:10",
+   "push": 11,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792969857.A.C63.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792976703.A.678",
+   "title": "[閒聊] 2026/10/26 盤後閒聊",
+   "author": "BlueBird5566 (賴粉-青鳥56)",
+   "ts": "2026-10-26 09:05",
+   "push": 896,
+   "boo": 125,
+   "cat": "閒聊",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792976703.A.678.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1792979908.A.B31",
+   "title": "[新聞] iPhone Duo 傳螢幕裂開災情 網紅拆解推估",
+   "author": "largan6075 (恩平重返榮耀)",
+   "ts": "2026-10-26 09:58",
+   "push": 101,
+   "boo": 9,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792979908.A.B31.html",
+   "codes": [
+    "6811",
+    "2850",
+    "3376"
+   ],
+   "sent": {
+    "6811": "neu",
+    "2850": "neu",
+    "3376": "neu"
+   }
+  },
+  {
+   "aid": "M.1792981747.A.13F",
+   "title": "Re: [新聞] iPhone Duo 傳螢幕裂開災情 網紅拆解推估",
+   "author": "icrose (人本良心)",
+   "ts": "2026-10-26 10:29",
+   "push": 33,
+   "boo": 34,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792981747.A.13F.html",
+   "codes": [
+    "1259",
+    "6811",
+    "2850",
+    "3376",
+    "2526"
+   ],
+   "sent": {
+    "1259": "neu",
+    "6811": "neu",
+    "2850": "neu",
+    "3376": "neu",
+    "2526": "neu"
+   }
+  },
+  {
+   "aid": "M.1792988519.A.2D6",
+   "title": "[新聞] SpaceX籌1.28兆買輝達晶片　馬斯克示警20",
+   "author": "STAV72 (刁民黨黨務主委)",
+   "ts": "2026-10-26 12:21",
+   "push": 89,
+   "boo": 3,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1792988519.A.2D6.html",
+   "codes": [
+    "911606",
+    "2419",
+    "1210",
+    "1595"
+   ],
+   "sent": {
+    "911606": "neu",
+    "2419": "neu",
+    "1210": "neu",
+    "1595": "neu"
+   }
+  },
+  {
+   "aid": "M.1793000979.A.39B",
+   "title": "[新聞] 折疊 iPhone 搶手 傳蘋果要求追加三成訂",
+   "author": "d8917936 (OKAS)",
+   "ts": "2026-10-26 15:49",
+   "push": 63,
+   "boo": 6,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793000979.A.39B.html",
+   "codes": [
+    "2317",
+    "2330",
+    "3376"
+   ],
+   "sent": {
+    "2317": "neu",
+    "2330": "neu",
+    "3376": "neu"
+   }
+  },
+  {
+   "aid": "M.1793001542.A.7AD",
+   "title": "[請益] 持股與質押水位健檢 (0050 / 2330)",
+   "author": "arctangine ()",
+   "ts": "2026-10-26 15:58",
+   "push": 22,
+   "boo": 11,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793001542.A.7AD.html",
+   "codes": [
+    "0050",
+    "2330"
+   ],
+   "sent": {
+    "0050": "neu",
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1793002557.A.667",
+   "title": "Re: [請益] 3000萬可以退休了嗎?（畢業了….）",
+   "author": "d012375913 (阿利)",
+   "ts": "2026-10-26 16:15",
+   "push": 122,
+   "boo": 13,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793002557.A.667.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1793007571.A.E62",
+   "title": "[新聞] A股異動)上緯新材(688585.SH)飆升逾17% A",
+   "author": "P12011021 (男子電不能倒)",
+   "ts": "2026-10-26 17:39",
+   "push": 5,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793007571.A.E62.html",
+   "codes": [
+    "4733",
+    "3708"
+   ],
+   "sent": {
+    "4733": "unk",
+    "3708": "unk"
+   }
+  },
+  {
+   "aid": "M.1793012023.A.CDC",
+   "title": "[新聞] 影音／台股明開盤大補跌？若「恐慌情緒+",
+   "author": "diefishfish ()",
+   "ts": "2026-10-26 18:53",
+   "push": 119,
+   "boo": 24,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793012023.A.CDC.html",
+   "codes": [
+    "3025",
+    "2337",
+    "2303",
+    "2308",
+    "2409",
+    "2454",
+    "2330",
+    "2408"
+   ],
+   "sent": {
+    "3025": "neu",
+    "2337": "neu",
+    "2303": "neu",
+    "2308": "neu",
+    "2409": "neu",
+    "2454": "neu",
+    "2330": "neu",
+    "2408": "neu"
+   }
+  },
+  {
+   "aid": "M.1793021600.A.400",
+   "title": "[新聞] AI新創Anthropic遞交IPO申請　估值達1.5",
+   "author": "rz2x (弗朗西爾我婆)",
+   "ts": "2026-10-26 21:33",
+   "push": 33,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793021600.A.400.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1793025061.A.553",
+   "title": "[新聞] 陸媒：黃仁勳對與長鑫存儲合作持開放態度",
+   "author": "InfoWars (艾力克斯瓊斯)",
+   "ts": "2026-10-26 22:30",
+   "push": 16,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793025061.A.553.html",
+   "codes": [
+    "5603",
+    "2526",
+    "4923"
+   ],
+   "sent": {
+    "5603": "neu",
+    "2526": "neu",
+    "4923": "neu"
+   }
+  },
+  {
+   "aid": "M.1793026348.A.244",
+   "title": "[新聞] 長鑫科技傳拒絕蘋果、台灣製造商記憶體訂",
+   "author": "speed364 (主動賣玻璃)",
+   "ts": "2026-10-26 22:52",
+   "push": 16,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793026348.A.244.html",
+   "codes": [
+    "3663",
+    "4923",
+    "2526"
+   ],
+   "sent": {
+    "3663": "neu",
+    "4923": "neu",
+    "2526": "neu"
+   }
+  },
+  {
+   "aid": "M.1793027599.A.5BB",
+   "title": "[新聞] 專家：中國製造商什麼都能製造 除了利潤",
+   "author": "Su22 (裝配匠)",
+   "ts": "2026-10-26 23:13",
+   "push": 0,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793027599.A.5BB.html",
+   "codes": [
+    "6568"
+   ],
+   "sent": {
+    "6568": "neu"
+   }
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": 29,
+  "due": false
+ }
+}
