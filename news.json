@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-29T16:09:20+08:00",
+ "generated_at": "2026-10-29T17:09:37+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-10-21",
@@ -9,11 +9,11 @@
   "2026-10-29"
  ],
  "pool_size": 150,
- "stocks_with_news": 89,
- "total_news": 484,
+ "stocks_with_news": 90,
+ "total_news": 500,
  "stats": {
-  "n_raw": 484,
-  "n_unique_articles": 456
+  "n_raw": 500,
+  "n_unique_articles": 468
  },
  "coverage": {
   "dates": [
@@ -809,9 +809,17 @@
    "industry": "通信網路業",
    "heavyweight": false,
    "weight_per": 0.4926,
-   "count": 1,
+   "count": 2,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-10-29 16:18:00",
+     "source": "FTNN新聞",
+     "title": "光通訊陷一片慘綠！「這檔」Q3獲利飆升逆勢再攻頂、光聖重摔7% 上詮崩8%、波若威、IET全跌逾4% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/591239",
+     "impact": "stock",
+     "aid": "7ff93826bc17"
+    },
     {
      "date": "2026-10-25 07:00:00",
      "source": "經濟日報",
@@ -956,9 +964,20 @@
    "industry": "半導體業",
    "heavyweight": false,
    "weight_per": 0.0,
-   "count": 36,
+   "count": 37,
    "market_count": 3,
    "news": [
+    {
+     "date": "2026-10-29 15:20:00",
+     "source": "FTNN新聞",
+     "title": "記憶體臉又綠了！「雙雄」開高走低、旺宏跌逾3%險收百元 晶豪科、十銓逆勢漲2%、宜鼎也收紅 - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/591218",
+     "impact": "stock",
+     "aid": "4bc2d7f95763",
+     "related": [
+      "3006"
+     ]
+    },
     {
      "date": "2026-10-29 03:00:00",
      "source": "工商時報",
@@ -2068,9 +2087,44 @@
    "industry": "光電業",
    "heavyweight": false,
    "weight_per": 0.0,
-   "count": 21,
+   "count": 25,
    "market_count": 1,
    "news": [
+    {
+     "date": "2026-10-29 16:45:07",
+     "source": "鉅亨(cnyes)",
+     "title": "廣達收購友達桃園廠房喊卡 AI伺服器產能不受影響 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6640622",
+     "impact": "stock",
+     "aid": "330d18a00d3a",
+     "related": [
+      "2382"
+     ]
+    },
+    {
+     "date": "2026-10-29 16:36:00",
+     "source": "MoneyDJ",
+     "title": "友達布局光通訊/玻璃基板，拚2-3年貢獻營收- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=aa3a284d-1ae9-497f-bbc8-d7faacce66fe",
+     "impact": "stock",
+     "aid": "f20962f05c06"
+    },
+    {
+     "date": "2026-10-29 14:54:32",
+     "source": "UDN",
+     "title": "台積電砸388億元買友達中科廠 取得近13萬坪廠房 - UDN",
+     "link": "https://udn.com/news/story/7240/9844803",
+     "impact": "stock",
+     "aid": "0ee0c1682c85"
+    },
+    {
+     "date": "2026-10-29 14:49:16",
+     "source": "UDN",
+     "title": "友達法說會／中科二座廠388億元售予台積電 另取消處分華亞廠售廣達案 - UDN",
+     "link": "https://udn.com/news/story/7252/9844794",
+     "impact": "stock",
+     "aid": "e5ed4cf3b7a7"
+    },
     {
      "date": "2026-10-29 14:38:04",
      "source": "自由時報系",
@@ -3427,6 +3481,77 @@
    ]
   },
   {
+   "stock_id": "2882",
+   "name": "國泰金",
+   "industry": "金融保險",
+   "heavyweight": true,
+   "weight_per": 0.0,
+   "count": 7,
+   "market_count": 3,
+   "news": [
+    {
+     "date": "2026-10-29 14:58:00",
+     "source": "今周刊",
+     "title": "富邦金、國泰金、中信金…元大金躋身兆元金控股，謝金河點名這5檔市值全破兆：金融業最兵肥馬壯的時代 - 今周刊",
+     "link": "https://www.businesstoday.com.tw/article/category/183025/post/202610290018/",
+     "impact": "heavy",
+     "aid": "1015dc5273fb",
+     "related": [
+      "2881",
+      "2885"
+     ]
+    },
+    {
+     "date": "2026-10-28 15:26:45",
+     "source": "理財周刊",
+     "title": "台股28日指數收復47000點關卡 金控股國泰金帶頭收漲1.32% - 理財周刊",
+     "link": "https://www.moneyweekly.com.tw/ArticleData/Info/Article/258575",
+     "impact": "market",
+     "aid": "20d684096725"
+    },
+    {
+     "date": "2026-10-28 11:01:46",
+     "source": "UDN",
+     "title": "台股反彈帶動金融股上揚 國泰金股價站穩多頭行情 - UDN",
+     "link": "https://udn.com/news/story/7251/9841600",
+     "impact": "market",
+     "aid": "41fff93ad01d"
+    },
+    {
+     "date": "2026-10-23 17:11:17",
+     "source": "自由時報系",
+     "title": "熱門股》外資認同股利 國泰金大漲5% - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/j9jzfjvjeetf",
+     "impact": "heavy",
+     "aid": "ee9815bc5fdd"
+    },
+    {
+     "date": "2026-10-22 17:00:00",
+     "source": "經濟日報",
+     "title": "國泰金、中信金 四檔悍 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5739/9819881",
+     "impact": "heavy",
+     "aid": "94c14e04040e"
+    },
+    {
+     "date": "2026-10-21 02:51:36",
+     "source": "UDN",
+     "title": "國泰金：股市樂觀指數攀峰 - UDN",
+     "link": "https://udn.com/news/story/7239/9827354",
+     "impact": "market",
+     "aid": "8b8b3232771f"
+    },
+    {
+     "date": "2026-10-21 02:28:08",
+     "source": "UDN",
+     "title": "國泰金公平待客獲肯定 - UDN",
+     "link": "https://udn.com/news/story/7239/9827261",
+     "impact": "heavy",
+     "aid": "3901ba30fcfe"
+    }
+   ]
+  },
+  {
    "stock_id": "3008",
    "name": "大立光",
    "industry": "光電業",
@@ -3493,65 +3618,6 @@
      "related": [
       "2409"
      ]
-    }
-   ]
-  },
-  {
-   "stock_id": "2882",
-   "name": "國泰金",
-   "industry": "金融保險",
-   "heavyweight": true,
-   "weight_per": 0.0,
-   "count": 6,
-   "market_count": 3,
-   "news": [
-    {
-     "date": "2026-10-28 15:26:45",
-     "source": "理財周刊",
-     "title": "台股28日指數收復47000點關卡 金控股國泰金帶頭收漲1.32% - 理財周刊",
-     "link": "https://www.moneyweekly.com.tw/ArticleData/Info/Article/258575",
-     "impact": "market",
-     "aid": "20d684096725"
-    },
-    {
-     "date": "2026-10-28 11:01:46",
-     "source": "UDN",
-     "title": "台股反彈帶動金融股上揚 國泰金股價站穩多頭行情 - UDN",
-     "link": "https://udn.com/news/story/7251/9841600",
-     "impact": "market",
-     "aid": "41fff93ad01d"
-    },
-    {
-     "date": "2026-10-23 17:11:17",
-     "source": "自由時報系",
-     "title": "熱門股》外資認同股利 國泰金大漲5% - 自由時報",
-     "link": "https://stock.ltn.com.tw/article/j9jzfjvjeetf",
-     "impact": "heavy",
-     "aid": "ee9815bc5fdd"
-    },
-    {
-     "date": "2026-10-22 17:00:00",
-     "source": "經濟日報",
-     "title": "國泰金、中信金 四檔悍 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5739/9819881",
-     "impact": "heavy",
-     "aid": "94c14e04040e"
-    },
-    {
-     "date": "2026-10-21 02:51:36",
-     "source": "UDN",
-     "title": "國泰金：股市樂觀指數攀峰 - UDN",
-     "link": "https://udn.com/news/story/7239/9827354",
-     "impact": "market",
-     "aid": "8b8b3232771f"
-    },
-    {
-     "date": "2026-10-21 02:28:08",
-     "source": "UDN",
-     "title": "國泰金公平待客獲肯定 - UDN",
-     "link": "https://udn.com/news/story/7239/9827261",
-     "impact": "heavy",
-     "aid": "3901ba30fcfe"
     }
    ]
   },
@@ -3790,6 +3856,118 @@
    ]
   },
   {
+   "stock_id": "2892",
+   "name": "第一金",
+   "industry": "金融保險",
+   "heavyweight": true,
+   "weight_per": 0.0,
+   "count": 5,
+   "market_count": 1,
+   "news": [
+    {
+     "date": "2026-10-29 15:20:30",
+     "source": "理財周刊",
+     "title": "台股29日失守5日線 金融類股第一金領漲終場上漲3.86% - 理財周刊",
+     "link": "https://www.moneyweekly.com.tw/Home/ChangePage/Article/258838/?Type=3&Line=Home_ArticleSet_103&Page=FCE914305A6531AB6432D7582FBD3210ED807EA1EE4F0EF46B3AD8D7E7A5E9BC32044E43358EF7BE3FFE2B65D95AA3586B10D937329E59C7ED705BACED8B4A93BD912BF951D1FBBCD80C0A736A30F986A1455562434D657A85A3E1709B59167E9BEE9B2534086EF8A781C32F1CBAE04CF19894B679F6BB51E0E34B8F7CFFFA19412A9BF770452606D3973B775C5C5637D9B9DCD09F37F4E7D3F808CC0D91FCE407FC9260C5284E1101B561C0A00D22B1611B5E91F5CE0EB9A4B5A998912D2A7B21F541D5A56F091BA48CB6A68A1224E1BEC79132B93E9B0A",
+     "impact": "market",
+     "aid": "764ab5b5b74c"
+    },
+    {
+     "date": "2026-10-27 10:54:00",
+     "source": "MoneyDJ",
+     "title": "第一金旗下投信規模擴張，有助提高非銀獲利比- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=f11b3850-3326-4784-876a-6510b6344f9d",
+     "impact": "heavy",
+     "aid": "57e031a5017d"
+    },
+    {
+     "date": "2026-10-26 17:00:00",
+     "source": "經濟日報",
+     "title": "公股投信「四合一」拍板！第一金持股50.3%掌主導權 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5613/9831515",
+     "impact": "heavy",
+     "aid": "47a0e503c340"
+    },
+    {
+     "date": "2026-10-23 17:00:00",
+     "source": "經濟日報",
+     "title": "四大金控今四點半宣布投信整併！第一金握主導權 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5613/9831242",
+     "impact": "heavy",
+     "aid": "dd4d6cf54a6f"
+    },
+    {
+     "date": "2026-10-22 14:52:24",
+     "source": "UDN",
+     "title": "四大金控今下午4點半宣布投信整併！第一金握主導權 - UDN",
+     "link": "https://udn.com/news/story/7239/9831242",
+     "impact": "heavy",
+     "aid": "51213ebcffda"
+    }
+   ]
+  },
+  {
+   "stock_id": "3006",
+   "name": "晶豪科",
+   "industry": "半導體業",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 5,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-10-29 15:20:00",
+     "source": "FTNN新聞",
+     "title": "記憶體臉又綠了！「雙雄」開高走低、旺宏跌逾3%險收百元 晶豪科、十銓逆勢漲2%、宜鼎也收紅 - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/591218",
+     "impact": "stock",
+     "aid": "4bc2d7f95763",
+     "related": [
+      "2337"
+     ]
+    },
+    {
+     "date": "2026-10-29 02:04:53",
+     "source": "UDN",
+     "title": "南亞科、晶豪科 權證四檔亮 - UDN",
+     "link": "https://udn.com/news/amp/story/7255/9843171",
+     "impact": "stock",
+     "aid": "7dc615c48a28"
+    },
+    {
+     "date": "2026-10-28 10:22:00",
+     "source": "MoneyDJ",
+     "title": "報價助攻，晶豪科Q3獲利季增八成創高- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=f2c9369a-8460-4550-8224-c10f1398eef1",
+     "impact": "stock",
+     "aid": "6972b402f76b"
+    },
+    {
+     "date": "2026-10-28 09:00:00",
+     "source": "經濟日報",
+     "title": "南亞科、晶豪科 四檔亮 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5739/9843171",
+     "impact": "stock",
+     "aid": "ef6e310144c8",
+     "related": [
+      "2408"
+     ]
+    },
+    {
+     "date": "2026-10-22 15:50:00",
+     "source": "FTNN新聞",
+     "title": "記憶體臉又綠了！「這指標廠」跌半根、南茂、力成挫逾6% 晶豪科跌4.88%、力積電Q3轉盈僅小漲0.3% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/589425",
+     "impact": "stock",
+     "aid": "418bc44f1f81",
+     "related": [
+      "6239",
+      "6770"
+     ]
+    }
+   ]
+  },
+  {
    "stock_id": "3481",
    "name": "群創",
    "industry": "電子工業",
@@ -3949,6 +4127,49 @@
    ]
   },
   {
+   "stock_id": "1717",
+   "name": "長興",
+   "industry": "化學工業",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 4,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-10-29 15:08:46",
+     "source": "自由時報系",
+     "title": "半導體先進封裝挹注 長興自結9月稅前盈餘年增158.28％ - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/rw0gvdbtwfmp",
+     "impact": "stock",
+     "aid": "9a20b8cd3b38"
+    },
+    {
+     "date": "2026-10-27 03:08:52",
+     "source": "自由時報系",
+     "title": "熱門股》帶量強彈 長興站回80元 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/gnpzduejyhp3",
+     "impact": "stock",
+     "aid": "6d7da5e26ef9"
+    },
+    {
+     "date": "2026-10-25 19:21:30",
+     "source": "自由時報系",
+     "title": "熱門股》爆量換手 長興噴出創28年新高 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/btaekehsugb2",
+     "impact": "stock",
+     "aid": "0375b5519d5d"
+    },
+    {
+     "date": "2026-10-23 17:00:00",
+     "source": "經濟日報",
+     "title": "長興 MUF 封裝膠放量 長廣設備認列回溫 法人看好下半年 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5612/9660422",
+     "impact": "stock",
+     "aid": "1768f31381a1"
+    }
+   ]
+  },
+  {
    "stock_id": "2312",
    "name": "金寶",
    "industry": "其他電子業",
@@ -4078,130 +4299,51 @@
    ]
   },
   {
-   "stock_id": "2892",
-   "name": "第一金",
-   "industry": "金融保險",
+   "stock_id": "2382",
+   "name": "廣達",
+   "industry": "電子工業",
    "heavyweight": true,
    "weight_per": 0.0,
    "count": 4,
    "market_count": 0,
    "news": [
     {
-     "date": "2026-10-27 10:54:00",
-     "source": "MoneyDJ",
-     "title": "第一金旗下投信規模擴張，有助提高非銀獲利比- 新聞 - MoneyDJ",
-     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=f11b3850-3326-4784-876a-6510b6344f9d",
+     "date": "2026-10-29 16:45:07",
+     "source": "鉅亨(cnyes)",
+     "title": "廣達收購友達桃園廠房喊卡 AI伺服器產能不受影響 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6640622",
      "impact": "heavy",
-     "aid": "57e031a5017d"
-    },
-    {
-     "date": "2026-10-26 17:00:00",
-     "source": "經濟日報",
-     "title": "公股投信「四合一」拍板！第一金持股50.3%掌主導權 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5613/9831515",
-     "impact": "heavy",
-     "aid": "47a0e503c340"
-    },
-    {
-     "date": "2026-10-23 17:00:00",
-     "source": "經濟日報",
-     "title": "四大金控今四點半宣布投信整併！第一金握主導權 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5613/9831242",
-     "impact": "heavy",
-     "aid": "dd4d6cf54a6f"
-    },
-    {
-     "date": "2026-10-22 14:52:24",
-     "source": "UDN",
-     "title": "四大金控今下午4點半宣布投信整併！第一金握主導權 - UDN",
-     "link": "https://udn.com/news/story/7239/9831242",
-     "impact": "heavy",
-     "aid": "51213ebcffda"
-    }
-   ]
-  },
-  {
-   "stock_id": "3006",
-   "name": "晶豪科",
-   "industry": "半導體業",
-   "heavyweight": false,
-   "weight_per": 0.0,
-   "count": 4,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-10-29 02:04:53",
-     "source": "UDN",
-     "title": "南亞科、晶豪科 權證四檔亮 - UDN",
-     "link": "https://udn.com/news/amp/story/7255/9843171",
-     "impact": "stock",
-     "aid": "7dc615c48a28"
-    },
-    {
-     "date": "2026-10-28 10:22:00",
-     "source": "MoneyDJ",
-     "title": "報價助攻，晶豪科Q3獲利季增八成創高- 新聞 - MoneyDJ",
-     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=f2c9369a-8460-4550-8224-c10f1398eef1",
-     "impact": "stock",
-     "aid": "6972b402f76b"
-    },
-    {
-     "date": "2026-10-28 09:00:00",
-     "source": "經濟日報",
-     "title": "南亞科、晶豪科 四檔亮 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5739/9843171",
-     "impact": "stock",
-     "aid": "ef6e310144c8",
+     "aid": "330d18a00d3a",
      "related": [
-      "2408"
+      "2409"
      ]
     },
     {
-     "date": "2026-10-22 15:50:00",
-     "source": "FTNN新聞",
-     "title": "記憶體臉又綠了！「這指標廠」跌半根、南茂、力成挫逾6% 晶豪科跌4.88%、力積電Q3轉盈僅小漲0.3% - FTNN 新聞網",
-     "link": "https://www.ftnn.com.tw/news/589425",
-     "impact": "stock",
-     "aid": "418bc44f1f81",
+     "date": "2026-10-27 17:58:39",
+     "source": "自由時報系",
+     "title": "廣達、旺宏、勤誠 6月營收創新高 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/0ycpxh8d8npt",
+     "impact": "heavy",
+     "aid": "3c14a895ec97",
      "related": [
-      "6239",
-      "6770"
+      "2337"
      ]
-    }
-   ]
-  },
-  {
-   "stock_id": "1717",
-   "name": "長興",
-   "industry": "化學工業",
-   "heavyweight": false,
-   "weight_per": 0.0,
-   "count": 3,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-10-27 03:08:52",
-     "source": "自由時報系",
-     "title": "熱門股》帶量強彈 長興站回80元 - 自由時報",
-     "link": "https://stock.ltn.com.tw/article/gnpzduejyhp3",
-     "impact": "stock",
-     "aid": "6d7da5e26ef9"
     },
     {
-     "date": "2026-10-25 19:21:30",
-     "source": "自由時報系",
-     "title": "熱門股》爆量換手 長興噴出創28年新高 - 自由時報",
-     "link": "https://stock.ltn.com.tw/article/btaekehsugb2",
-     "impact": "stock",
-     "aid": "0375b5519d5d"
+     "date": "2026-10-21 22:00:14",
+     "source": "鉅亨(cnyes)",
+     "title": "輝達AI工廠拚14天上線，鴻海、廣達等台廠列合作夥伴 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6635334",
+     "impact": "heavy",
+     "aid": "5d2304a05b76"
     },
     {
-     "date": "2026-10-23 17:00:00",
-     "source": "經濟日報",
-     "title": "長興 MUF 封裝膠放量 長廣設備認列回溫 法人看好下半年 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5612/9660422",
-     "impact": "stock",
-     "aid": "1768f31381a1"
+     "date": "2026-10-21 20:40:52",
+     "source": "自由時報系",
+     "title": "輝達DSX POD明年全球部署 鴻海、廣達等六台廠入列 - 自由時報",
+     "link": "https://ec.ltn.com.tw/article/breakingnews/5614199",
+     "impact": "heavy",
+     "aid": "4df042f22ddd"
     }
    ]
   },
@@ -4276,40 +4418,41 @@
    ]
   },
   {
-   "stock_id": "2382",
-   "name": "廣達",
-   "industry": "電子工業",
+   "stock_id": "2881",
+   "name": "富邦金",
+   "industry": "金融保險",
    "heavyweight": true,
    "weight_per": 0.0,
    "count": 3,
-   "market_count": 0,
+   "market_count": 1,
    "news": [
     {
-     "date": "2026-10-27 17:58:39",
-     "source": "自由時報系",
-     "title": "廣達、旺宏、勤誠 6月營收創新高 - 自由時報",
-     "link": "https://stock.ltn.com.tw/article/0ycpxh8d8npt",
+     "date": "2026-10-29 14:58:00",
+     "source": "今周刊",
+     "title": "富邦金、國泰金、中信金…元大金躋身兆元金控股，謝金河點名這5檔市值全破兆：金融業最兵肥馬壯的時代 - 今周刊",
+     "link": "https://www.businesstoday.com.tw/article/category/183025/post/202610290018/",
      "impact": "heavy",
-     "aid": "3c14a895ec97",
+     "aid": "1015dc5273fb",
      "related": [
-      "2337"
+      "2882",
+      "2885"
      ]
     },
     {
-     "date": "2026-10-21 22:00:14",
-     "source": "鉅亨(cnyes)",
-     "title": "輝達AI工廠拚14天上線，鴻海、廣達等台廠列合作夥伴 - 鉅亨網",
-     "link": "https://news.cnyes.com/news/id/6635334",
-     "impact": "heavy",
-     "aid": "5d2304a05b76"
+     "date": "2026-10-27 15:08:01",
+     "source": "理財周刊",
+     "title": "台股27日開高走低收漲54點 富邦金量價突出上漲2.21% - 理財周刊",
+     "link": "https://www.moneyweekly.com.tw/ArticleData/Info/Article/258281",
+     "impact": "market",
+     "aid": "f6bed0ba5bc3"
     },
     {
-     "date": "2026-10-21 20:40:52",
-     "source": "自由時報系",
-     "title": "輝達DSX POD明年全球部署 鴻海、廣達等六台廠入列 - 自由時報",
-     "link": "https://ec.ltn.com.tw/article/breakingnews/5614199",
+     "date": "2026-10-22 17:14:00",
+     "source": "中央社",
+     "title": "富邦金控旗下子公司榮獲財訊金融獎7項大獎 - 中央社 CNA",
+     "link": "https://www.cna.com.tw/business/chinese/447867",
      "impact": "heavy",
-     "aid": "4df042f22ddd"
+     "aid": "65a34b57e2b6"
     }
    ]
   },
@@ -4562,6 +4705,33 @@
    ]
   },
   {
+   "stock_id": "1216",
+   "name": "統一",
+   "industry": "食品工業",
+   "heavyweight": true,
+   "weight_per": 0.0,
+   "count": 2,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-10-29 16:09:28",
+     "source": "鉅亨(cnyes)",
+     "title": "統一企業2026「愛‧Sharing」以奇幻布拉格爲主題11/20點燈 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6640582",
+     "impact": "heavy",
+     "aid": "1eff82f18f70"
+    },
+    {
+     "date": "2026-10-29 12:48:33",
+     "source": "經濟日報",
+     "title": "Purple Wish 聖誕樹璀璨登場！統一愛．Sharing 11月20日點亮北高 - 經濟日報",
+     "link": "https://money.udn.com/money/story/122328/9844452",
+     "impact": "heavy",
+     "aid": "36e949ce970d"
+    }
+   ]
+  },
+  {
    "stock_id": "1709",
    "name": "和益",
    "industry": "化學工業",
@@ -4643,29 +4813,60 @@
    ]
   },
   {
-   "stock_id": "2881",
-   "name": "富邦金",
+   "stock_id": "2885",
+   "name": "元大金",
    "industry": "金融保險",
    "heavyweight": true,
    "weight_per": 0.0,
    "count": 2,
-   "market_count": 1,
+   "market_count": 0,
    "news": [
     {
-     "date": "2026-10-27 15:08:01",
-     "source": "理財周刊",
-     "title": "台股27日開高走低收漲54點 富邦金量價突出上漲2.21% - 理財周刊",
-     "link": "https://www.moneyweekly.com.tw/ArticleData/Info/Article/258281",
-     "impact": "market",
-     "aid": "f6bed0ba5bc3"
+     "date": "2026-10-29 14:58:00",
+     "source": "今周刊",
+     "title": "富邦金、國泰金、中信金…元大金躋身兆元金控股，謝金河點名這5檔市值全破兆：金融業最兵肥馬壯的時代 - 今周刊",
+     "link": "https://www.businesstoday.com.tw/article/category/183025/post/202610290018/",
+     "impact": "heavy",
+     "aid": "1015dc5273fb",
+     "related": [
+      "2881",
+      "2882"
+     ]
     },
     {
-     "date": "2026-10-22 17:14:00",
-     "source": "中央社",
-     "title": "富邦金控旗下子公司榮獲財訊金融獎7項大獎 - 中央社 CNA",
-     "link": "https://www.cna.com.tw/business/chinese/447867",
+     "date": "2026-10-21 08:40:04",
+     "source": "UDN",
+     "title": "13大金控前3季獲利出爐！元大金超車中信金專家點名6檔明年配息翻倍| 股市要聞| 股市 - UDN",
+     "link": "https://udn.com/news/story/7251/9827599?from=udn-relatednews_ch2",
      "impact": "heavy",
-     "aid": "65a34b57e2b6"
+     "aid": "12a1ce4461ae"
+    }
+   ]
+  },
+  {
+   "stock_id": "3711",
+   "name": "日月光投控",
+   "industry": "半導體業",
+   "heavyweight": true,
+   "weight_per": 0.0,
+   "count": 2,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-10-29 15:30:11",
+     "source": "自由時報系",
+     "title": "日月光投控Q3獲利創19季新高 單季大賺逾半個股本 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/ysxbulermwzs",
+     "impact": "heavy",
+     "aid": "80939082fd0b"
+    },
+    {
+     "date": "2026-10-22 09:56:28",
+     "source": "理財周刊",
+     "title": "輝達霸氣預付357億包產能！點名欣興、京元電、日月光投控大擴產，CPO狂翻30倍 - 理財周刊",
+     "link": "https://www.moneyweekly.com.tw/ArticleData/Info/Article/257349",
+     "impact": "heavy",
+     "aid": "cbeee3eb3567"
     }
    ]
   },
@@ -4720,25 +4921,6 @@
      "link": "https://ec.ltn.com.tw/article/breakingnews/5619834",
      "impact": "stock",
      "aid": "92f4dffcdd75"
-    }
-   ]
-  },
-  {
-   "stock_id": "1216",
-   "name": "統一",
-   "industry": "食品工業",
-   "heavyweight": true,
-   "weight_per": 0.0,
-   "count": 1,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-10-29 12:48:33",
-     "source": "經濟日報",
-     "title": "Purple Wish 聖誕樹璀璨登場！統一愛．Sharing 11月20日點亮北高 - 經濟日報",
-     "link": "https://money.udn.com/money/story/122328/9844452",
-     "impact": "heavy",
-     "aid": "36e949ce970d"
     }
    ]
   },
@@ -4955,25 +5137,6 @@
    ]
   },
   {
-   "stock_id": "2885",
-   "name": "元大金",
-   "industry": "金融保險",
-   "heavyweight": true,
-   "weight_per": 0.0,
-   "count": 1,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-10-21 08:40:04",
-     "source": "UDN",
-     "title": "13大金控前3季獲利出爐！元大金超車中信金專家點名6檔明年配息翻倍| 股市要聞| 股市 - UDN",
-     "link": "https://udn.com/news/story/7251/9827599?from=udn-relatednews_ch2",
-     "impact": "heavy",
-     "aid": "12a1ce4461ae"
-    }
-   ]
-  },
-  {
    "stock_id": "3042",
    "name": "晶技",
    "industry": "電子工業",
@@ -5008,25 +5171,6 @@
      "link": "https://stock.ltn.com.tw/article/e41wmfmzwmmq",
      "impact": "heavy",
      "aid": "04ac38c4ac59"
-    }
-   ]
-  },
-  {
-   "stock_id": "3711",
-   "name": "日月光投控",
-   "industry": "半導體業",
-   "heavyweight": true,
-   "weight_per": 0.0,
-   "count": 1,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-10-22 09:56:28",
-     "source": "理財周刊",
-     "title": "輝達霸氣預付357億包產能！點名欣興、京元電、日月光投控大擴產，CPO狂翻30倍 - 理財周刊",
-     "link": "https://www.moneyweekly.com.tw/ArticleData/Info/Article/257349",
-     "impact": "heavy",
-     "aid": "cbeee3eb3567"
     }
    ]
   },
@@ -5160,6 +5304,25 @@
      "link": "https://news.cnyes.com/news/id/6637127",
      "impact": "stock",
      "aid": "b6c037b14ebd"
+    }
+   ]
+  },
+  {
+   "stock_id": "8454",
+   "name": "富邦媒",
+   "industry": "貿易百貨",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-10-29 15:09:00",
+     "source": "MoneyDJ",
+     "title": "富邦媒力拼今年營收獲利創高，雙11雙位數成長- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=9baeb8a1-c6e4-4aac-a027-b514f9a6a56c",
+     "impact": "stock",
+     "aid": "d4c7e6c356c1"
     }
    ]
   },
