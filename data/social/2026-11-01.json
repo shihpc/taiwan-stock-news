@@ -1,0 +1,846 @@
+{
+ "schema": 1,
+ "date": "2026-11-01",
+ "generated_at": "2026-11-01T23:22:17+08:00",
+ "source": "ptt-stock",
+ "robots": "allow",
+ "robots_crawl_delay": null,
+ "robots_detail": {
+  "status": 200,
+  "err": null,
+  "final_url": "https://www.ptt.cc/robots.txt",
+  "attempts": 1
+ },
+ "fetch_errors": [],
+ "pages_fetched": 3,
+ "articles_n": 21,
+ "articles_fetched_n": 21,
+ "failed_n": 0,
+ "requests_n": 25,
+ "elapsed_s": 126.7,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": "batch",
+  "skipped": null,
+  "classified_n": 17,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 15314,
+   "output_tokens": 599
+  }
+ },
+ "stocks": {
+  "0050": {
+   "name": "元大台灣50",
+   "n": 4,
+   "push": 281,
+   "boo": 36,
+   "pos": 1,
+   "neg": 0,
+   "neu": 3,
+   "unk": 0
+  },
+  "2330": {
+   "name": "台積電",
+   "n": 2,
+   "push": 80,
+   "boo": 18,
+   "pos": 1,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2516": {
+   "name": "新建",
+   "n": 2,
+   "push": 57,
+   "boo": 14,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "2526": {
+   "name": "大陸",
+   "n": 2,
+   "push": 103,
+   "boo": 27,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "TAIEX": {
+   "name": "加權指數",
+   "n": 2,
+   "push": 54,
+   "boo": 13,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "00403A": {
+   "name": "主動統一升級50",
+   "n": 1,
+   "push": 29,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "00406A": {
+   "name": "主動中信台灣收益",
+   "n": 1,
+   "push": 29,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "0056": {
+   "name": "元大高股息",
+   "n": 1,
+   "push": 29,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1102": {
+   "name": "亞泥",
+   "n": 1,
+   "push": 25,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1210": {
+   "name": "大成",
+   "n": 1,
+   "push": 36,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1216": {
+   "name": "統一",
+   "n": 1,
+   "push": 25,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1218": {
+   "name": "泰山",
+   "n": 1,
+   "push": 36,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1219": {
+   "name": "福壽",
+   "n": 1,
+   "push": 36,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1232": {
+   "name": "大統益",
+   "n": 1,
+   "push": 36,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1434": {
+   "name": "福懋",
+   "n": 1,
+   "push": 36,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1476": {
+   "name": "儒鴻",
+   "n": 1,
+   "push": 25,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1477": {
+   "name": "聚陽",
+   "n": 1,
+   "push": 25,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1536": {
+   "name": "和大",
+   "n": 1,
+   "push": 36,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1589": {
+   "name": "永冠-KY",
+   "n": 1,
+   "push": 73,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2231": {
+   "name": "為升",
+   "n": 1,
+   "push": 52,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2303": {
+   "name": "聯電",
+   "n": 1,
+   "push": 88,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2327": {
+   "name": "國巨*",
+   "n": 1,
+   "push": 88,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2408": {
+   "name": "南亞科",
+   "n": 1,
+   "push": 8,
+   "boo": 2,
+   "pos": 0,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  },
+  "2542": {
+   "name": "興富發",
+   "n": 1,
+   "push": 25,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2827": {
+   "name": "中聯",
+   "n": 1,
+   "push": 36,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2912": {
+   "name": "統一超",
+   "n": 1,
+   "push": 25,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3035": {
+   "name": "智原",
+   "n": 1,
+   "push": 88,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3038": {
+   "name": "全台",
+   "n": 1,
+   "push": 88,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3162": {
+   "name": "精確",
+   "n": 1,
+   "push": 172,
+   "boo": 26,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3163": {
+   "name": "波若威",
+   "n": 1,
+   "push": 8,
+   "boo": 2,
+   "pos": 0,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  },
+  "3374": {
+   "name": "精材",
+   "n": 1,
+   "push": 88,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3531": {
+   "name": "先益",
+   "n": 1,
+   "push": 73,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "4556": {
+   "name": "旭然",
+   "n": 1,
+   "push": 29,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "4716": {
+   "name": "大立",
+   "n": 1,
+   "push": 66,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "4906": {
+   "name": "正文",
+   "n": 1,
+   "push": 81,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6486": {
+   "name": "互動",
+   "n": 1,
+   "push": 28,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6488": {
+   "name": "環球晶",
+   "n": 1,
+   "push": 88,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6550": {
+   "name": "北極星藥業-KY",
+   "n": 1,
+   "push": 5,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6757": {
+   "name": "台灣虎航-創",
+   "n": 1,
+   "push": 42,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8093": {
+   "name": "保銳",
+   "n": 1,
+   "push": 29,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8112": {
+   "name": "至上",
+   "n": 1,
+   "push": 29,
+   "boo": 2,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "9904": {
+   "name": "寶成",
+   "n": 1,
+   "push": 25,
+   "boo": 11,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1793463166.A.F1E",
+   "title": "Re: [新聞] OpenAI奧特曼：個人電腦上裝記憶體太浪費",
+   "author": "hayuyang (鳳山蠹)",
+   "ts": "2026-11-01 00:12",
+   "push": 36,
+   "boo": 5,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793463166.A.F1E.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1793486622.A.5A8",
+   "title": "Re: [新聞] OpenAI奧特曼：個人電腦上裝記憶體太浪費",
+   "author": "zzahoward (Cheshire Cat)",
+   "ts": "2026-11-01 06:43",
+   "push": 25,
+   "boo": 3,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793486622.A.5A8.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1793499151.A.EAD",
+   "title": "[新聞] 大陸製造業再陷收縮！10月PMI降至49.3 生",
+   "author": "Su22 (裝配匠)",
+   "ts": "2026-11-01 10:12",
+   "push": 25,
+   "boo": 5,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793499151.A.EAD.html",
+   "codes": [
+    "2526"
+   ],
+   "sent": {
+    "2526": "neu"
+   }
+  },
+  {
+   "aid": "M.1793503283.A.55B",
+   "title": "[請益] 不升息, 台幣繼續貶= 外資一直提款？",
+   "author": "PeterPan9129 (彼得意的一天葵花油)",
+   "ts": "2026-11-01 11:21",
+   "push": 79,
+   "boo": 21,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793503283.A.55B.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1793505005.A.9F3",
+   "title": "Re: [請益] 大盤正2是投資還是投機",
+   "author": "ccmaple (CCC)",
+   "ts": "2026-11-01 11:50",
+   "push": 91,
+   "boo": 15,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793505005.A.9F3.html",
+   "codes": [
+    "0050"
+   ],
+   "sent": {
+    "0050": "pos"
+   }
+  },
+  {
+   "aid": "M.1793505861.A.4B2",
+   "title": "Re: [新聞] OpenAI奧特曼：個人電腦上裝記憶體太浪費",
+   "author": "YAYA6655 (YAYA)",
+   "ts": "2026-11-01 12:04",
+   "push": 10,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793505861.A.4B2.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1793509356.A.318",
+   "title": "[新聞] 「股神」巴菲特 50 年沒喝過白開水！每天",
+   "author": "Su22 (裝配匠)",
+   "ts": "2026-11-01 13:02",
+   "push": 78,
+   "boo": 22,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793509356.A.318.html",
+   "codes": [
+    "2526"
+   ],
+   "sent": {
+    "2526": "neu"
+   }
+  },
+  {
+   "aid": "M.1793509849.A.CB5",
+   "title": "[新聞] 買不到桶裝油 炸物店臨時停售薯條 食品行",
+   "author": "ChanHoPark (公園先生)",
+   "ts": "2026-11-01 13:10",
+   "push": 36,
+   "boo": 9,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793509849.A.CB5.html",
+   "codes": [
+    "1210",
+    "1434",
+    "1219",
+    "1218",
+    "2827",
+    "1232",
+    "1536"
+   ],
+   "sent": {
+    "1210": "neu",
+    "1434": "neu",
+    "1219": "neu",
+    "1218": "neu",
+    "2827": "neu",
+    "1232": "neu",
+    "1536": "neu"
+   }
+  },
+  {
+   "aid": "M.1793510684.A.E36",
+   "title": "Re: [新聞] 財報〉英特爾財測疲弱暴跌20% 歸咎PC市場",
+   "author": "asahi98 (あさひ)",
+   "ts": "2026-11-01 13:24",
+   "push": 28,
+   "boo": 7,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793510684.A.E36.html",
+   "codes": [
+    "2330"
+   ],
+   "sent": {
+    "2330": "pos"
+   }
+  },
+  {
+   "aid": "M.1793511075.A.DF2",
+   "title": "Re: [請益] 不升息, 台幣繼續貶= 外資一直提款？",
+   "author": "konica42 (拉麵)",
+   "ts": "2026-11-01 13:31",
+   "push": 52,
+   "boo": 11,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793511075.A.DF2.html",
+   "codes": [
+    "2231",
+    "2516",
+    "2330"
+   ],
+   "sent": {
+    "2231": "neu",
+    "2516": "neu",
+    "2330": "neu"
+   }
+  },
+  {
+   "aid": "M.1793513511.A.4E1",
+   "title": "[新聞] 市場不在乎期中選舉？歷史數據顯示：不",
+   "author": "IzumiKonata ( )",
+   "ts": "2026-11-01 14:11",
+   "push": 66,
+   "boo": 12,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793513511.A.4E1.html",
+   "codes": [
+    "4716"
+   ],
+   "sent": {
+    "4716": "neu"
+   }
+  },
+  {
+   "aid": "M.1793517020.A.EC9",
+   "title": "[新聞] 郭哲榮：再跌破4萬點砸幾千萬買0050　 點",
+   "author": "diefishfish ()",
+   "ts": "2026-11-01 15:10",
+   "push": 88,
+   "boo": 16,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793517020.A.EC9.html",
+   "codes": [
+    "0050",
+    "3374",
+    "2303",
+    "3035",
+    "2327",
+    "6488",
+    "3038"
+   ],
+   "sent": {
+    "0050": "neu",
+    "3374": "neu",
+    "2303": "neu",
+    "3035": "neu",
+    "2327": "neu",
+    "6488": "neu",
+    "3038": "neu"
+   }
+  },
+  {
+   "aid": "M.1793517475.A.463",
+   "title": "[情報] [情報] Deepseek 提出 Super-agent: 邁",
+   "author": "vic750314 (Nick)",
+   "ts": "2026-11-01 15:17",
+   "push": 28,
+   "boo": 1,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793517475.A.463.html",
+   "codes": [
+    "6486"
+   ],
+   "sent": {
+    "6486": "neu"
+   }
+  },
+  {
+   "aid": "M.1793519773.A.2D0",
+   "title": "[新聞]資產規模遭00406A超車！00403A再破發「8千",
+   "author": "linhu8883324 (江流曲似九迴腸)",
+   "ts": "2026-11-01 15:56",
+   "push": 29,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793519773.A.2D0.html",
+   "codes": [
+    "TAIEX",
+    "00403A",
+    "8093",
+    "8112",
+    "00406A",
+    "0050",
+    "4556",
+    "0056"
+   ],
+   "sent": {
+    "TAIEX": "neu",
+    "00403A": "neu",
+    "8093": "neu",
+    "8112": "neu",
+    "00406A": "neu",
+    "0050": "neu",
+    "4556": "neu",
+    "0056": "neu"
+   }
+  },
+  {
+   "aid": "M.1793523983.A.2B6",
+   "title": "Re: [請益] 大盤正2是投資還是投機",
+   "author": "tompi (大波動)",
+   "ts": "2026-11-01 17:06",
+   "push": 73,
+   "boo": 3,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793523983.A.2B6.html",
+   "codes": [
+    "0050",
+    "1589",
+    "3531"
+   ],
+   "sent": {
+    "0050": "neu",
+    "1589": "neu",
+    "3531": "neu"
+   }
+  },
+  {
+   "aid": "M.1793527457.A.637",
+   "title": "[新聞] AI融資、財報與政治風險三重夾擊，市場開",
+   "author": "a0808996 (dammmmm)",
+   "ts": "2026-11-01 18:04",
+   "push": 5,
+   "boo": 3,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793527457.A.637.html",
+   "codes": [
+    "6550",
+    "2516"
+   ],
+   "sent": {
+    "6550": "neu",
+    "2516": "neu"
+   }
+  },
+  {
+   "aid": "M.1793528099.A.F46",
+   "title": "[新聞] 金管會出手了！防堵「四貸同堂」",
+   "author": "atliberty (正東十三海浬~~)",
+   "ts": "2026-11-01 18:14",
+   "push": 172,
+   "boo": 26,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793528099.A.F46.html",
+   "codes": [
+    "3162"
+   ],
+   "sent": {
+    "3162": "neu"
+   }
+  },
+  {
+   "aid": "M.1793529966.A.7D2",
+   "title": "[新聞] 美股重挫台股週一剉咧等？陳重銘揭「15檔",
+   "author": "nisi0773 (深知身在情常在)",
+   "ts": "2026-11-01 18:46",
+   "push": 25,
+   "boo": 11,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793529966.A.7D2.html",
+   "codes": [
+    "TAIEX",
+    "1216",
+    "2912",
+    "2542",
+    "1476",
+    "1477",
+    "9904",
+    "1102"
+   ],
+   "sent": {
+    "TAIEX": "neu",
+    "1216": "neu",
+    "2912": "neu",
+    "2542": "neu",
+    "1476": "neu",
+    "1477": "neu",
+    "9904": "neu",
+    "1102": "neu"
+   }
+  },
+  {
+   "aid": "M.1793531024.A.B01",
+   "title": "[標的] 台股大盤世界第一強後續會補跌還續漲？",
+   "author": "inyo (@_@)",
+   "ts": "2026-11-01 19:03",
+   "push": 81,
+   "boo": 3,
+   "cat": "標的",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793531024.A.B01.html",
+   "codes": [
+    "4906"
+   ],
+   "sent": {
+    "4906": "neu"
+   }
+  },
+  {
+   "aid": "M.1793531924.A.435",
+   "title": "[創作] 停損單 《洋蔥》",
+   "author": "bluefancy (吃香蕉(ﾉ>ω<)ﾉ)",
+   "ts": "2026-11-01 19:18",
+   "push": 8,
+   "boo": 2,
+   "cat": "創作",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793531924.A.435.html",
+   "codes": [
+    "3163",
+    "2408"
+   ],
+   "sent": {
+    "3163": "neg",
+    "2408": "neg"
+   }
+  },
+  {
+   "aid": "M.1793532095.A.91C",
+   "title": "[新聞] 獲利創同期新高！台灣虎航前三季賺進逾半",
+   "author": "asahi98 (あさひ)",
+   "ts": "2026-11-01 19:21",
+   "push": 42,
+   "boo": 3,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1793532095.A.91C.html",
+   "codes": [
+    "6757"
+   ],
+   "sent": {
+    "6757": "neu"
+   }
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": 35,
+  "due": false
+ }
+}
