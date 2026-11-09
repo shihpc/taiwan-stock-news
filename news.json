@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-09T10:09:12+08:00",
+ "generated_at": "2026-11-09T11:09:12+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-11-03",
@@ -9,11 +9,11 @@
   "2026-11-09"
  ],
  "pool_size": 150,
- "stocks_with_news": 80,
- "total_news": 351,
+ "stocks_with_news": 81,
+ "total_news": 357,
  "stats": {
-  "n_raw": 351,
-  "n_unique_articles": 347
+  "n_raw": 357,
+  "n_unique_articles": 353
  },
  "coverage": {
   "dates": [
@@ -480,9 +480,17 @@
    "industry": "通信網路業",
    "heavyweight": false,
    "weight_per": 0.4739,
-   "count": 2,
-   "market_count": 0,
+   "count": 3,
+   "market_count": 1,
    "news": [
+    {
+     "date": "2026-11-09 09:14:00",
+     "source": "FTNN新聞",
+     "title": "前三季稅後純益飆3.21億元！台股衝高4萬點聯亞、波若威亮漲停「這AI大廠」擬買回8000張藏股也噴出 - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/594085",
+     "impact": "market",
+     "aid": "dedf19ed1ed2"
+    },
     {
      "date": "2026-11-06 16:50:00",
      "source": "FTNN新聞",
@@ -716,9 +724,17 @@
    "industry": "塑膠工業",
    "heavyweight": true,
    "weight_per": 0.0,
-   "count": 22,
+   "count": 23,
    "market_count": 2,
    "news": [
+    {
+     "date": "2026-11-09 09:20:00",
+     "source": "FTNN新聞",
+     "title": "AI禁令VS國際油價跌破100美元！台塑四寶標的大洗牌「市場最看好這1寶黑馬」：Q3 EPS衝上4.9元 - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/594070",
+     "impact": "heavy",
+     "aid": "cffdf86c2ee6"
+    },
     {
      "date": "2026-11-09 05:11:13",
      "source": "鉅亨(cnyes)",
@@ -903,9 +919,17 @@
    "industry": "半導體業",
    "heavyweight": false,
    "weight_per": 0.0,
-   "count": 18,
-   "market_count": 2,
+   "count": 19,
+   "market_count": 3,
    "news": [
+    {
+     "date": "2026-11-09 09:35:00",
+     "source": "FTNN新聞",
+     "title": "國安基金發威！台股狂飆千點「這記憶體」1分鐘衝漲停最狂 華邦電、南亞科、旺宏齊噴半根 - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/594089",
+     "impact": "market",
+     "aid": "28a5fd0c28e3"
+    },
     {
      "date": "2026-11-08 23:10:00",
      "source": "FTNN新聞",
@@ -2813,6 +2837,57 @@
    ]
   },
   {
+   "stock_id": "3605",
+   "name": "宏致",
+   "industry": "電子零組件業",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 5,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-09 10:10:00",
+     "source": "MoneyDJ",
+     "title": "宏致Q3獲利略低預期，Q4不淡明年續看佳 - 科技脈動 - 新聞 - MoneyDJ",
+     "link": "https://m.moneydj.com/f1a.aspx?a=4a435c3a-3d08-4b91-959e-a60c3d6db1c2&c=MB070100",
+     "impact": "stock",
+     "aid": "154f2b5293e2"
+    },
+    {
+     "date": "2026-11-07 17:02:26",
+     "source": "鉅亨(cnyes)",
+     "title": "宏致前三季EPS 3.31元 看好AI營收逐季增擬斥14億元購地擴產 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6652063",
+     "impact": "stock",
+     "aid": "48903d93814c"
+    },
+    {
+     "date": "2026-11-06 21:14:44",
+     "source": "鉅亨(cnyes)",
+     "title": "宏致斥2.6億元收購捷盛跨入PCBA代工 強化AI、網通及工業應用布局 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6651518",
+     "impact": "stock",
+     "aid": "d72313f3c280"
+    },
+    {
+     "date": "2026-11-06 17:39:33",
+     "source": "自由時報系",
+     "title": "AI伺服器需求強勁 宏致Q3營業利益年增84％ - 自由財經",
+     "link": "https://ec.ltn.com.tw/article/breakingnews/5631961",
+     "impact": "stock",
+     "aid": "8c66b3d56b64"
+    },
+    {
+     "date": "2026-11-06 17:35:00",
+     "source": "MoneyDJ",
+     "title": "宏致Q3 EPS 1.42元；再購地與收購捷盛100%股權 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=136b1cf6-b4c7-465e-b1b3-7fa507286842",
+     "impact": "stock",
+     "aid": "8ce56fcd5dab"
+    }
+   ]
+  },
+  {
    "stock_id": "6239",
    "name": "力成",
    "industry": "半導體業",
@@ -3044,45 +3119,45 @@
    ]
   },
   {
-   "stock_id": "3605",
-   "name": "宏致",
-   "industry": "電子零組件業",
+   "stock_id": "4915",
+   "name": "致伸",
+   "industry": "電子工業",
    "heavyweight": false,
    "weight_per": 0.0,
    "count": 4,
    "market_count": 0,
    "news": [
     {
-     "date": "2026-11-07 17:02:26",
+     "date": "2026-11-09 09:30:03",
      "source": "鉅亨(cnyes)",
-     "title": "宏致前三季EPS 3.31元 看好AI營收逐季增擬斥14億元購地擴產 - 鉅亨網",
-     "link": "https://news.cnyes.com/news/id/6652063",
+     "title": "致伸(4915)第三季毛利率降至13.4%！AIoT、機器人接棒，2027年才是成長關鍵 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6652753",
      "impact": "stock",
-     "aid": "48903d93814c"
+     "aid": "59779887b125"
     },
     {
-     "date": "2026-11-06 21:14:44",
+     "date": "2026-11-06 17:27:24",
+     "source": "TechNews 科技新報",
+     "title": "致伸10月營收61.48 億元 - TechNews 科技新報",
+     "link": "https://finance.technews.tw/2026/11/06/primax-4915-202610-financial-report/",
+     "impact": "stock",
+     "aid": "401b628aae5b"
+    },
+    {
+     "date": "2026-11-05 17:21:57",
      "source": "鉅亨(cnyes)",
-     "title": "宏致斥2.6億元收購捷盛跨入PCBA代工 強化AI、網通及工業應用布局 - 鉅亨網",
-     "link": "https://news.cnyes.com/news/id/6651518",
+     "title": "〈致伸法說〉Q3賺3.9億元季年雙減EPS 0.83元 PC市場疲軟及零組件飆漲壓抑獲利 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6648111",
      "impact": "stock",
-     "aid": "d72313f3c280"
+     "aid": "995b2ce9f5e1"
     },
     {
-     "date": "2026-11-06 17:39:33",
-     "source": "自由時報系",
-     "title": "AI伺服器需求強勁 宏致Q3營業利益年增84％ - 自由財經",
-     "link": "https://ec.ltn.com.tw/article/breakingnews/5631961",
-     "impact": "stock",
-     "aid": "8c66b3d56b64"
-    },
-    {
-     "date": "2026-11-06 17:35:00",
+     "date": "2026-11-05 17:13:00",
      "source": "MoneyDJ",
-     "title": "宏致Q3 EPS 1.42元；再購地與收購捷盛100%股權 - MoneyDJ",
-     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=136b1cf6-b4c7-465e-b1b3-7fa507286842",
+     "title": "致伸Q3獲利承壓，聚焦毛利修復與AI感測融合布局- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=6695ff30-e2e4-4fc2-a2d0-75bfd8417d6a",
      "impact": "stock",
-     "aid": "8ce56fcd5dab"
+     "aid": "ea1ebdfa8150"
     }
    ]
   },
@@ -3188,41 +3263,6 @@
      "link": "https://udn.com/news/story/7255/9852732",
      "impact": "stock",
      "aid": "289fc27caf46"
-    }
-   ]
-  },
-  {
-   "stock_id": "4915",
-   "name": "致伸",
-   "industry": "電子工業",
-   "heavyweight": false,
-   "weight_per": 0.0,
-   "count": 3,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-11-06 17:27:24",
-     "source": "TechNews 科技新報",
-     "title": "致伸10月營收61.48 億元 - TechNews 科技新報",
-     "link": "https://finance.technews.tw/2026/11/06/primax-4915-202610-financial-report/",
-     "impact": "stock",
-     "aid": "401b628aae5b"
-    },
-    {
-     "date": "2026-11-05 17:21:57",
-     "source": "鉅亨(cnyes)",
-     "title": "〈致伸法說〉Q3賺3.9億元季年雙減EPS 0.83元 PC市場疲軟及零組件飆漲壓抑獲利 - 鉅亨網",
-     "link": "https://news.cnyes.com/news/id/6648111",
-     "impact": "stock",
-     "aid": "995b2ce9f5e1"
-    },
-    {
-     "date": "2026-11-05 17:13:00",
-     "source": "MoneyDJ",
-     "title": "致伸Q3獲利承壓，聚焦毛利修復與AI感測融合布局- 新聞 - MoneyDJ",
-     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=6695ff30-e2e4-4fc2-a2d0-75bfd8417d6a",
-     "impact": "stock",
-     "aid": "ea1ebdfa8150"
     }
    ]
   },
@@ -3734,6 +3774,25 @@
      "link": "https://news.cnyes.com/news/id/6648755",
      "impact": "stock",
      "aid": "6034a924eb31"
+    }
+   ]
+  },
+  {
+   "stock_id": "3703",
+   "name": "欣陸",
+   "industry": "建材營造",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-09 10:23:04",
+     "source": "自由時報系",
+     "title": "焦點股》欣陸投控：財報佳又低價 強攻漲停 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/rxcye0whfb4v",
+     "impact": "stock",
+     "aid": "f74c632d1c51"
     }
    ]
   },
