@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-10T18:09:16+08:00",
+ "generated_at": "2026-11-10T19:09:13+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-11-04",
@@ -9,11 +9,11 @@
   "2026-11-10"
  ],
  "pool_size": 150,
- "stocks_with_news": 95,
- "total_news": 445,
+ "stocks_with_news": 96,
+ "total_news": 456,
  "stats": {
-  "n_raw": 445,
-  "n_unique_articles": 426
+  "n_raw": 456,
+  "n_unique_articles": 436
  },
  "coverage": {
   "dates": [
@@ -1180,9 +1180,17 @@
    "industry": "通信網路業",
    "heavyweight": true,
    "weight_per": 0.8408,
-   "count": 12,
+   "count": 13,
    "market_count": 2,
    "news": [
+    {
+     "date": "2026-11-10 18:12:15",
+     "source": "經濟日報",
+     "title": "中華電信10月營收、獲利創同期新高 單月 EPS 0.46元 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5710/9869907",
+     "impact": "heavy",
+     "aid": "f5774acb1bef"
+    },
     {
      "date": "2026-11-10 16:55:00",
      "source": "工商時報",
@@ -1287,9 +1295,20 @@
    "industry": "通信網路業",
    "heavyweight": false,
    "weight_per": 0.8347,
-   "count": 1,
+   "count": 2,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-11-10 18:15:00",
+     "source": "FTNN新聞",
+     "title": "低軌衛星升空！「這檔」累計EPS攻73元同昇達科、金像電等5檔漲停 穩懋、台光電衝破7% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/594561",
+     "impact": "stock",
+     "aid": "1a1eff7257ac",
+     "related": [
+      "2368"
+     ]
+    },
     {
      "date": "2026-11-06 05:41:00",
      "source": "鏡週刊/鏡報系",
@@ -1794,14 +1813,60 @@
    ]
   },
   {
+   "stock_id": "6290",
+   "name": "良維",
+   "industry": "電子零組件業",
+   "heavyweight": false,
+   "weight_per": 0.3706,
+   "count": 2,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-10 18:14:25",
+     "source": "TechNews 科技新報",
+     "title": "良維10月營收9.36 億元 - TechNews 科技新報",
+     "link": "https://finance.technews.tw/2026/11/10/longwell-6290-202610-financial-report/",
+     "impact": "stock",
+     "aid": "16a29902a52b"
+    },
+    {
+     "date": "2026-11-10 18:13:44",
+     "source": "UDN",
+     "title": "良維財報／第3季獲利6.74億元、創單季新高 前三季與去年全年相當 - UDN",
+     "link": "https://udn.com/news/story/7252/9869921",
+     "impact": "stock",
+     "aid": "1c6551569f77"
+    }
+   ]
+  },
+  {
    "stock_id": "2368",
    "name": "金像電",
    "industry": "電子工業",
    "heavyweight": false,
    "weight_per": 0.3613,
-   "count": 6,
+   "count": 8,
    "market_count": 1,
    "news": [
+    {
+     "date": "2026-11-10 18:15:00",
+     "source": "FTNN新聞",
+     "title": "低軌衛星升空！「這檔」累計EPS攻73元同昇達科、金像電等5檔漲停 穩懋、台光電衝破7% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/594561",
+     "impact": "stock",
+     "aid": "1a1eff7257ac",
+     "related": [
+      "3491"
+     ]
+    },
+    {
+     "date": "2026-11-10 17:43:06",
+     "source": "鉅亨(cnyes)",
+     "title": "PCB廠金像電1-3季每股純益28.41元居全製程之冠 健鼎居次 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6655952",
+     "impact": "stock",
+     "aid": "1196a7b87b66"
+    },
     {
      "date": "2026-11-09 16:55:00",
      "source": "FTNN新聞",
@@ -2417,9 +2482,17 @@
    "industry": "航運業",
    "heavyweight": false,
    "weight_per": 0.1562,
-   "count": 3,
+   "count": 4,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-11-10 17:46:56",
+     "source": "UDN",
+     "title": "長榮航營收／10月創單月歷史次高 - UDN",
+     "link": "https://udn.com/news/story/7252/9869850",
+     "impact": "stock",
+     "aid": "ea08d447fd54"
+    },
     {
      "date": "2026-11-06 08:00:00",
      "source": "FTNN新聞",
@@ -2498,9 +2571,17 @@
    "industry": "電子工業",
    "heavyweight": false,
    "weight_per": 0.1446,
-   "count": 12,
+   "count": 13,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-11-10 17:31:26",
+     "source": "鉅亨(cnyes)",
+     "title": "〈英業達法說〉AI需求沒有改變 明年GPU及ASIC營收及出貨量皆高雙位數年增 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6655945",
+     "impact": "stock",
+     "aid": "a2d593fc4cbe"
+    },
     {
      "date": "2026-11-10 15:48:00",
      "source": "MoneyDJ",
@@ -3581,16 +3662,24 @@
    "industry": "紡織纖維",
    "heavyweight": false,
    "weight_per": 0.0596,
-   "count": 9,
+   "count": 10,
    "market_count": 2,
    "news": [
     {
-     "date": "2026-11-10 15:49:03",
-     "source": "UDN",
-     "title": "儒鴻法說會／明年資本支出上看12億元 印尼三期擴產啟動布局 - UDN",
-     "link": "https://udn.com/news/story/7252/9869511",
+     "date": "2026-11-10 17:59:00",
+     "source": "工商時報",
+     "title": "訂單能見度高達6個月！儒鴻：看好第四季營運全年拚創新高- 產業 - 工商時報",
+     "link": "https://www.ctee.com.tw/news/20261110701853-430503",
      "impact": "stock",
-     "aid": "10cff7841827"
+     "aid": "ac2ccb970fa5"
+    },
+    {
+     "date": "2026-11-10 15:49:04",
+     "source": "經濟日報",
+     "title": "儒鴻法說會／明年資本支出上看12億元！印尼三期擴產啟動布局 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5612/9869511",
+     "impact": "stock",
+     "aid": "aa14040e7b40"
     },
     {
      "date": "2026-11-10 03:00:00",
@@ -4235,9 +4324,17 @@
    "industry": "電子工業",
    "heavyweight": false,
    "weight_per": 0.0291,
-   "count": 1,
+   "count": 2,
    "market_count": 0,
    "news": [
+    {
+     "date": "2026-11-10 18:05:00",
+     "source": "ETtoday",
+     "title": "光通訊飆股全新「抓去關」唯一上榜　騰輝電子-KY列潛在名單 - ETtoday財經雲",
+     "link": "https://finance.ettoday.net/news/3269781",
+     "impact": "stock",
+     "aid": "707b6bf8fb76"
+    },
     {
      "date": "2026-11-04 05:30:00",
      "source": "自由時報系",
@@ -4426,9 +4523,17 @@
    "industry": "半導體業",
    "heavyweight": false,
    "weight_per": 0.025,
-   "count": 4,
+   "count": 5,
    "market_count": 1,
    "news": [
+    {
+     "date": "2026-11-10 18:45:00",
+     "source": "FTNN新聞",
+     "title": "矽晶圓滿面紅光！3檔指標股齊收紅「環球晶大漲8.7%」 嘉晶跳空漲停鎖死、「這檔」卻反重挫9% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/594568",
+     "impact": "stock",
+     "aid": "06735caabc45"
+    },
     {
      "date": "2026-11-10 16:28:31",
      "source": "TechNews 科技新報",
