@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-16T06:08:45+08:00",
+ "generated_at": "2026-11-16T07:08:39+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-11-10",
@@ -10,10 +10,10 @@
  ],
  "pool_size": 150,
  "stocks_with_news": 81,
- "total_news": 383,
+ "total_news": 385,
  "stats": {
-  "n_raw": 383,
-  "n_unique_articles": 363
+  "n_raw": 385,
+  "n_unique_articles": 365
  },
  "coverage": {
   "dates": [
@@ -1553,9 +1553,17 @@
    "industry": "光電業",
    "heavyweight": false,
    "weight_per": 0.0,
-   "count": 17,
-   "market_count": 1,
+   "count": 18,
+   "market_count": 2,
    "news": [
+    {
+     "date": "2026-11-16 05:12:48",
+     "source": "鉅亨(cnyes)",
+     "title": "〈台股盤前要聞〉群創Q3每股賺0.96元連5季獲利、公股4金2銀前10月賺1440億元皆超越去年 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6663078",
+     "impact": "market",
+     "aid": "a1ae1e91c1e9"
+    },
     {
      "date": "2026-11-14 05:30:00",
      "source": "自由時報系",
@@ -3783,6 +3791,33 @@
    ]
   },
   {
+   "stock_id": "2881",
+   "name": "富邦金",
+   "industry": "金融保險",
+   "heavyweight": true,
+   "weight_per": 0.0,
+   "count": 2,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-16 05:30:00",
+     "source": "自由時報系",
+     "title": "〈財經週報-財經焦點〉逾40年企業實踐獲肯定 富邦金董事長蔡明興獲頒臺大名譽博士 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/kt1hxdntck4d",
+     "impact": "heavy",
+     "aid": "06638a793d7e"
+    },
+    {
+     "date": "2026-11-13 15:13:36",
+     "source": "中央社",
+     "title": "富邦金控、富邦育樂連5屆獲「運動企業認證」 - 中央社 CNA",
+     "link": "https://www.cna.com.tw/business/chinese/449925",
+     "impact": "heavy",
+     "aid": "15e326c285ff"
+    }
+   ]
+  },
+  {
    "stock_id": "3029",
    "name": "零壹",
    "industry": "電子工業",
@@ -3982,25 +4017,6 @@
      "link": "https://udn.com/news/story/7252/9869935",
      "impact": "stock",
      "aid": "2579a40dce68"
-    }
-   ]
-  },
-  {
-   "stock_id": "2881",
-   "name": "富邦金",
-   "industry": "金融保險",
-   "heavyweight": true,
-   "weight_per": 0.0,
-   "count": 1,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-11-13 15:13:36",
-     "source": "中央社",
-     "title": "富邦金控、富邦育樂連5屆獲「運動企業認證」 - 中央社 CNA",
-     "link": "https://www.cna.com.tw/business/chinese/449925",
-     "impact": "heavy",
-     "aid": "15e326c285ff"
     }
    ]
   },
