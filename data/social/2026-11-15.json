@@ -1,0 +1,822 @@
+{
+ "schema": 1,
+ "date": "2026-11-15",
+ "generated_at": "2026-11-15T23:22:46+08:00",
+ "source": "ptt-stock",
+ "robots": "allow",
+ "robots_crawl_delay": null,
+ "robots_detail": {
+  "status": 200,
+  "err": null,
+  "final_url": "https://www.ptt.cc/robots.txt",
+  "attempts": 1
+ },
+ "fetch_errors": [],
+ "pages_fetched": 4,
+ "articles_n": 28,
+ "articles_fetched_n": 28,
+ "failed_n": 0,
+ "requests_n": 33,
+ "elapsed_s": 159.9,
+ "llm": {
+  "model": "claude-opus-5",
+  "prompt_ver": 1,
+  "via": "mixed",
+  "skipped": null,
+  "classified_n": 18,
+  "failed_n": 0,
+  "usage": {
+   "input_tokens": 16211,
+   "output_tokens": 1652
+  }
+ },
+ "stocks": {
+  "2330": {
+   "name": "台積電",
+   "n": 5,
+   "push": 237,
+   "boo": 68,
+   "pos": 0,
+   "neg": 1,
+   "neu": 4,
+   "unk": 0
+  },
+  "2317": {
+   "name": "鴻海",
+   "n": 2,
+   "push": 43,
+   "boo": 13,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "3686": {
+   "name": "達能",
+   "n": 2,
+   "push": 148,
+   "boo": 35,
+   "pos": 0,
+   "neg": 0,
+   "neu": 2,
+   "unk": 0
+  },
+  "1108": {
+   "name": "幸福",
+   "n": 1,
+   "push": 65,
+   "boo": 9,
+   "pos": 0,
+   "neg": 1,
+   "neu": 0,
+   "unk": 0
+  },
+  "1303": {
+   "name": "南亞",
+   "n": 1,
+   "push": 8,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1324": {
+   "name": "地球",
+   "n": 1,
+   "push": 130,
+   "boo": 5,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1476": {
+   "name": "儒鴻",
+   "n": 1,
+   "push": 9,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "1595": {
+   "name": "川寶",
+   "n": 1,
+   "push": 117,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2208": {
+   "name": "台船",
+   "n": 1,
+   "push": 64,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "2308": {
+   "name": "台達電",
+   "n": 1,
+   "push": 23,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2325": {
+   "name": "矽品",
+   "n": 1,
+   "push": 23,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2337": {
+   "name": "旺宏",
+   "n": 1,
+   "push": 64,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "2376": {
+   "name": "技嘉",
+   "n": 1,
+   "push": 68,
+   "boo": 16,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2382": {
+   "name": "廣達",
+   "n": 1,
+   "push": 23,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2412": {
+   "name": "中華電",
+   "n": 1,
+   "push": 48,
+   "boo": 6,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2501": {
+   "name": "國建",
+   "n": 1,
+   "push": 7,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "2516": {
+   "name": "新建",
+   "n": 1,
+   "push": 86,
+   "boo": 15,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3013": {
+   "name": "晟銘電",
+   "n": 1,
+   "push": 64,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "3033": {
+   "name": "威健",
+   "n": 1,
+   "push": 4,
+   "boo": 0,
+   "pos": 1,
+   "neg": 0,
+   "neu": 0,
+   "unk": 0
+  },
+  "3040": {
+   "name": "遠見",
+   "n": 1,
+   "push": 50,
+   "boo": 3,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3042": {
+   "name": "晶技",
+   "n": 1,
+   "push": 64,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "3095": {
+   "name": "及成",
+   "n": 1,
+   "push": 86,
+   "boo": 15,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3443": {
+   "name": "創意",
+   "n": 1,
+   "push": 23,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3661": {
+   "name": "世芯-KY",
+   "n": 1,
+   "push": 23,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3675": {
+   "name": "德微",
+   "n": 1,
+   "push": 6,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "3711": {
+   "name": "日月光投控",
+   "n": 1,
+   "push": 23,
+   "boo": 12,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "4923": {
+   "name": "力士",
+   "n": 1,
+   "push": 46,
+   "boo": 20,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6486": {
+   "name": "互動",
+   "n": 1,
+   "push": 8,
+   "boo": 4,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "6643": {
+   "name": "M31",
+   "n": 1,
+   "push": 64,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "8222": {
+   "name": "寶一",
+   "n": 1,
+   "push": 9,
+   "boo": 0,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "8299": {
+   "name": "群聯",
+   "n": 1,
+   "push": 64,
+   "boo": 9,
+   "pos": 0,
+   "neg": 0,
+   "neu": 0,
+   "unk": 1
+  },
+  "911606": {
+   "name": "超級",
+   "n": 1,
+   "push": 46,
+   "boo": 20,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  },
+  "TPEx": {
+   "name": "櫃買指數",
+   "n": 1,
+   "push": 6,
+   "boo": 1,
+   "pos": 0,
+   "neg": 0,
+   "neu": 1,
+   "unk": 0
+  }
+ },
+ "articles": [
+  {
+   "aid": "M.1794677467.A.438",
+   "title": "[新聞] 共犯結構超龐大！彭博：黃樂聯手丈夫及手",
+   "author": "win8719 (win8719)",
+   "ts": "2026-11-15 01:31",
+   "push": 68,
+   "boo": 16,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794677467.A.438.html",
+   "codes": [
+    "2376"
+   ],
+   "sent": {
+    "2376": "neu"
+   }
+  },
+  {
+   "aid": "M.1794677475.A.5BE",
+   "title": "Re: [新聞] 受黃仁勳辭職衝擊 中國AI股票暴跌",
+   "author": "qaz90427 (總有說不完的回收故事)",
+   "ts": "2026-11-15 01:31",
+   "push": 4,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794677475.A.5BE.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794677562.A.081",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "LDPC (Channel Coding)",
+   "ts": "2026-11-15 01:32",
+   "push": 129,
+   "boo": 14,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794677562.A.081.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794686495.A.B6F",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "waitrop (嘴砲無雙)",
+   "ts": "2026-11-15 04:01",
+   "push": 130,
+   "boo": 5,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794686495.A.B6F.html",
+   "codes": [
+    "1324"
+   ],
+   "sent": {
+    "1324": "neu"
+   }
+  },
+  {
+   "aid": "M.1794699868.A.070",
+   "title": "[新聞] 黃仁勳走後誰來當「AI央行」？逾5,300億",
+   "author": "blackpudding (甩奶抖肚拳)",
+   "ts": "2026-11-15 07:44",
+   "push": 50,
+   "boo": 3,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794699868.A.070.html",
+   "codes": [
+    "3040"
+   ],
+   "sent": {
+    "3040": "neu"
+   }
+  },
+  {
+   "aid": "M.1794706129.A.039",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "pujos (lks)",
+   "ts": "2026-11-15 09:28",
+   "push": 40,
+   "boo": 19,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794706129.A.039.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794710089.A.A81",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "MacBookAir12 (New Mac Water)",
+   "ts": "2026-11-15 10:34",
+   "push": 56,
+   "boo": 19,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794710089.A.A81.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794712985.A.DEE",
+   "title": "Re: [新聞] 黃仁勳坦承與中國女間諜有婚外情 輝達",
+   "author": "s800525 (Tim)",
+   "ts": "2026-11-15 11:23",
+   "push": 115,
+   "boo": 21,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794712985.A.DEE.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794713705.A.BC0",
+   "title": "[請益] 被動元件股 後續該怎麼操作？",
+   "author": "aikaimolie (aikaimolie)",
+   "ts": "2026-11-15 11:35",
+   "push": 65,
+   "boo": 9,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794713705.A.BC0.html",
+   "codes": [
+    "1108"
+   ],
+   "sent": {
+    "1108": "neg"
+   }
+  },
+  {
+   "aid": "M.1794714462.A.B7A",
+   "title": "[新聞] 黃仁勳離職《大賣空》貝瑞再加碼放空科技",
+   "author": "bamama56 (bamama)",
+   "ts": "2026-11-15 11:47",
+   "push": 86,
+   "boo": 15,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794714462.A.B7A.html",
+   "codes": [
+    "2516",
+    "3095"
+   ],
+   "sent": {
+    "2516": "neu",
+    "3095": "neu"
+   }
+  },
+  {
+   "aid": "M.1794718837.A.B55",
+   "title": "[新聞] 中華電信帳單金額異常暴增！大批用戶收簡",
+   "author": "wu73 (早八晚五其實已經9小時了)",
+   "ts": "2026-11-15 13:00",
+   "push": 48,
+   "boo": 6,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794718837.A.B55.html",
+   "codes": [
+    "2412"
+   ],
+   "sent": {
+    "2412": "neu"
+   }
+  },
+  {
+   "aid": "M.1794721563.A.E85",
+   "title": "[新聞] 別管輝達了，Anthropic 才是 AI 投資的試",
+   "author": "xephon (Usagi)",
+   "ts": "2026-11-15 13:45",
+   "push": 46,
+   "boo": 20,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794721563.A.E85.html",
+   "codes": [
+    "4923",
+    "2330",
+    "911606"
+   ],
+   "sent": {
+    "4923": "neu",
+    "2330": "neu",
+    "911606": "neu"
+   }
+  },
+  {
+   "aid": "M.1794722045.A.317",
+   "title": "[新聞] 輝達恐爆離職潮！傳OpenAI、競爭對手瘋",
+   "author": "y598763 (diamond)",
+   "ts": "2026-11-15 13:54",
+   "push": 117,
+   "boo": 9,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794722045.A.317.html",
+   "codes": [
+    "1595"
+   ],
+   "sent": {
+    "1595": "neu"
+   }
+  },
+  {
+   "aid": "M.1794723053.A.42E",
+   "title": "[新聞] 伊朗稱無人機襲美軍基地　巴林急發2次警",
+   "author": "qazxc1156892 (QQ)",
+   "ts": "2026-11-15 14:10",
+   "push": 9,
+   "boo": 2,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794723053.A.42E.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794724605.A.8C9",
+   "title": "[新聞] 誰對黃仁勳「下黑手」？魯比歐遭控改寫CI",
+   "author": "thinksilver (銀白色的沉思)",
+   "ts": "2026-11-15 14:36",
+   "push": 134,
+   "boo": 5,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794724605.A.8C9.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794728665.A.D09",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "pinkowa (pinkowa)",
+   "ts": "2026-11-15 15:44",
+   "push": 7,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794728665.A.D09.html",
+   "codes": [
+    "2501"
+   ],
+   "sent": {
+    "2501": "neu"
+   }
+  },
+  {
+   "aid": "M.1794728744.A.9DB",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "zzahoward (Cheshire Cat)",
+   "ts": "2026-11-15 15:45",
+   "push": 264,
+   "boo": 33,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794728744.A.9DB.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794735036.A.158",
+   "title": "[請益] 持股健檢",
+   "author": "shoo42 (shoo42)",
+   "ts": "2026-11-15 17:30",
+   "push": 64,
+   "boo": 9,
+   "cat": "請益",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794735036.A.158.html",
+   "codes": [
+    "2208",
+    "2337",
+    "8299",
+    "3013",
+    "3042",
+    "6643"
+   ],
+   "sent": {
+    "2208": "unk",
+    "2337": "unk",
+    "8299": "unk",
+    "3013": "unk",
+    "3042": "unk",
+    "6643": "unk"
+   }
+  },
+  {
+   "aid": "M.1794735102.A.B5B",
+   "title": "[新聞] 黃仁勳離開輝達台廠也變天！分析師點名鴻",
+   "author": "diefishfish ()",
+   "ts": "2026-11-15 17:31",
+   "push": 23,
+   "boo": 12,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794735102.A.B5B.html",
+   "codes": [
+    "2317",
+    "2308",
+    "3443",
+    "3661",
+    "2382",
+    "2330",
+    "3711",
+    "2325"
+   ],
+   "sent": {
+    "2317": "neu",
+    "2308": "neu",
+    "3443": "neu",
+    "3661": "neu",
+    "2382": "neu",
+    "2330": "neu",
+    "3711": "neu",
+    "2325": "neu"
+   }
+  },
+  {
+   "aid": "M.1794738288.A.E56",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "breathair (拆了？簡單了)",
+   "ts": "2026-11-15 18:24",
+   "push": 20,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794738288.A.E56.html",
+   "codes": [
+    "2330",
+    "2317"
+   ],
+   "sent": {
+    "2330": "neu",
+    "2317": "neu"
+   }
+  },
+  {
+   "aid": "M.1794740265.A.1D1",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "kcy05785 (肥宅一號)",
+   "ts": "2026-11-15 18:57",
+   "push": 20,
+   "boo": 9,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794740265.A.1D1.html",
+   "codes": [],
+   "sent": null
+  },
+  {
+   "aid": "M.1794741332.A.D71",
+   "title": "[新聞] 黃仁勳親自挑選輝達接班人？華郵爆料「已",
+   "author": "goddamnhuge (超!!級!!!!大!!!!!!!)",
+   "ts": "2026-11-15 19:15",
+   "push": 107,
+   "boo": 21,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794741332.A.D71.html",
+   "codes": [
+    "2330",
+    "3686"
+   ],
+   "sent": {
+    "2330": "neu",
+    "3686": "neu"
+   }
+  },
+  {
+   "aid": "M.1794745091.A.6E4",
+   "title": "Re: [新聞] 黃仁勳親自挑選輝達接班人？華郵爆料「已",
+   "author": "storyb181 (storyb111)",
+   "ts": "2026-11-15 20:18",
+   "push": 41,
+   "boo": 14,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794745091.A.6E4.html",
+   "codes": [
+    "2330",
+    "3686"
+   ],
+   "sent": {
+    "2330": "neg",
+    "3686": "neu"
+   }
+  },
+  {
+   "aid": "M.1794751248.A.A0E",
+   "title": "[新聞] 訂單能見度達6個月、產能持續滿載！成衣",
+   "author": "tooth9 (牙仙)",
+   "ts": "2026-11-15 22:00",
+   "push": 9,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794751248.A.A0E.html",
+   "codes": [
+    "1476",
+    "8222"
+   ],
+   "sent": {
+    "1476": "neu",
+    "8222": "neu"
+   }
+  },
+  {
+   "aid": "M.1794751631.A.CF6",
+   "title": "[情報] 3033 威健115年Q1-Q3 EPS 5.34",
+   "author": "Vanquze ()",
+   "ts": "2026-11-15 22:07",
+   "push": 4,
+   "boo": 0,
+   "cat": "情報",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794751631.A.CF6.html",
+   "codes": [
+    "3033"
+   ],
+   "sent": {
+    "3033": "pos"
+   }
+  },
+  {
+   "aid": "M.1794754006.A.707",
+   "title": "[新聞] 台股單週強彈逾10％、全球居第一 投顧喊",
+   "author": "Su22 (裝配匠)",
+   "ts": "2026-11-15 22:46",
+   "push": 6,
+   "boo": 1,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794754006.A.707.html",
+   "codes": [
+    "3675",
+    "TPEx"
+   ],
+   "sent": {
+    "3675": "neu",
+    "TPEx": "neu"
+   }
+  },
+  {
+   "aid": "M.1794754201.A.D38",
+   "title": "[新聞] 黃仁勳如何打造讓北京留在AI競賽中的後門",
+   "author": "LoveSports (如何當一個好男人)",
+   "ts": "2026-11-15 22:49",
+   "push": 8,
+   "boo": 4,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794754201.A.D38.html",
+   "codes": [
+    "1303",
+    "6486"
+   ],
+   "sent": {
+    "1303": "neu",
+    "6486": "neu"
+   }
+  },
+  {
+   "aid": "M.1794755272.A.642",
+   "title": "Re: [新聞] 連鎖效應？輝達5千億美元融資計畫恐喊卡",
+   "author": "billionerx10 (股十0)",
+   "ts": "2026-11-15 23:07",
+   "push": 2,
+   "boo": 0,
+   "cat": "新聞",
+   "url": "https://www.ptt.cc/bbs/Stock/M.1794755272.A.642.html",
+   "codes": [],
+   "sent": null
+  }
+ ],
+ "teardown": {
+  "since": "2026-09-27",
+  "age_days": 49,
+  "due": true
+ }
+}
