@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-20T18:08:48+08:00",
+ "generated_at": "2026-11-20T19:08:42+08:00",
  "lookback_days": 5,
  "trading_days": [
   "2026-11-16",
@@ -9,11 +9,11 @@
   "2026-11-20"
  ],
  "pool_size": 150,
- "stocks_with_news": 51,
- "total_news": 135,
+ "stocks_with_news": 53,
+ "total_news": 143,
  "stats": {
-  "n_raw": 135,
-  "n_unique_articles": 134
+  "n_raw": 143,
+  "n_unique_articles": 142
  },
  "coverage": {
   "dates": [
@@ -392,9 +392,17 @@
    "industry": "半導體業",
    "heavyweight": true,
    "weight_per": 0.0,
-   "count": 12,
+   "count": 13,
    "market_count": 3,
    "news": [
+    {
+     "date": "2026-11-20 18:07:05",
+     "source": "自由時報系",
+     "title": "台積電再投入3.2億元 投資以色列AI晶片新創Element Labs - 自由財經",
+     "link": "https://ec.ltn.com.tw/article/breakingnews/5647912",
+     "impact": "heavy",
+     "aid": "d3e2a336488b"
+    },
     {
      "date": "2026-11-20 09:40:20",
      "source": "自由時報系",
@@ -494,6 +502,81 @@
    ]
   },
   {
+   "stock_id": "2412",
+   "name": "中華電",
+   "industry": "通信網路業",
+   "heavyweight": true,
+   "weight_per": 0.0,
+   "count": 8,
+   "market_count": 2,
+   "news": [
+    {
+     "date": "2026-11-20 17:36:40",
+     "source": "鉅亨(cnyes)",
+     "title": "中華電信進駐KidZania Taipei 董事長簡志誠揭合作目的 - 鉅亨網",
+     "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9XWFk1VXJNRmRWdWRrNGRfNVRfU1RveDhJVkNNSU9KVnUyN3BMRnVLdFU0ek96T3RPd3NsTHlfcV91YmtPMVRpV1kyNmUySFU?oc=5",
+     "impact": "heavy",
+     "aid": "640b8811528d"
+    },
+    {
+     "date": "2026-11-20 16:26:54",
+     "source": "經濟日報",
+     "title": "搶攻親子世代 中華電信進駐 KidZania 「智慧通信科技總部」首開箱 | 產業熱點 | 產業 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5612/9891685",
+     "impact": "heavy",
+     "aid": "3769075fcf86"
+    },
+    {
+     "date": "2026-11-20 05:54:55",
+     "source": "經濟日報",
+     "title": "甩開「牛皮股」標籤！中華電信大象跳舞 股價與市值屢創新高 | 產業熱點 | 產業 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5612/9890374",
+     "impact": "heavy",
+     "aid": "dadae4f04de7"
+    },
+    {
+     "date": "2026-11-20 02:01:52",
+     "source": "UDN",
+     "title": "電信三雄扮資金避風港 中華電股價逆勢創高 - UDN",
+     "link": "https://udn.com/news/story/7252/9889789",
+     "impact": "market",
+     "aid": "bcf0679ceffc"
+    },
+    {
+     "date": "2026-11-19 17:52:04",
+     "source": "經濟日報",
+     "title": "中華電信攜新創強打海地星空、智慧醫療、數位娛樂及智慧製造 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5612/9889565",
+     "impact": "heavy",
+     "aid": "6cf864953e5b"
+    },
+    {
+     "date": "2026-11-19 10:30:25",
+     "source": "鉅亨(cnyes)",
+     "title": "〈焦點股〉資金流往防禦股電信三雄走揚 中華電信股價創高 - 鉅亨網",
+     "link": "https://news.cnyes.com/news/id/6632224",
+     "impact": "market",
+     "aid": "946f8fe9ddde"
+    },
+    {
+     "date": "2026-11-18 11:45:59",
+     "source": "自由時報系",
+     "title": "鐳洋3億元現金增資案超額認購 中華電信、富邦金大咖到齊 - 自由時報",
+     "link": "https://stock.ltn.com.tw/article/hjepf6grkecd",
+     "impact": "heavy",
+     "aid": "4f0f0b09608d"
+    },
+    {
+     "date": "2026-11-17 19:00:00",
+     "source": "經濟日報",
+     "title": "中華電信首次投資台灣衛星供應鏈！參與鐳洋現金增資 - 經濟日報",
+     "link": "https://money.udn.com/money/story/5612/9885973",
+     "impact": "heavy",
+     "aid": "5e743fde5386"
+    }
+   ]
+  },
+  {
    "stock_id": "2382",
    "name": "廣達",
    "industry": "電腦及週邊設備業",
@@ -549,65 +632,6 @@
      "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE50X1h4SlRqNllJMTRLTUYxOXhUYjRfN0x4QnVRZU5zbWlYTW1kNzNzY2Z3elJpd3FadFZoaUN6QWY0N25WeU9XZGNxdV9TOGRXM1VtYjVmbG05U3RRa1VPWk8xbjJPWERxZjhpUHJXOA?oc=5",
      "impact": "heavy",
      "aid": "43b61d0ba116"
-    }
-   ]
-  },
-  {
-   "stock_id": "2412",
-   "name": "中華電",
-   "industry": "通信網路業",
-   "heavyweight": true,
-   "weight_per": 0.0,
-   "count": 6,
-   "market_count": 2,
-   "news": [
-    {
-     "date": "2026-11-20 05:54:55",
-     "source": "經濟日報",
-     "title": "甩開「牛皮股」標籤！中華電信大象跳舞 股價與市值屢創新高 | 產業熱點 | 產業 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5612/9890374",
-     "impact": "heavy",
-     "aid": "dadae4f04de7"
-    },
-    {
-     "date": "2026-11-20 02:01:52",
-     "source": "UDN",
-     "title": "電信三雄扮資金避風港 中華電股價逆勢創高 - UDN",
-     "link": "https://udn.com/news/story/7252/9889789",
-     "impact": "market",
-     "aid": "bcf0679ceffc"
-    },
-    {
-     "date": "2026-11-19 17:52:04",
-     "source": "經濟日報",
-     "title": "中華電信攜新創強打海地星空、智慧醫療、數位娛樂及智慧製造 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5612/9889565",
-     "impact": "heavy",
-     "aid": "6cf864953e5b"
-    },
-    {
-     "date": "2026-11-19 10:30:25",
-     "source": "鉅亨(cnyes)",
-     "title": "〈焦點股〉資金流往防禦股電信三雄走揚 中華電信股價創高 - 鉅亨網",
-     "link": "https://news.cnyes.com/news/id/6632224",
-     "impact": "market",
-     "aid": "946f8fe9ddde"
-    },
-    {
-     "date": "2026-11-18 11:45:59",
-     "source": "自由時報系",
-     "title": "鐳洋3億元現金增資案超額認購 中華電信、富邦金大咖到齊 - 自由時報",
-     "link": "https://stock.ltn.com.tw/article/hjepf6grkecd",
-     "impact": "heavy",
-     "aid": "4f0f0b09608d"
-    },
-    {
-     "date": "2026-11-17 19:00:00",
-     "source": "經濟日報",
-     "title": "中華電信首次投資台灣衛星供應鏈！參與鐳洋現金增資 - 經濟日報",
-     "link": "https://money.udn.com/money/story/5612/9885973",
-     "impact": "heavy",
-     "aid": "5e743fde5386"
     }
    ]
   },
@@ -913,6 +937,49 @@
    ]
   },
   {
+   "stock_id": "2207",
+   "name": "和泰車",
+   "industry": "汽車工業",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 4,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-20 18:23:22",
+     "source": "UDN",
+     "title": "和泰車法說會／看好今年車市仍是43萬台 三品牌銷量拚16.5萬台 - UDN",
+     "link": "https://udn.com/news/story/7252/9891947",
+     "impact": "stock",
+     "aid": "7fab56d0971d"
+    },
+    {
+     "date": "2026-11-20 16:49:00",
+     "source": "MoneyDJ",
+     "title": "和泰車今年銷售可望達標，全年車市拚43萬台- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=ff5eb5ac-f98c-48cd-b1cc-1517a3394560",
+     "impact": "stock",
+     "aid": "98bcda13db25"
+    },
+    {
+     "date": "2026-11-19 10:39:00",
+     "source": "MoneyDJ",
+     "title": "和泰車獲利、配息穩健，成股災避風港- 新聞 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=cda56568-b3f6-48e4-8d80-4a9750c282d9",
+     "impact": "stock",
+     "aid": "aea5b1169165"
+    },
+    {
+     "date": "2026-11-17 00:10:14",
+     "source": "經濟日報",
+     "title": "不只賣車還要賣品味！和泰車打造 TOYOTA 高階品牌 推 CROWN 雙車上市 | 綜合產業 | 產業 - 經濟日報",
+     "link": "https://money.udn.com/money/story/10871/9882824",
+     "impact": "stock",
+     "aid": "cda452ca34dc"
+    }
+   ]
+  },
+  {
    "stock_id": "3008",
    "name": "大立光",
    "industry": "光電業",
@@ -1038,6 +1105,41 @@
      "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNTHNvcmpIdWE0RGRhb1VxZVVPcGFjYTBlR0ZFdkZTU2RrZkJ2czRuNEhxOEdrZkh1QXhfVlc5bVFUbmNtR0VwdG9ZbTBKanZDSE1jMVFTdDBlbWRNcjFQQ0g2Q29BVGNBWUtfSTdjYVlwZjNEYVlOMFZuWUVKaS03Vg?oc=5",
      "impact": "market",
      "aid": "72778e34e8f9"
+    }
+   ]
+  },
+  {
+   "stock_id": "1904",
+   "name": "正隆",
+   "industry": "造紙工業",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 3,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-20 16:32:00",
+     "source": "MoneyDJ",
+     "title": "正隆平陽廠產能逾百萬噸 寧平紙器廠估明年H1投產 - MoneyDJ",
+     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=617a5dd8-eeae-468e-b7ca-3138cf55fdac",
+     "impact": "stock",
+     "aid": "33dd13414297"
+    },
+    {
+     "date": "2026-11-20 16:21:00",
+     "source": "工商時報",
+     "title": "正隆越南平陽廠工紙產能破百萬噸董座鄭人銘：一條龍全力搶攻東南亞市場- 產業 - 工商時報",
+     "link": "https://www.ctee.com.tw/news/20261120701355-430503",
+     "impact": "stock",
+     "aid": "c0f9ff72f8eb"
+    },
+    {
+     "date": "2026-11-20 16:19:03",
+     "source": "UDN",
+     "title": "正隆平陽廠產能突破百萬噸 北越寧平紙器廠明年上半年投產 - UDN",
+     "link": "https://udn.com/news/story/7241/9891672",
+     "impact": "stock",
+     "aid": "58852418307a"
     }
    ]
   },
@@ -1352,60 +1454,6 @@
    ]
   },
   {
-   "stock_id": "1904",
-   "name": "正隆",
-   "industry": "造紙工業",
-   "heavyweight": false,
-   "weight_per": 0.0,
-   "count": 2,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-11-20 16:21:00",
-     "source": "工商時報",
-     "title": "正隆越南平陽廠工紙產能破百萬噸董座鄭人銘：一條龍全力搶攻東南亞市場- 產業 - 工商時報",
-     "link": "https://www.ctee.com.tw/news/20261120701355-430503",
-     "impact": "stock",
-     "aid": "c0f9ff72f8eb"
-    },
-    {
-     "date": "2026-11-20 16:19:03",
-     "source": "UDN",
-     "title": "正隆平陽廠產能突破百萬噸！北越寧平紙器廠明年上半年投產 - UDN",
-     "link": "https://udn.com/news/story/7241/9891672",
-     "impact": "stock",
-     "aid": "58852418307a"
-    }
-   ]
-  },
-  {
-   "stock_id": "2207",
-   "name": "和泰車",
-   "industry": "汽車工業",
-   "heavyweight": false,
-   "weight_per": 0.0,
-   "count": 2,
-   "market_count": 0,
-   "news": [
-    {
-     "date": "2026-11-19 10:39:00",
-     "source": "MoneyDJ",
-     "title": "和泰車獲利、配息穩健，成股災避風港- 新聞 - MoneyDJ",
-     "link": "https://www.moneydj.com/kmdj/news/newsviewer.aspx?a=cda56568-b3f6-48e4-8d80-4a9750c282d9",
-     "impact": "stock",
-     "aid": "aea5b1169165"
-    },
-    {
-     "date": "2026-11-17 00:10:14",
-     "source": "經濟日報",
-     "title": "不只賣車還要賣品味！和泰車打造 TOYOTA 高階品牌 推 CROWN 雙車上市 | 綜合產業 | 產業 - 經濟日報",
-     "link": "https://money.udn.com/money/story/10871/9882824",
-     "impact": "stock",
-     "aid": "cda452ca34dc"
-    }
-   ]
-  },
-  {
    "stock_id": "2379",
    "name": "瑞昱",
    "industry": "半導體業",
@@ -1579,6 +1627,25 @@
    ]
   },
   {
+   "stock_id": "1514",
+   "name": "亞力",
+   "industry": "電機機械",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-20 17:46:13",
+     "source": "UDN",
+     "title": "亞力法說會／AI、半導體及台電市場需求仍良好 在手訂單維持百億元 - UDN",
+     "link": "https://udn.com/news/story/7252/9891886",
+     "impact": "stock",
+     "aid": "a8492d652bb3"
+    }
+   ]
+  },
+  {
    "stock_id": "2606",
    "name": "裕民",
    "industry": "航運業",
@@ -1689,6 +1756,25 @@
      "link": "https://www.moneyweekly.com.tw/Home/ChangePage/%E7%90%86%E8%B2%A1%E5%91%A8%E5%88%8A/263056/?Type=3&Line=Home_ArticleSet_103&Page=CB1236E4382981CC2C6FF103A554258AA99C791F444B16F53726251D2AB6F99237DA03AA35780E1B14647358F9ADA458874F14E51FEA63A6A38726A789CEFAFAC8C3EB046CCA8B7535FF41181A75E02486C0F491C749F29FA34724041529B2000258B1C6E1F07F0F6BDD54208C1591159AAA15A0BC521255584A1A3A4F4D4D4FB54772431E6563B1567C550331FAC616FC2445805417C2097E1D382E3F50E3044E8D0F5A33693DC558017E585E3648F9C629155A752EB0FBEB0CA3ABAA9F1D3A8633863665BB72DB943E4330964367244DFCB5EF6DEF1BD5502035CB7EAE3C237F67B3DF08766F5B95389C1AA09929CFE6DDCCBE612354FA77E9AD312963CA30D5C96EC3A7FBF3B5960535CC783619B88FBAC32BCDBA03EB02ACAE5B021BF56C764EEB611978427486BCF7634917E96DEECFEE4FCAAE1936",
      "impact": "stock",
      "aid": "5cdf4bd7eda6"
+    }
+   ]
+  },
+  {
+   "stock_id": "6239",
+   "name": "力成",
+   "industry": "半導體業",
+   "heavyweight": false,
+   "weight_per": 0.0,
+   "count": 1,
+   "market_count": 0,
+   "news": [
+    {
+     "date": "2026-11-20 17:47:00",
+     "source": "FTNN新聞",
+     "title": "記憶體跌跌不休！「這檔」週殺3根拖南亞科、力成跌停 華邦電連7跌33.7%、群聯摔9% - FTNN 新聞網",
+     "link": "https://www.ftnn.com.tw/news/597617",
+     "impact": "stock",
+     "aid": "f914d7a3555f"
     }
    ]
   },
