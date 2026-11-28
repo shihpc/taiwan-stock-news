@@ -9,3 +9,5 @@
 
 ## 未經回測功能
 - 社群聲量的紅綠、排行、雙確認建議與參考價位（畫面在 postmkt）：見 `docs/social-display.md` 的事後驗證到期日。
+
+> 事後驗證到期日登錄於 `postmkt/docs/unbacktested.md`（畫面在 postmkt）。
